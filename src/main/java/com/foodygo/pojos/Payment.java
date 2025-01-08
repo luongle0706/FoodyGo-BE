@@ -3,12 +3,10 @@ package com.foodygo.pojos;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Data
@@ -34,7 +32,4 @@ public class Payment extends BaseEntity {
 
     @ManyToOne
     User user;
-
-    @OneToMany(mappedBy = "payment")
-    List<Order> orders;
 }
