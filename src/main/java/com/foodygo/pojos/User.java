@@ -1,4 +1,4 @@
-package com.foodygo.entity;
+package com.foodygo.pojos;
 
 import jakarta.persistence.*;
 import lombok.*;

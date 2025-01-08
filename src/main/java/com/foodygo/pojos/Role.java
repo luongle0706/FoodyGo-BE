@@ -1,4 +1,4 @@
-package com.foodygo.entity;
+package com.foodygo.pojos;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.foodygo.enums.EnumRoleName;
