@@ -13,9 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class User extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userID;
+
     @Column(name = "first_name", columnDefinition = "NVARCHAR(30)")
     private String firstName;
 
