@@ -2,15 +2,13 @@ package com.foodygo.pojos;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+@Builder
 @MappedSuperclass
 @Getter
 @Setter
@@ -26,4 +24,6 @@ public class BaseEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Builder.Default
+    private boolean deleted = false;
 }

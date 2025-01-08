@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity(name = "user")
 @Getter
@@ -30,14 +31,12 @@ public class User extends BaseEntity {
     @Column(name = "phone", nullable = true, unique = true, columnDefinition = "VARCHAR(12)")
     private String phone;
 
-    @Column(name = "address", nullable = true, columnDefinition = "NVARCHAR(255)")
-    private String address;
-
-    @Column(name = "avata", nullable = true, columnDefinition = "VARCHAR(255)")
-    private String avata;
+    @Column(name = "avatar", nullable = true, columnDefinition = "VARCHAR(255)")
+    private String avatar;
 
     @Column(name = "code_verify", nullable = false, columnDefinition = "VARCHAR(36)")
     private String codeVerify;
+
     @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean enabled;
 
@@ -54,4 +53,12 @@ public class User extends BaseEntity {
     @JoinColumn(name = "roleID")
     private Role role;
 
+    @ManyToOne
+    private Hub hub;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
+
+    @OneToMany(mappedBy = "user")
+    private List<Payment> payments;
 }
