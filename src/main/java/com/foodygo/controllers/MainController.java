@@ -48,6 +48,8 @@ public class MainController {
                     CustomUserDetail customUserDetail = CustomUserDetail.mapUserToUserDetail(user);
                     if(customUserDetail != null) {
                         String newToken = jwtToken.generatedToken(customUserDetail);
+                        user.setAccessToken(newToken);
+                        userService.save(user);
                         return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse("Success", "Refresh token successfully", newToken, refreshToken));
                     }
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Refresh token failed", null, null));
@@ -69,7 +71,12 @@ public class MainController {
             //SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String token = jwtToken.generatedToken(userDetails);
             String refreshToken = jwtToken.generatedRefreshToken(userDetails);
-
+            User user = userService.getUserByEmail(userDetails.getEmail());
+            if(user != null) {
+                user.setRefreshToken(refreshToken);
+                user.setAccessToken(token);
+                userService.save(user);
+            }
             return ResponseEntity.status(HttpStatus.OK).body(new TokenResponse("Success", "Login successfully", token, refreshToken));
         } catch(Exception e) {
             log.error("Cannot login : {}", e.toString());

@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class BaseEntity {
 
     @Column(name = "created_at")
@@ -24,6 +23,5 @@ public class BaseEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @Builder.Default
     private boolean deleted = false;
 }

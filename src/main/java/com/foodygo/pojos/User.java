@@ -51,10 +51,10 @@ public class User extends BaseEntity {
     @Column(name = "offline_at", nullable = true)
     private Date offlineAt;
 
-    @Column(name = "access_token", nullable = true)
+    @Column(name = "access_token", nullable = true, columnDefinition = "TEXT")
     private String accessToken;
 
-    @Column(name = "refresh_token", nullable = true)
+    @Column(name = "refresh_token", nullable = true, columnDefinition = "TEXT")
     private String refreshToken;
 
     @ManyToOne
