@@ -21,7 +21,7 @@ public class UserLoginRequest {
 
     @NotNull(message = "Vui lòng nhập mật khẩu")
     @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(max = 100, min = 6, message = "Mật khẩu phải từ 6 tới 100 kí tự")
+    @Size(max = 100, min = 1, message = "Mật khẩu phải từ 6 tới 100 kí tự")
     private String password;
 
 }

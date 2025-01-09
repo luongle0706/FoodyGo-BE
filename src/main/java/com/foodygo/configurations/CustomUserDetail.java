@@ -44,6 +44,8 @@ public class CustomUserDetail implements UserDetails {
                 .password(user.getPassword())
                 .phone(user.getPhone())
                 .nonLocked(user.isNonLocked())
+                .accessToken(user.getAccessToken())
+                .refreshToken(user.getRefreshToken())
                 .enabled(user.isEnabled())
                 .grantedAuthorities(roles)
                 .build();
