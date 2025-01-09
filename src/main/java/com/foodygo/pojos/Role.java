@@ -27,7 +27,5 @@ public class Role {
         this.roleName = roleName;
         this.users = users;
     }
-    public Role(EnumRoleName roleName) {
-        this.roleName = roleName;
-    }
+
 }

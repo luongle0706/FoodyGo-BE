@@ -51,6 +51,12 @@ public class User extends BaseEntity {
     @Column(name = "offline_at", nullable = true)
     private Date offlineAt;
 
+    @Column(name = "access_token", nullable = true)
+    private String accessToken;
+
+    @Column(name = "refresh_token", nullable = true)
+    private String refreshToken;
+
     @ManyToOne
     @JoinColumn(name = "roleID")
     private Role role;
@@ -63,4 +69,5 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
+
 }

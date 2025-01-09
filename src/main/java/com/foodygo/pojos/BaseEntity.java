@@ -8,12 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Builder
+
 @MappedSuperclass
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class BaseEntity {
 
     @Column(name = "created_at")
