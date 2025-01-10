@@ -1,6 +1,7 @@
 package com.foodygo.configuration;
 
 import com.foodygo.enums.EnumTokenType;
+import com.foodygo.handleExceptions.UnauthorizedException;
 import io.jsonwebtoken.lang.Strings;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -54,16 +55,22 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtToken.getEmailFromJwt(bearerToken, EnumTokenType.TOKEN);
                 CustomUserDetail customUserDetail = (CustomUserDetail) customUserDetailService.loadUserByUsername(email);
                 if(customUserDetail != null) {
+                    if(customUserDetail.getAccessToken().equals(bearerToken)) {
+                        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                                new UsernamePasswordAuthenticationToken(customUserDetail, null, customUserDetail.getAuthorities());
+                        usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    } else {
+                        throw new UnauthorizedException("You don't have permission");
+                    }
 
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                            new UsernamePasswordAuthenticationToken(customUserDetail, null, customUserDetail.getAuthorities());
-                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                } else {
+                    throw new UnauthorizedException("You don't have permission");
                 }
             }
         } catch (Exception e) {
             log.error("Fail on set user authentication:{}", e.toString());
-            return;
+            throw new UnauthorizedException("You don't have permission");
         }
         filterChain.doFilter(request, response);
     }
