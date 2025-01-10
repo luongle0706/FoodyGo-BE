@@ -1,3 +1,4 @@
+
 spring:
   application:
     name: foodygo
@@ -11,6 +12,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+  data:
+    jdbc:
+      dialect: mysql
 jwt:
   secret: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
   expiration: 60000
