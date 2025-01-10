@@ -92,6 +92,7 @@ public class MainController {
             User user = userService.getUserByEmail(email);
             user.setAccessToken(null);
             user.setRefreshToken(null);
+            userService.save(user);
         } catch (Exception e) {
             log.error("Error logout : {}", e.toString());
         } finally {
