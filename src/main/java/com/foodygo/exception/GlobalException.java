@@ -1,4 +1,4 @@
-package com.foodygo.handleExceptions;
+package com.foodygo.exception;
 
 import com.foodygo.dto.response.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -17,13 +17,13 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalException {
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> unauthorizedException(UnauthorizedException e, WebRequest request) {
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> unauthorizedException(AuthenticationException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(new Date(), "Failed", "You don't have permission", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<ErrorResponse> unauthorizedExceptionJWT(UnauthorizedException e, WebRequest request) {
+    public ResponseEntity<ErrorResponse> unauthorizedExceptionJWT(AuthenticationException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(new Date(), "Failed", "You don't have permission", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 

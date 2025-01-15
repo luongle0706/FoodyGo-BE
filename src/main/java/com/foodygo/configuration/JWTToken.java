@@ -1,6 +1,7 @@
 package com.foodygo.configuration;
 
 import com.foodygo.enums.EnumTokenType;
+import com.foodygo.exception.AuthenticationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,8 +85,12 @@ public class JWTToken {
     }
 
     private <T> T getClaims(String token, Function<Claims, T> claimsTFunction, EnumTokenType type) {
-        return claimsTFunction.apply(
-                Jwts.parser().verifyWith(getSecretKey(type)).build().parseSignedClaims(token).getPayload());
+        try {
+            return claimsTFunction.apply(
+                    Jwts.parser().verifyWith(getSecretKey(type)).build().parseSignedClaims(token).getPayload());
+        } catch (Exception e) {
+            throw new AuthenticationException("You don't have permission to access this token");
+        }
     }
 
 //    private <T> T getClaims(String token, Function<Claims, T> claimsTFunction) {
@@ -94,14 +99,22 @@ public class JWTToken {
 //    }
 
     public boolean validate(String token, EnumTokenType type) {
-        if(getEmailFromJwt(token, type) != null && !isExpired(token, type)) {
-            return true;
+        try {
+            if(getEmailFromJwt(token, type) != null && !isExpired(token, type)) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            throw new AuthenticationException("You don't have permission to access this token");
         }
-        return false;
     }
 
     public boolean isExpired(String token, EnumTokenType type) {
-        return getClaims(token, Claims::getExpiration, type).before(new Date(System.currentTimeMillis()));
+        try {
+            return getClaims(token, Claims::getExpiration, type).before(new Date(System.currentTimeMillis()));
+        } catch (Exception e) {
+            throw new AuthenticationException("You don't have permission to access this token");
+        }
     }
 
 }

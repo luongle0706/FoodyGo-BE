@@ -1,14 +1,16 @@
 package com.foodygo.configuration;
 
 import com.foodygo.enums.EnumTokenType;
-import com.foodygo.handleExceptions.UnauthorizedException;
+import com.foodygo.exception.AuthenticationException;
 import io.jsonwebtoken.lang.Strings;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,16 +19,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.List;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired private JWTToken jwtToken;
     @Autowired private CustomUserDetailService customUserDetailService;
+
+    @Autowired
+    @Qualifier("handlerExceptionResolver")
+    private HandlerExceptionResolver resolver;
 
     private final List<String> NON_USER = List.of(
             "/swagger-ui/**",
@@ -55,22 +63,22 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtToken.getEmailFromJwt(bearerToken, EnumTokenType.TOKEN);
                 CustomUserDetail customUserDetail = (CustomUserDetail) customUserDetailService.loadUserByUsername(email);
                 if(customUserDetail != null) {
-                    if(customUserDetail.getAccessToken().equals(bearerToken)) {
+                    if(customUserDetail.getAccessToken() != null && customUserDetail.getAccessToken().equals(bearerToken)) {
                         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                                 new UsernamePasswordAuthenticationToken(customUserDetail, null, customUserDetail.getAuthorities());
                         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                     } else {
-                        throw new UnauthorizedException("You don't have permission");
+                        throw new AuthenticationException("You don't have permission");
                     }
-
                 } else {
-                    throw new UnauthorizedException("You don't have permission");
+                    throw new AuthenticationException("You don't have permission");
                 }
             }
         } catch (Exception e) {
             log.error("Fail on set user authentication:{}", e.toString());
-            throw new UnauthorizedException("You don't have permission");
+            resolver.resolveException(request, response, null, e);
+            return;
         }
         filterChain.doFilter(request, response);
     }

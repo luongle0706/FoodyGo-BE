@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserLoginRequest {
 
-    @Email(message = "Email không hợp lệ")
-    @NotNull(message = "Vui lòng điền email")
-    @NotBlank(message = "Email không được để trống")
-    @Size(max = 255, min = 10, message = "Email phải từ 10 tới 255 kí tự bao gồm cả @gmail.com")
+    @Email(message = "Invalid email")
+    @NotNull(message = "Please enter email")
+    @NotBlank(message = "Email is not blank")
+    @Size(max = 255, min = 10, message = "Email must be between 10 and 255 characters including @gmail.com")
     private String email;
 
-    @NotNull(message = "Vui lòng nhập mật khẩu")
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(max = 100, min = 1, message = "Mật khẩu phải từ 6 tới 100 kí tự")
+    @NotNull(message = "Please enter password")
+    @NotBlank(message = "Password is not blank")
+    @Size(max = 100, min = 6, message = "Password must be between 6 and 100 characters")
     private String password;
 
 }

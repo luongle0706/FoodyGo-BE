@@ -42,7 +42,7 @@ public class DatabaseInit {
                         .accessToken(null)
                         .refreshToken(null)
                         .email("hoangsonhadev@gmail.com")
-                        .password(bCryptPasswordEncoder.encode("1"))
+                        .password(bCryptPasswordEncoder.encode("123456"))
                         .enabled(true)
                         .nonLocked(true)
                         .role(role)
