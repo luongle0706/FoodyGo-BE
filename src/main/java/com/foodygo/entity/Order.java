@@ -29,20 +29,29 @@ public class Order extends BaseEntity {
 
     Double totalPrice;
 
-    LocalDateTime expectedDeliveryTime;
-
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
+    LocalDateTime expectedDeliveryTime;
+
     @ManyToOne
-    User user;
+    User employee;
+
+    @ManyToOne
+    Customer customer;
 
     @ManyToOne
     Restaurant restaurant;
 
-    @OneToOne
-    Payment payment;
+    @ManyToOne
+    Hub hub;
 
-    @OneToMany
+    @OneToOne
+    Transaction transaction;
+
+    @OneToMany(mappedBy = "order")
     List<OrderDetail> orderDetails;
+
+    @OneToMany(mappedBy = "order")
+    List<OrderActivity> orderActivities;
 }

@@ -1,6 +1,6 @@
 package com.foodygo.entity;
 
-import com.foodygo.enums.PaymentMethod;
+import com.foodygo.enums.DepositMethod;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,20 +14,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Payment extends BaseEntity {
+public class Transaction extends BaseEntity {
 
     @Id
     Integer id;
 
-    Double amount;
+    String description;
 
     LocalDateTime time;
 
-    @OneToOne(mappedBy = "payment")
+    Double amount;
+
+    Double remaining;
+
+    @ManyToOne
     Order order;
 
-    @Enumerated(EnumType.STRING)
-    PaymentMethod method;
+    @ManyToOne
+    Wallet wallet;
 
-    Integer userId;
+    @OneToOne(mappedBy = "transaction")
+    Deposit deposit;
 }

@@ -22,6 +22,8 @@ public class OrderDetail extends BaseEntity {
 
     Double price;
 
+    String addonItems;
+
     @ManyToOne
     Product product;
 

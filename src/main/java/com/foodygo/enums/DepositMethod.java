@@ -1,6 +1,6 @@
 package com.foodygo.enums;
 
-public enum PaymentMethod {
+public enum DepositMethod {
     CASH,
     PAYPAL,
     MOMO

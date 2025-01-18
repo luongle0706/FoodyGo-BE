@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -11,20 +13,20 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Address extends BaseEntity {
+public class Wallet extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String longtitude;
-
-    String latitude;
-
-    String description;
+    Double balance;
 
     @OneToOne
-    Hub hub;
+    Customer customer;
 
-    @OneToOne
-    Restaurant restaurant;
+    @OneToMany(mappedBy = "wallet")
+    List<Transaction> transactions;
+
+    @OneToMany(mappedBy = "wallet")
+    List<Deposit> deposits;
 }

@@ -3,28 +3,31 @@ package com.foodygo.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Entity
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Image {
+public class Building extends BaseEntity {
 
     @Id
     Integer id;
 
-    String url;
+    String name;
+
+    String description;
 
     @ManyToOne
-    User user;
+    Hub hub;
 
-    @ManyToOne
-    Restaurant restaurant;
-
-    @ManyToOne
-    Product product;
+    @OneToMany(mappedBy = "building")
+    List<Customer> customers;
 }

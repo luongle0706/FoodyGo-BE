@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductAddonItem extends BaseEntity {
+public class AddonItem extends BaseEntity {
 
     @Id
     Integer id;
@@ -25,6 +25,6 @@ public class ProductAddonItem extends BaseEntity {
     Integer quantity;
 
     @ManyToOne
-    ProductAddonSection section;
+    AddonSection section;
 
 }

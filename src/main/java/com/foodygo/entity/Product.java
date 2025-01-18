@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data
@@ -34,12 +33,12 @@ public class Product extends BaseEntity {
     @ManyToOne
     Restaurant restaurant;
 
-    @ManyToMany
-    Set<Category> categories;
+    @ManyToOne
+    Category category;
 
     @OneToMany(mappedBy = "product")
     List<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "product")
-    List<ProductAddonSection> sections;
+    List<AddonSection> sections;
 }

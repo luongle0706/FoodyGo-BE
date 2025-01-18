@@ -1,10 +1,12 @@
 package com.foodygo.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,9 +24,9 @@ public class Hub extends BaseEntity {
 
     String block;
 
-    @OneToOne(mappedBy = "hub")
-    Address address;
+    @OneToMany(mappedBy = "hub")
+    List<Order> orders;
 
-    @ManyToMany(mappedBy = "hubs")
-    Set<User> users;
+    @OneToMany(mappedBy = "hub")
+    List<Building> buildings;
 }

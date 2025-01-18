@@ -37,8 +37,7 @@ public class DatabaseInit {
             if (userRepository.count() == 0) {
                 Role role = roleRepository.getRoleByRoleName(EnumRoleName.ROLE_USER);
                 User user = User.builder()
-                        .firstName("Hoang")
-                        .lastName("Ha")
+                        .fullName("HOANG SON HA")
                         .accessToken(null)
                         .refreshToken(null)
                         .email("hoangsonhadev@gmail.com")
@@ -46,7 +45,6 @@ public class DatabaseInit {
                         .enabled(true)
                         .nonLocked(true)
                         .role(role)
-                        .codeVerify("3333")
                         .build();
                 userRepository.save(user);
             }

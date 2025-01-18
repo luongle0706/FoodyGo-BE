@@ -19,8 +19,7 @@ import java.util.List;
 @Builder
 public class CustomUserDetail implements UserDetails {
     private int userID;
-    private String firstName;
-    private String lastName;
+    private String fullName;
     private String email;
     private String password;
     private String phone;
@@ -36,10 +35,9 @@ public class CustomUserDetail implements UserDetails {
         List<GrantedAuthority> roles = new ArrayList<>();
         roles.add(simpleGrantedAuthority);
 
-        CustomUserDetail customUserDetail = CustomUserDetail.builder()
+        return CustomUserDetail.builder()
                 .userID(user.getUserID())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
+                .fullName(user.getFullName())
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .phone(user.getPhone())
@@ -49,7 +47,6 @@ public class CustomUserDetail implements UserDetails {
                 .enabled(user.isEnabled())
                 .grantedAuthorities(roles)
                 .build();
-        return customUserDetail;
     }
 
     @Override

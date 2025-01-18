@@ -13,18 +13,23 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Category extends BaseEntity {
+public class Customer extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    String name;
-
-    String description;
-
-    @OneToMany(mappedBy = "category")
-    List<Product> products;
+    String image;
 
     @ManyToOne
-    Restaurant restaurant;
+    Building building;
+
+    @OneToOne
+    User user;
+
+    @OneToOne(mappedBy = "customer")
+    Wallet wallet;
+
+    @OneToMany(mappedBy = "customer")
+    List<Order> orders;
 }

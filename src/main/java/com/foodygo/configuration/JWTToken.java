@@ -33,17 +33,15 @@ public class JWTToken {
     private String algorithm;
 
     private SecretKey getSecretKey(EnumTokenType type) {
-        byte[] keyBytes = null;
-        SecretKey SCRET_KEY = null;
+        byte[] keyBytes;
+        SecretKey SCRET_KEY;
         if(type == EnumTokenType.TOKEN) {
             keyBytes = Base64.getDecoder().decode(sceretString.getBytes(StandardCharsets.UTF_8));
-            SCRET_KEY = new SecretKeySpec(keyBytes, algorithm);
-            return SCRET_KEY;
         } else {
             keyBytes = Base64.getDecoder().decode(refreshSecretString.getBytes(StandardCharsets.UTF_8));
-            SCRET_KEY = new SecretKeySpec(keyBytes, algorithm);
-            return SCRET_KEY;
         }
+        SCRET_KEY = new SecretKeySpec(keyBytes, algorithm);
+        return SCRET_KEY;
     }
 
     public String generatedToken(CustomUserDetail customUserDetail) {
@@ -56,8 +54,7 @@ public class JWTToken {
                 .issuedAt(date)
                 .expiration(exp)
                 .claim("userID", customUserDetail.getUserID())
-                .claim("firstName", customUserDetail.getFirstName())
-                .claim("lastName", customUserDetail.getLastName())
+                .claim("fullName", customUserDetail.getFullName())
                 .claim("role", customUserDetail.getGrantedAuthorities())
                 .signWith(getSecretKey(EnumTokenType.TOKEN))
                 .compact();
@@ -73,8 +70,7 @@ public class JWTToken {
                 .issuedAt(date)
                 .expiration(exp)
                 .claim("userID", customUserDetail.getUserID())
-                .claim("firstName", customUserDetail.getFirstName())
-                .claim("lastName", customUserDetail.getLastName())
+                .claim("fullName", customUserDetail.getFullName())
                 .claim("role", customUserDetail.getGrantedAuthorities())
                 .signWith(getSecretKey(EnumTokenType.REFRESH_TOKEN))
                 .compact();
@@ -93,17 +89,9 @@ public class JWTToken {
         }
     }
 
-//    private <T> T getClaims(String token, Function<Claims, T> claimsTFunction) {
-//        return claimsTFunction.apply(
-//                Jwts.parser().verifyWith(getSecretKey()).build().parseSignedClaims(token).getPayload());
-//    }
-
     public boolean validate(String token, EnumTokenType type) {
         try {
-            if(getEmailFromJwt(token, type) != null && !isExpired(token, type)) {
-                return true;
-            }
-            return false;
+            return getEmailFromJwt(token, type) != null && !isExpired(token, type);
         } catch (Exception e) {
             throw new AuthenticationException("You don't have permission to access this token");
         }

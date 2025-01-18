@@ -1,6 +1,5 @@
 package com.foodygo.entity;
 
-import com.foodygo.enums.ProductAddonType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductAddonSection extends BaseEntity {
+public class AddonSection extends BaseEntity {
 
     @Id
     Integer id;
@@ -26,12 +25,9 @@ public class ProductAddonSection extends BaseEntity {
     @Builder.Default
     boolean required = false;
 
-    @Enumerated(EnumType.STRING)
-    ProductAddonType type;
-
     @ManyToOne
     Product product;
 
     @OneToMany(mappedBy = "section")
-    List<ProductAddonItem> items;
+    List<AddonItem> items;
 }

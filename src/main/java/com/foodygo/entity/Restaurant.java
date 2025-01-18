@@ -24,20 +24,15 @@ public class Restaurant extends BaseEntity {
 
     String email;
 
-    String openHours; // HOI THAY PHUONG
-
     @Builder.Default
-    boolean open = true;
-
-    @OneToOne(mappedBy = "restaurant")
-    Address address;
-
-    @OneToMany(mappedBy = "restaurant")
-    List<Image> images;
+    boolean available = true;
 
     @OneToMany(mappedBy = "restaurant")
     List<Order> orders;
 
     @OneToMany(mappedBy = "restaurant")
     List<Product> products;
+
+    @OneToMany(mappedBy = "restaurant")
+    List<Category> categories;
 }
