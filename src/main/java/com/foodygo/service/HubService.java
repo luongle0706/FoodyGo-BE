@@ -4,6 +4,7 @@ import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
+import com.foodygo.entity.Order;
 
 import java.util.List;
 
@@ -16,5 +17,8 @@ public interface HubService extends BaseService<Hub, Integer> {
 
     Hub updateHub(HubUpdateRequest hubUpdateRequest, int hubID);
 
-    List<Hub> getTest(Building building);
+    List<Building> getBuildingsByHubID(Integer hubID);
+
+    List<Order> getOrdersByHubID(Integer hubID);
+
 }

@@ -3,10 +3,10 @@ package com.foodygo.service;
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.entity.Building;
+import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.BuildingRepository;
-import com.foodygo.repository.HubRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +18,12 @@ import java.util.List;
 public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implements BuildingService {
 
     private final BuildingRepository buildingRepository;
-    private final HubRepository hubRepository;
+    private final HubService hubService;
 
-    public BuildingServiceImp(BuildingRepository buildingRepository, HubRepository hubRepository) {
+    public BuildingServiceImp(BuildingRepository buildingRepository, HubService hubService) {
         super(buildingRepository);
         this.buildingRepository = buildingRepository;
-        this.hubRepository = hubRepository;
+        this.hubService = hubService;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implem
                 .hub(null)
                 .build();
         if(buildingCreateRequest.getHubID() > 0) {
-            Hub hub = hubRepository.findHubById(buildingCreateRequest.getHubID());
+            Hub hub = hubService.findById(buildingCreateRequest.getHubID());
             if (hub != null) {
                 building.setHub(hub);
             } else {
@@ -82,7 +82,7 @@ public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implem
                 building.setHub(null);
             } else {
                 if(buildingUpdateRequest.getHubID() > 0) {
-                    Hub hub = hubRepository.findHubById(buildingUpdateRequest.getHubID());
+                    Hub hub = hubService.findById(buildingUpdateRequest.getHubID());
                     if (hub != null) {
                         building.setHub(hub);
                     } else {
@@ -91,6 +91,24 @@ public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implem
                 }
             }
             return buildingRepository.save(building);
+        }
+        return null;
+    }
+
+    @Override
+    public Hub getHubByBuildingID(Integer buildingID) {
+        Building building = buildingRepository.findBuildingById(buildingID);
+        if (building != null) {
+            return building.getHub();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Customer> getCustomersByBuildingID(Integer buildingID) {
+        Building building = buildingRepository.findBuildingById(buildingID);
+        if (building != null) {
+            return building.getCustomers();
         }
         return null;
     }

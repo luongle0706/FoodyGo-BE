@@ -4,7 +4,9 @@ import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
+import com.foodygo.entity.Order;
 import com.foodygo.repository.HubRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -71,8 +73,21 @@ public class HubServiceImp extends BaseServiceImp<Hub, Integer> implements HubSe
     }
 
     @Override
-    public List<Hub> getTest(Building building) {
-        return hubRepository.findByBuildings(building);
+    public List<Building> getBuildingsByHubID(Integer hubID) {
+        Hub hub = hubRepository.findHubById(hubID);
+        if (hub != null) {
+            return hub.getBuildings();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Order> getOrdersByHubID(Integer hubID) {
+        Hub hub = hubRepository.findHubById(hubID);
+        if(hub != null) {
+            return hub.getOrders();
+        }
+        return null;
     }
 
 }

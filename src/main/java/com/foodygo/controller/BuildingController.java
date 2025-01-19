@@ -4,6 +4,8 @@ import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.entity.Building;
+import com.foodygo.entity.Customer;
+import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.service.BuildingService;
 import com.foodygo.service.HubService;
@@ -15,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -22,21 +26,40 @@ import org.springframework.web.bind.annotation.*;
 public class BuildingController {
 
     private final BuildingService buildingService;
-    private final HubService hubService;
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all")
     public ResponseEntity<ObjectResponse> getAllBuildings() {
-        return !buildingService.findAll().isEmpty() ?
-            ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings successfully", buildingService.findAll())) :
+        List<Building> buildings = buildingService.findAll();
+        return !buildings.isEmpty() ?
+            ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings successfully", buildings)) :
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all buildings failed", null));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/get-all-hub/{building-id}")
+    public ResponseEntity<ObjectResponse> getHubByBuildingID(@PathVariable("building-id") int buildingID) {
+        Hub hub = buildingService.getHubByBuildingID(buildingID);
+        return hub != null ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all hub by building ID successfully", hub)) :
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all hub by building ID failed", null));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/get-all-customers/{building-id}")
+    public ResponseEntity<ObjectResponse> getCustomersByBuildingID(@PathVariable("building-id") int buildingID) {
+        List<Customer> results = buildingService.getCustomersByBuildingID(buildingID);
+        return results != null ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all customer by building ID successfully", results)) :
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all customer by building ID failed", null));
     }
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-active")
     public ResponseEntity<ObjectResponse> getAllHubsActive() {
-        return !buildingService.getBuildingsActive().isEmpty() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings active successfully", buildingService.getBuildingsActive())) :
+        List<Building> buildings = buildingService.getBuildingsActive();
+        return !buildings.isEmpty() ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings active successfully", buildings)) :
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all buildings active failed", null));
     }
 
@@ -51,8 +74,9 @@ public class BuildingController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get/{building-id}")
     public ResponseEntity<ObjectResponse> getBuildingByID(@PathVariable("building-id") int buildingID) {
-        return buildingService.findById(buildingID) != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get building by ID successfully", buildingService.findById(buildingID))) :
+        Building building = buildingService.findById(buildingID);
+        return building != null ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get building by ID successfully", building)) :
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get building by ID failed", null));
     }
 

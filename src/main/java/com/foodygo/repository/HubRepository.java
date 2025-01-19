@@ -22,8 +22,4 @@ public interface HubRepository extends JpaRepository<Hub, Integer> {
 
     Hub findHubById(int id);
 
-    List<Hub> findByBuildings(Building buildings);
-
-    List<Hub> findByOrders(Order orders);
-
 }
