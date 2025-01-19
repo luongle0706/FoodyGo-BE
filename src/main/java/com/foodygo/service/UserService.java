@@ -9,8 +9,6 @@ public interface UserService {
 
     public void save(User user);
 
-    public boolean verifyAccount(String code);
-
     public User getUserByID(int userID);
 
     public User getUserByEmail(String email);

@@ -74,16 +74,6 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
-    public boolean verifyAccount(String code) {
-//        User user = userRepository.getUserByCodeVerify(code);
-//        if (user == null || user.isEnabled() || !user.isNonLocked()) {
-//            return false;
-//        }
-//        userRepository.enabled(user.getUserID());
-        return true;
-    }
-
-    @Override
     public boolean getUserByPhone(String phone) {
         User user = userRepository.getUserByPhone(phone);
         if (user == null || !user.isNonLocked() || !user.isEnabled()) {

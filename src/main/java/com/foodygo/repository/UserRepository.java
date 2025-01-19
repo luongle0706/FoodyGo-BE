@@ -11,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-//    User getUserByCodeVerify(String code);
-
     User getUserByEmail(String email);
 
     User getUserByUserID(int userID);
