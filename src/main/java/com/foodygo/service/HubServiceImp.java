@@ -6,7 +6,6 @@ import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.repository.HubRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

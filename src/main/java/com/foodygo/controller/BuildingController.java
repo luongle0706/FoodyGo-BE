@@ -8,7 +8,6 @@ import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.service.BuildingService;
-import com.foodygo.service.HubService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +26,7 @@ public class BuildingController {
 
     private final BuildingService buildingService;
 
+    // lấy tất cả buildings
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all")
     public ResponseEntity<ObjectResponse> getAllBuildings() {
@@ -36,6 +36,7 @@ public class BuildingController {
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all buildings failed", null));
     }
 
+    // lấy hub theo building id
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-hub/{building-id}")
     public ResponseEntity<ObjectResponse> getHubByBuildingID(@PathVariable("building-id") int buildingID) {
@@ -45,6 +46,7 @@ public class BuildingController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all hub by building ID failed", null));
     }
 
+    // lấy tất cả customer trong building
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-customers/{building-id}")
     public ResponseEntity<ObjectResponse> getCustomersByBuildingID(@PathVariable("building-id") int buildingID) {
@@ -54,6 +56,7 @@ public class BuildingController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all customer by building ID failed", null));
     }
 
+    // lấy tất cả building chưa xóa
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-active")
     public ResponseEntity<ObjectResponse> getAllHubsActive() {
@@ -63,6 +66,7 @@ public class BuildingController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all buildings active failed", null));
     }
 
+    // khôi phục building
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/undelete/{building-id}")
     public ResponseEntity<ObjectResponse> unDeleteHubByID(@PathVariable("building-id") int buildingID) {
@@ -71,6 +75,7 @@ public class BuildingController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Undelete building failed", null));
     }
 
+    // get building by id
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get/{building-id}")
     public ResponseEntity<ObjectResponse> getBuildingByID(@PathVariable("building-id") int buildingID) {
@@ -80,15 +85,13 @@ public class BuildingController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get building by ID failed", null));
     }
 
+    // create building
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createBuilding(@Valid @RequestBody BuildingCreateRequest buildingCreateRequest) {
         try {
             Building building = buildingService.createBuilding(buildingCreateRequest);
-            if (building != null) {
-                return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create building successfully", building));
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create building failed. Building is null", null));
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create building successfully", building));
         } catch (ElementNotFoundException e) {
             log.error("Error while creating building", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create building failed. Hub not found", null));
@@ -98,6 +101,7 @@ public class BuildingController {
         }
     }
 
+    // update building theo id
     @PreAuthorize("hasRole('USER')")
     @PutMapping("/update/{building-id}")
     public ResponseEntity<ObjectResponse> updateBuilding(@Valid @RequestBody BuildingUpdateRequest buildingUpdateRequest, @PathVariable("building-id") int buildingID) {
@@ -116,6 +120,7 @@ public class BuildingController {
         }
     }
 
+    // xóa building
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/delete/{building-id}")
     public ResponseEntity<ObjectResponse> deleteHubByID(@PathVariable("building-id") int buildingID) {

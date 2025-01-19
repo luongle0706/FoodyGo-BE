@@ -6,6 +6,7 @@ import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
+import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.service.HubService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -90,10 +91,7 @@ public class HubController {
     public ResponseEntity<ObjectResponse> createHub(@Valid @RequestBody HubCreateRequest hubCreateRequest) {
         try {
             Hub hub = hubService.createHub(hubCreateRequest);
-            if (hub != null) {
-                return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create hub successfully", hub));
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create hub failed. Hub is null", null));
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create hub successfully", hub));
         } catch (Exception e) {
             log.error("Error creating hub", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create hub failed", null));
@@ -110,6 +108,9 @@ public class HubController {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update hub successfully", hub));
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update hub failed. Hub is null", null));
+        } catch (ElementNotFoundException e) {
+            log.error("Error while updating hub", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update hub failed. Hub not found", null));
         } catch (Exception e) {
             log.error("Error updating hub", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update hub failed", null));
