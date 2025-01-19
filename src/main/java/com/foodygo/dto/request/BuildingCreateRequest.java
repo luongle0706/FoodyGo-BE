@@ -1,7 +1,8 @@
 package com.foodygo.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,15 +11,14 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class HubCreateRequest {
+public class BuildingCreateRequest {
 
-    @NotNull(message = "Please enter name")
     @NotBlank(message = "Name is not blank")
     @Size(max = 255, min = 1, message = "Name must be between 1 and 255")
     private String name;
 
-    @NotNull(message = "Please enter block")
-    @NotBlank(message = "Block is not blank")
-    @Size(max = 255, min = 1, message = "Block must be between 1 and 255 characters")
-    private String block;
+    @Size(max = 255, min = 1, message = "Description must be between 1 and 255 characters")
+    private String description;
+
+    private Integer hubID;
 }

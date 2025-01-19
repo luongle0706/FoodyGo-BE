@@ -1,5 +1,6 @@
 package com.foodygo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -26,5 +27,6 @@ public class Hub extends BaseEntity {
     List<Order> orders;
 
     @OneToMany(mappedBy = "hub")
+    @JsonBackReference
     List<Building> buildings;
 }
