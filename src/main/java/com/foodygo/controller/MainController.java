@@ -4,10 +4,15 @@ import com.foodygo.configuration.CustomUserDetail;
 import com.foodygo.configuration.JWTAuthenticationFilter;
 import com.foodygo.configuration.JWTToken;
 import com.foodygo.dto.request.UserLoginRequest;
+import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.TokenResponse;
+import com.foodygo.entity.Hub;
+import com.foodygo.entity.Role;
 import com.foodygo.entity.User;
+import com.foodygo.enums.EnumRoleName;
 import com.foodygo.enums.EnumTokenType;
+import com.foodygo.service.RoleService;
 import com.foodygo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,8 +24,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/public")
@@ -32,12 +41,26 @@ public class MainController {
     private final JWTToken jwtToken;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationManager authenticationManager;
+    private final RoleService roleService;
 
     @GetMapping("/test")
     public String testne() {
         return "testne2";
     }
 
+    // user đăng kí tài khoản
+    @PostMapping("/register")
+    public ResponseEntity<ObjectResponse> userRegister(@Valid @RequestBody UserRegisterRequest userRegisterRequest, HttpServletRequest request) {
+        try {
+            User user = userService.createUser(userRegisterRequest);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create user successfully", user));
+        } catch (Exception e) {
+            log.error("Error creating user", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create user failed", null));
+        }
+    }
+
+    // token refresh
     @PostMapping("/refresh_token")
     public ResponseEntity<TokenResponse> refreshToken(HttpServletRequest request) {
         String refreshToken = request.getHeader("RefreshToken");
@@ -61,6 +84,7 @@ public class MainController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Refresh token failed", null, null));
     }
 
+    // login
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> loginPage(@Valid @RequestBody UserLoginRequest userLogin) {
         try {
@@ -85,6 +109,7 @@ public class MainController {
         }
     }
 
+    // logout
     @PostMapping("/logout")
     public ResponseEntity<ObjectResponse> getLogout(HttpServletRequest request) {
         try {

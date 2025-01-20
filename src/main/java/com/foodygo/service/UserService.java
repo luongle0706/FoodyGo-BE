@@ -1,28 +1,28 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.request.UserRegisterRequest;
+import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.entity.User;
 import java.util.List;
 
-public interface UserService {
+public interface UserService extends BaseService<User, Integer> {
 
-    public List<User> findAll(String role);
+    List<User> getUsersByRole(String role);
 
-    public void save(User user);
+    User getUserByEmail(String email);
 
-    public boolean verifyAccount(String code);
+    boolean lockedUser(int id);
 
-    public User getUserByID(int userID);
+    boolean unLockedUser(int id);
 
-    public User getUserByEmail(String email);
+    boolean getUserByPhone(String phone);
 
-    public boolean lockedUser(int id);
+    void lockedUserByEmail(String email);
 
-    public boolean unLockedUser(int id);
+    boolean checkEmailOrPhone(String s);
 
-    public boolean getUserByPhone(String phone);
+    User createUser(UserRegisterRequest userRegisterRequest);
 
-    public void lockedUserByEmail(String email);
-
-    public boolean checkEmailOrPhone(String s);
+    User updateUser(UserUpdateRequest userUpdateRequest, int userID);
 
 }

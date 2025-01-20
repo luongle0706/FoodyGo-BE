@@ -1,12 +1,15 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.request.UserRegisterRequest;
+import com.foodygo.dto.request.UserUpdateRequest;
+import com.foodygo.entity.Building;
+import com.foodygo.entity.Hub;
 import com.foodygo.enums.EnumRoleName;
 import com.foodygo.entity.Role;
 import com.foodygo.entity.User;
+import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +17,21 @@ import java.util.*;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class UserServiceImp implements UserService {
+public class UserServiceImp extends BaseServiceImp<User, Integer> implements UserService {
 
     private final UserRepository userRepository;
     private final RoleService roleService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public UserServiceImp(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        super(userRepository);
+        this.userRepository = userRepository;
+        this.roleService = roleService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
 
     @Override
-    public List<User> findAll(String role) {
+    public List<User> getUsersByRole(String role) {
         List<User> listsByRole = userRepository.findAll();
         Role role_admin = roleService.getRoleByRoleName(EnumRoleName.ROLE_ADMIN);
         Role role_manager = roleService.getRoleByRoleName(EnumRoleName.ROLE_MANAGER);
@@ -36,11 +46,6 @@ public class UserServiceImp implements UserService {
                 return userRepository.findAll();
         }
         return listsByRole;
-    }
-
-    @Override
-    public void save(User user) {
-        userRepository.save(user);
     }
 
     @Override
@@ -63,24 +68,10 @@ public class UserServiceImp implements UserService {
         return false;
     }
 
-    @Override
-    public User getUserByID(int userID) {
-        return userRepository.getUserByUserID(userID);
-    }
 
     @Override
     public User getUserByEmail(String email) {
         return userRepository.getUserByEmail(email);
-    }
-
-    @Override
-    public boolean verifyAccount(String code) {
-//        User user = userRepository.getUserByCodeVerify(code);
-//        if (user == null || user.isEnabled() || !user.isNonLocked()) {
-//            return false;
-//        }
-//        userRepository.enabled(user.getUserID());
-        return true;
     }
 
     @Override
@@ -113,6 +104,40 @@ public class UserServiceImp implements UserService {
             check = false;
         }
         return check;
+    }
+
+    @Override
+    public User createUser(UserRegisterRequest userRegisterRequest) {
+        Role role = roleService.getRoleByRoleName(EnumRoleName.ROLE_USER);
+        User user = User.builder()
+                .email(userRegisterRequest.getEmail())
+                .password(bCryptPasswordEncoder.encode(userRegisterRequest.getPassword()))
+                .accessToken(null)
+                .refreshToken(null)
+                .enabled(true)
+                .nonLocked(true)
+                .role(role)
+                .build();
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User updateUser(UserUpdateRequest userUpdateRequest, int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        if (user != null) {
+            if (userUpdateRequest.getPassword() != null) {
+                user.setPassword(bCryptPasswordEncoder.encode(userUpdateRequest.getPassword()));
+            }
+            if (userUpdateRequest.getPhone() != null) {
+                user.setPhone(userUpdateRequest.getPhone());
+            }
+            if(userUpdateRequest.getFullName() != null) {
+                user.setFullName(userUpdateRequest.getFullName());
+            }
+            return userRepository.save(user);
+        } else {
+            throw new ElementNotFoundException("User not found");
+        }
     }
 
 }
