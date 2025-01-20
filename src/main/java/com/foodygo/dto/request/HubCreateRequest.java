@@ -17,8 +17,11 @@ public class HubCreateRequest {
     @Size(max = 255, min = 1, message = "Name must be between 1 and 255")
     private String name;
 
-    @NotNull(message = "Please enter block")
-    @NotBlank(message = "Block is not blank")
-    @Size(max = 255, min = 1, message = "Block must be between 1 and 255 characters")
-    private String block;
+    @NotNull(message = "Please enter address")
+    @NotBlank(message = "Address is not blank")
+    @Size(max = 255, min = 1, message = "Address must be between 1 and 255 characters")
+    private String address;
+
+    @Size(max = 255, min = 1, message = "Description must be between 1 and 255 characters")
+    private String description;
 }

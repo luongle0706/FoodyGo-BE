@@ -1,12 +1,10 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
-import com.foodygo.entity.Building;
-import com.foodygo.entity.Hub;
+import com.foodygo.entity.*;
 import com.foodygo.enums.EnumRoleName;
-import com.foodygo.entity.Role;
-import com.foodygo.entity.User;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -138,6 +136,54 @@ public class UserServiceImp extends BaseServiceImp<User, Integer> implements Use
         } else {
             throw new ElementNotFoundException("User not found");
         }
+    }
+
+    @Override
+    public User createUserWithRole(UserCreateRequest userCreateRequest) {
+        Role role = roleService.getRoleByRoleId(userCreateRequest.getRoleID());
+        User user = User.builder()
+                .email(userCreateRequest.getEmail())
+                .password(bCryptPasswordEncoder.encode(userCreateRequest.getPassword()))
+                .accessToken(null)
+                .refreshToken(null)
+                .enabled(true)
+                .nonLocked(true)
+                .role(role)
+                .build();
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User undeletedUser(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        if (user != null && !user.isNonLocked() && !user.isEnabled() && user.isDeleted()) {
+            user.setNonLocked(true);
+            user.setDeleted(false);
+            user.setEnabled(true);
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
+    @Override
+    public Customer getCustomerByUserID(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        if (user != null) {
+            return user.getCustomer();
+        }
+        return null;
+    }
+
+    @Override
+    public List<OrderActivity> getOrderActivitiesByUserID(int userID) {
+        // chua co order activity
+        return List.of();
+    }
+
+    @Override
+    public User getUserByOrderActivityID(int orderActivityID) {
+        // chua co order activity
+        return null;
     }
 
 }

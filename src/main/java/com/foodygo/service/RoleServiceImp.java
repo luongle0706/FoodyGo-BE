@@ -20,6 +20,12 @@ public class RoleServiceImp implements RoleService {
     }
 
     @Override
+    public Role getRoleByRoleId(int roleId) {
+        Role role = roleRepository.getRolesByRoleID(roleId);
+        return role != null ? role : null;
+    }
+
+    @Override
     public List<Role> getAllRoles() {
         return roleRepository.findAll();
     }

@@ -56,6 +56,16 @@ public class HubController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all orders by hub ID failed", null));
     }
 
+    // lấy hub từ order id
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/get-hub/{order-id}")
+    public ResponseEntity<ObjectResponse> getHubByOrderID(@PathVariable("order-id") int orderID) {
+        Hub results = hubService.getHubByOrderID(orderID);
+        return results != null ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get hub by order ID successfully", results)) :
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get hub by order ID failed", null));
+    }
+
     // lấy tất cả các hubs chưa bị xóa
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-active")

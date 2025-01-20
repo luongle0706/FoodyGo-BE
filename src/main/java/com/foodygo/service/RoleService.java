@@ -9,5 +9,7 @@ import java.util.List;
 public interface RoleService {
     Role getRoleByRoleName(EnumRoleName roleName);
 
+    Role getRoleByRoleId(int roleId);
+
     List<Role> getAllRoles();
 }
