@@ -1,2 +1,4 @@
-package com.foodygo.service;public interface ProductService {
+package com.foodygo.service;
+
+public interface ProductService {
 }

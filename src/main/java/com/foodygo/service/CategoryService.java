@@ -1,2 +1,4 @@
-package com.foodygo.service;public interface CategoryService {
+package com.foodygo.service;
+
+public interface CategoryService {
 }

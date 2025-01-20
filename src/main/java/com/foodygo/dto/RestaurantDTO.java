@@ -1,2 +1,7 @@
-package com.foodygo.dto;public record RestaurantDTO() {
+package com.foodygo.dto;
+
+import lombok.Builder;
+
+@Builder
+public record RestaurantDTO() {
 }

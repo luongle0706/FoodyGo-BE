@@ -1,2 +1,4 @@
-package com.foodygo.service;public interface AddonSectionService {
+package com.foodygo.service;
+
+public interface AddonSectionService {
 }

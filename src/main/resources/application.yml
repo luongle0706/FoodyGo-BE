@@ -3,9 +3,9 @@ spring:
   application:
     name: foodygo
   datasource:
-    url: jdbc:mysql://localhost:3306/foodygo
+    url: jdbc:mysql://localhost:3307/foodygo
     username: root
-    password: 123456789
+    password: 123456
   jpa:
     hibernate:
       ddl-auto: update
