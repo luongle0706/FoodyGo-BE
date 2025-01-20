@@ -19,13 +19,15 @@ public class Product extends BaseEntity {
     @Id
     Integer id;
 
+    String code;
+
     String name;
 
     Double price;
 
     String description;
 
-    LocalDateTime prepareTime;
+    Double prepareTime;
 
     @Builder.Default
     boolean available = true;

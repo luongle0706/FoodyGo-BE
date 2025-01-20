@@ -24,6 +24,10 @@ public class Restaurant extends BaseEntity {
 
     String email;
 
+    String address;
+
+    String image;
+
     @Builder.Default
     boolean available = true;
 

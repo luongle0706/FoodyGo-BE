@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @AllArgsConstructor
@@ -21,7 +22,9 @@ public class Hub extends BaseEntity {
 
     String name;
 
-    String block;
+    String address;
+
+    String description;
 
     @OneToMany(mappedBy = "hub")
     List<Order> orders;
