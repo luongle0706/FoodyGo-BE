@@ -14,9 +14,9 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("FoodyGo - Food delivery platform for Dormitory B - Ho Chi Minh City National University Dormitory"))
+                .info(new Info().title("FoodyGo - Food delivery platform for Dormitory B - HCMC National University Dormitory"))
                 .addSecurityItem(new SecurityRequirement().addList("FoodyGo Authentication Service"))
                 .components(new Components().addSecuritySchemes("FoodyGo Authentication Service", new SecurityScheme()
-                        .name("Dormitory B - Ho Chi Minh City National University Dormitory").type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
+                        .name("Dormitory B - HCMC National University Dormitory").type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
     }
 }
