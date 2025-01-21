@@ -42,5 +42,5 @@ public class Product extends BaseEntity {
     List<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "product")
-    List<AddonSection> sections;
+    List<AddonSection> addonSections;
 }

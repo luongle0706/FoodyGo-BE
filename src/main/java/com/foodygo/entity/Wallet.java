@@ -1,5 +1,6 @@
 package com.foodygo.entity;
 
+import com.foodygo.enums.WalletType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,12 +22,15 @@ public class Wallet extends BaseEntity {
 
     Double balance;
 
+    @Enumerated(EnumType.STRING)
+    WalletType walletType;
+
     @OneToOne
     Customer customer;
 
-    @OneToMany(mappedBy = "wallet")
-    List<Transaction> transactions;
+    @ManyToOne
+    Restaurant restaurant;
 
     @OneToMany(mappedBy = "wallet")
-    List<Deposit> deposits;
+    List<Transaction> transactions;
 }

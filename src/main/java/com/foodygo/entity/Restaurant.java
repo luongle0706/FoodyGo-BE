@@ -28,6 +28,9 @@ public class Restaurant extends BaseEntity {
 
     String image;
 
+    @OneToMany(mappedBy = "restaurant")
+    List<Wallet> wallets;
+
     @Builder.Default
     boolean available = true;
 

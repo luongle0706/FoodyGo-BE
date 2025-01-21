@@ -21,7 +21,10 @@ public class OrderActivity extends BaseEntity {
     Integer id;
 
     @Enumerated(EnumType.STRING)
-    OrderStatus status;
+    OrderStatus fromStatus;
+
+    @Enumerated(EnumType.STRING)
+    OrderStatus toStatus;
 
     LocalDateTime time;
 

@@ -1,6 +1,7 @@
 package com.foodygo.entity;
 
 import com.foodygo.enums.DepositMethod;
+import com.foodygo.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,12 +28,15 @@ public class Transaction extends BaseEntity {
 
     Double remaining;
 
+    @Enumerated(EnumType.STRING)
+    TransactionType type;
+
     @ManyToOne
     Order order;
 
     @ManyToOne
     Wallet wallet;
 
-    @OneToOne(mappedBy = "transaction")
+    @ManyToOne
     Deposit deposit;
 }

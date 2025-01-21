@@ -34,6 +34,12 @@ public class Order extends BaseEntity {
 
     LocalDateTime expectedDeliveryTime;
 
+    String customerPhone;
+
+    String shipperPhone;
+
+    String notes;
+
     @ManyToOne
     User employee;
 
@@ -46,8 +52,8 @@ public class Order extends BaseEntity {
     @ManyToOne
     Hub hub;
 
-    @OneToOne
-    Transaction transaction;
+    @OneToMany(mappedBy = "order")
+    List<Transaction> transactions;
 
     @OneToMany(mappedBy = "order")
     List<OrderDetail> orderDetails;

@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -34,6 +35,6 @@ public class Deposit extends BaseEntity {
     @ManyToOne
     Wallet wallet;
 
-    @OneToOne
-    Transaction transaction;
+    @OneToMany(mappedBy = "deposit")
+    List<Transaction> transactions;
 }
