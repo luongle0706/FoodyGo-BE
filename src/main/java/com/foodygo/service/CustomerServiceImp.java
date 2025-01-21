@@ -50,7 +50,7 @@ public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implem
     @Value("${firebase.get.url}")
     private String urlFirebase;
 
-    @Value("${firebase,get.folder}")
+    @Value("${firebase.get.folder}")
     private String folderContainImage;
 
     @Value("${firebase.file.format}")
