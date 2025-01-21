@@ -1,5 +1,6 @@
 package com.foodygo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -7,8 +8,8 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Entity
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -19,6 +20,7 @@ public class Customer extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(name = "image", columnDefinition = "VARCHAR(1000)")
     String image;
 
     @ManyToOne
@@ -31,5 +33,7 @@ public class Customer extends BaseEntity {
     Wallet wallet;
 
     @OneToMany(mappedBy = "customer")
+    @JsonBackReference
     List<Order> orders;
+
 }

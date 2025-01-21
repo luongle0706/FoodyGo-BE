@@ -3,9 +3,9 @@ spring:
   application:
     name: foodygo
   datasource:
-    url: jdbc:mysql://localhost:3307/foodygo
+    url: jdbc:mysql://localhost:3306/foodygo
     username: root
-    password: 123456
+    password: 123456789
   jpa:
     hibernate:
       ddl-auto: update
@@ -28,13 +28,13 @@ jwt:
 # Firebase
 firebase:
   bucket:
-    name: swd391-f046d.appspot.com
+    name: swp391-f046d.appspot.com
   content:
     type: image/png
   get:
-    stream: swd391-f046d-firebase-adminsdk-drdyq-6dc6c24b5a.json
+    stream: swp391-f046d-firebase-adminsdk-drdyq-e270ed7356.json
     url: https://firebasestorage.googleapis.com/v0/b/swd391-f046d.appspot.com/o/%s?alt=media
-    folder: 1
+    folder: swd391_image_customer
   file:
     format: .png
 

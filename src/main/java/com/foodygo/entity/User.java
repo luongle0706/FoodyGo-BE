@@ -1,7 +1,9 @@
 package com.foodygo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
 import java.util.List;
@@ -14,43 +16,45 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userID;
+    int userID;
 
     @Column(name = "full_name")
-    private String fullName;
+    String fullName;
 
-    @Column(name = "email", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
-    private String email;
+    @Column(name = "email", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
+    String email;
 
-    @Column(name = "password", nullable = true, columnDefinition = "VARCHAR(60)")
-    private String password;
+    @Column(name = "password", columnDefinition = "VARCHAR(60)")
+    String password;
 
-    @Column(name = "phone", nullable = true, unique = true, columnDefinition = "VARCHAR(12)")
-    private String phone;
+    @Column(name = "phone", unique = true, columnDefinition = "VARCHAR(12)")
+    String phone;
 
     @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-    private boolean enabled;
+    boolean enabled;
 
     @Column(name = "non_locked", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
-    private boolean nonLocked;
+    boolean nonLocked;
 
-    @Column(name = "access_token", nullable = true, columnDefinition = "TEXT")
-    private String accessToken;
+    @Column(name = "access_token", columnDefinition = "TEXT")
+    String accessToken;
 
-    @Column(name = "refresh_token", nullable = true, columnDefinition = "TEXT")
-    private String refreshToken;
+    @Column(name = "refresh_token", columnDefinition = "TEXT")
+    String refreshToken;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
-    private Role role;
+    Role role;
 
     @OneToOne(mappedBy = "user")
-    private Customer customer;
+    Customer customer;
 
     @OneToMany(mappedBy = "employee")
-    private List<Order> employeeOrders;
+    @JsonBackReference
+    List<Order> employeeOrders;
 }

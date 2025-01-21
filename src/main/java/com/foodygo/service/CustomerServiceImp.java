@@ -158,9 +158,11 @@ public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implem
         User user = getUser(customerCreateRequest.getUserID());
         try {
             String url = null;
-            if(customerCreateRequest.getImage() != null) {
+            if(customerCreateRequest.getImage() == null) {
                 String dataUrl = generateImageWithInitial(user.getEmail());
                 url = uploadFileBase64(dataUrl);
+            } else {
+                url = upload(customerCreateRequest.getImage());
             }
             Customer customer = Customer.builder()
                     .image(url)
@@ -372,10 +374,10 @@ public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implem
 
         // insert character into image
         Graphics2D graphics = bufferedImage.createGraphics();
-        graphics.setColor(Color.decode(bufferImageColorBackground));
+        graphics.setColor(Color.decode("#" + bufferImageColorBackground));
         graphics.fillRect(bufferImageX, bufferImageY, width, height);  // x, y is the conner on the top left of rectangle
         graphics.setFont(new Font(bufferImageFontText, Font.BOLD, bufferImageSizeText));
-        graphics.setColor(Color.decode(bufferImageColorText));
+        graphics.setColor(Color.decode("#" + bufferImageColorText));
         FontMetrics fontMetrics = graphics.getFontMetrics();
         int x = (width - fontMetrics.charWidth(initial)) / bufferImageDevide;
         int y = ((height - fontMetrics.getHeight()) / bufferImageDevide) + fontMetrics.getAscent();

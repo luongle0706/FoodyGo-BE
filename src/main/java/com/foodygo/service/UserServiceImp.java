@@ -5,6 +5,7 @@ import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.entity.*;
 import com.foodygo.enums.EnumRoleName;
+import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.UserRepository;
 import com.google.auth.Credentials;
@@ -122,6 +123,10 @@ public class UserServiceImp extends BaseServiceImp<User, Integer> implements Use
 
     @Override
     public User createUser(UserRegisterRequest userRegisterRequest) {
+        User checkExistingUser = userRepository.getUserByEmail(userRegisterRequest.getEmail());
+        if (checkExistingUser != null) {
+            throw new ElementExistException("User already exists");
+        }
         Role role = roleService.getRoleByRoleName(EnumRoleName.ROLE_USER);
         User user = User.builder()
                 .email(userRegisterRequest.getEmail())
@@ -156,6 +161,10 @@ public class UserServiceImp extends BaseServiceImp<User, Integer> implements Use
 
     @Override
     public User createUserWithRole(UserCreateRequest userCreateRequest) {
+        User checkExistingUser = userRepository.getUserByEmail(userCreateRequest.getEmail());
+        if (checkExistingUser != null) {
+            throw new ElementExistException("User already exists");
+        }
         Role role = roleService.getRoleByRoleId(userCreateRequest.getRoleID());
         User user = User.builder()
                 .email(userCreateRequest.getEmail())

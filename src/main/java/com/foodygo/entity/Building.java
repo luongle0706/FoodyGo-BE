@@ -8,7 +8,8 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 @Entity
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -19,13 +20,17 @@ public class Building extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(name = "name", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     String name;
 
+    @Column(name = "description", columnDefinition = "VARCHAR(1000)")
     String description;
 
     @ManyToOne
     Hub hub;
 
     @OneToMany(mappedBy = "building")
+    @JsonBackReference
     List<Customer> customers;
+
 }
