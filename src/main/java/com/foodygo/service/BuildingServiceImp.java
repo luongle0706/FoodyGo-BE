@@ -5,6 +5,7 @@ import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
+import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.BuildingRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -52,12 +53,18 @@ public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implem
 
     @Override
     public Building createBuilding(BuildingCreateRequest buildingCreateRequest) {
+        Building checkExist = buildingRepository.findBuildingByName(buildingCreateRequest.getName());
+        if (checkExist != null) {
+            throw new ElementExistException("There is already a building with the name " + buildingCreateRequest.getName());
+        }
         Building building = Building.builder()
                 .name(buildingCreateRequest.getName())
                 .description(buildingCreateRequest.getDescription())
                 .hub(null)
                 .build();
-        if(buildingCreateRequest.getHubID() > 0) {
+        if (buildingCreateRequest.getHubID() == null) {
+            building.setHub(null);
+        } else if(buildingCreateRequest.getHubID() > 0) {
             Hub hub = hubService.findById(buildingCreateRequest.getHubID());
             if (hub != null) {
                 building.setHub(hub);
@@ -78,10 +85,9 @@ public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implem
             if (buildingUpdateRequest.getDescription() != null) {
                 building.setDescription(buildingUpdateRequest.getDescription());
             }
-            if(buildingUpdateRequest.getHubID() == null) {
+            if (buildingUpdateRequest.getHubID() == null) {
                 building.setHub(null);
-            } else {
-                if(buildingUpdateRequest.getHubID() > 0) {
+            } else if(buildingUpdateRequest.getHubID() > 0) {
                     Hub hub = hubService.findById(buildingUpdateRequest.getHubID());
                     if (hub != null) {
                         building.setHub(hub);
@@ -89,7 +95,6 @@ public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implem
                         throw new ElementNotFoundException("Hub not found");
                     }
                 }
-            }
             return buildingRepository.save(building);
         }
         return null;

@@ -3,9 +3,9 @@ spring:
   application:
     name: foodygo
   datasource:
-    url: jdbc:mysql://localhost:3307/foodygo
+    url: jdbc:mysql://localhost:3306/foodygo
     username: root
-    password: 123456
+    password: 12345
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,10 +18,48 @@ spring:
       dialect: mysql
 jwt:
   secret: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
-  expiration: 6000000
+  expiration: 8640000
   refresh:
     secret: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
     expiration: 864000000
   algorithms: HmacSHA256
   # header: Authorization
   # prefix: Bearer
+
+# Firebase
+firebase:
+  bucket:
+    name: swp391-f046d.appspot.com
+  content:
+    type: image/png
+  get:
+    stream: swp391-f046d-firebase-adminsdk-drdyq-e270ed7356.json
+    url: https://firebasestorage.googleapis.com/v0/b/swd391-f046d.appspot.com/o/%s?alt=media
+    folder: swd391_image_customer
+  file:
+    format: .png
+
+# BufferedImage
+buffer-image:
+  type: png
+  fill-rect:
+    width: 200
+    height: 200
+    color:
+      background: ff793f
+      text: 05c46b
+    font:
+      text: Arial
+    size:
+      text: 100
+    x: 0
+    y: 0
+  devide: 2
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+  default-produces-media-type: application/json
+

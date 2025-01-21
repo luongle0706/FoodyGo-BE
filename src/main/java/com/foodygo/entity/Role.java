@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.foodygo.enums.EnumRoleName;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,20 +15,21 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int roleID;
+    int roleID;
 
     @Enumerated(EnumType.STRING)
-    private EnumRoleName roleName;
+    EnumRoleName roleName;
 
-    private String displayName;
+    String displayName;
 
     @JsonBackReference
     @OneToMany(mappedBy = "role")
-    private Set<User> users = new HashSet<>();
+    Set<User> users = new HashSet<>();
 
     public Role(EnumRoleName roleName, Set<User> users) {
         this.roleName = roleName;

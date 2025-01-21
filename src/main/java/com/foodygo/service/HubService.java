@@ -21,4 +21,6 @@ public interface HubService extends BaseService<Hub, Integer> {
 
     List<Order> getOrdersByHubID(Integer hubID);
 
+    Hub getHubByOrderID(Integer orderID);
+
 }

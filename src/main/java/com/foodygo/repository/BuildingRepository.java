@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface BuildingRepository extends JpaRepository<Building, Integer> {
     Building findBuildingById(int id);
 
+    Building findBuildingByName(String name);
+
     @Modifying
     @Query("update Building set deleted = false where id = ?1")
     void unDeleted(int buildingId);

@@ -7,9 +7,9 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -20,13 +20,17 @@ public class Hub extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(name = "name", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     String name;
 
+    @Column(name = "address", nullable = false, columnDefinition = "VARCHAR(1000)")
     String address;
 
+    @Column(name = "description", columnDefinition = "VARCHAR(1000)")
     String description;
 
     @OneToMany(mappedBy = "hub")
+    @JsonBackReference
     List<Order> orders;
 
     @OneToMany(mappedBy = "hub")

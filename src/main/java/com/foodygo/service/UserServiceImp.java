@@ -1,19 +1,34 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
-import com.foodygo.entity.Building;
-import com.foodygo.entity.Hub;
+import com.foodygo.entity.*;
 import com.foodygo.enums.EnumRoleName;
-import com.foodygo.entity.Role;
-import com.foodygo.entity.User;
+import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.UserRepository;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -108,6 +123,10 @@ public class UserServiceImp extends BaseServiceImp<User, Integer> implements Use
 
     @Override
     public User createUser(UserRegisterRequest userRegisterRequest) {
+        User checkExistingUser = userRepository.getUserByEmail(userRegisterRequest.getEmail());
+        if (checkExistingUser != null) {
+            throw new ElementExistException("User already exists");
+        }
         Role role = roleService.getRoleByRoleName(EnumRoleName.ROLE_USER);
         User user = User.builder()
                 .email(userRegisterRequest.getEmail())
@@ -138,6 +157,73 @@ public class UserServiceImp extends BaseServiceImp<User, Integer> implements Use
         } else {
             throw new ElementNotFoundException("User not found");
         }
+    }
+
+    @Override
+    public User createUserWithRole(UserCreateRequest userCreateRequest) {
+        User checkExistingUser = userRepository.getUserByEmail(userCreateRequest.getEmail());
+        if (checkExistingUser != null) {
+            throw new ElementExistException("User already exists");
+        }
+        Role role = roleService.getRoleByRoleId(userCreateRequest.getRoleID());
+        User user = User.builder()
+                .email(userCreateRequest.getEmail())
+                .password(bCryptPasswordEncoder.encode(userCreateRequest.getPassword()))
+                .accessToken(null)
+                .refreshToken(null)
+                .enabled(true)
+                .nonLocked(true)
+                .role(role)
+                .build();
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User undeletedUser(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        if (user != null && !user.isNonLocked() && !user.isEnabled() && user.isDeleted()) {
+            user.setNonLocked(true);
+            user.setDeleted(false);
+            user.setEnabled(true);
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
+    @Override
+    public Customer getCustomerByUserID(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        if (user != null) {
+            return user.getCustomer();
+        }
+        return null;
+    }
+
+    @Override
+    public List<OrderActivity> getOrderActivitiesByUserID(int userID) {
+        // chua co order activity
+        return List.of();
+    }
+
+    @Override
+    public User getUserByOrderActivityID(int orderActivityID) {
+        // chua co order activity
+        return null;
+    }
+
+    @Override
+    public List<Order> getOrdersByEmployeeID(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        if (user == null) {
+            throw new ElementNotFoundException("User not found");
+        }
+        return user.getEmployeeOrders();
+    }
+
+    @Override
+    public User getEmployeeByOrderID(int orderID) {
+        // chua co order service
+        return null;
     }
 
 }

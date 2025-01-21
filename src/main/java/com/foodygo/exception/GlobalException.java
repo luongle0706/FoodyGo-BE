@@ -23,12 +23,17 @@ public class GlobalException {
     }
 
     @ExceptionHandler(ElementNotFoundException.class)
-    public ResponseEntity<ErrorResponse> elementNotFoundException(AuthenticationException e, WebRequest request) {
+    public ResponseEntity<ErrorResponse> elementNotFoundException(ElementNotFoundException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new Date(), "Failed", "Can not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
+    @ExceptionHandler(ElementExistException.class)
+    public ResponseEntity<ErrorResponse> elementExistException(ElementExistException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element existed", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+    }
+
     @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<ErrorResponse> unauthorizedExceptionJWT(AuthenticationException e, WebRequest request) {
+    public ResponseEntity<ErrorResponse> unauthorizedExceptionJWT(ExpiredJwtException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(new Date(), "Failed", "You don't have permission", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
