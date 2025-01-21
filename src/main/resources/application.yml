@@ -3,9 +3,9 @@ spring:
   application:
     name: foodygo
   datasource:
-    url: jdbc:mysql://localhost:3307/foodygo
+    url: jdbc:mysql://localhost:3306/foodygo
     username: root
-    password: 123456
+    password: 12345
   jpa:
     hibernate:
       ddl-auto: update
@@ -55,3 +55,11 @@ buffer-image:
     x: 0
     y: 0
   devide: 2
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+  default-produces-media-type: application/json
+

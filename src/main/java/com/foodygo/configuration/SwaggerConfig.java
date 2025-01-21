@@ -1,4 +1,4 @@
-package com.foodygo.configurations;
+package com.foodygo.configuration;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
