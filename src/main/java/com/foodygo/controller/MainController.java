@@ -7,12 +7,8 @@ import com.foodygo.dto.request.UserLoginRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.TokenResponse;
-import com.foodygo.entity.Hub;
-import com.foodygo.entity.Role;
 import com.foodygo.entity.User;
-import com.foodygo.enums.EnumRoleName;
 import com.foodygo.enums.EnumTokenType;
-import com.foodygo.service.RoleService;
 import com.foodygo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -24,12 +20,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/public")
@@ -41,7 +33,6 @@ public class MainController {
     private final JWTToken jwtToken;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationManager authenticationManager;
-    private final RoleService roleService;
 
     @GetMapping("/test")
     public String testne() {

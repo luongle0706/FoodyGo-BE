@@ -88,7 +88,7 @@ public class HubController {
     // lấy ra hub bằng id
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get/{hub-id}")
-    public ResponseEntity<ObjectResponse> getBuildingByID(@PathVariable("hub-id") int hubID) {
+    public ResponseEntity<ObjectResponse> getHubByID(@PathVariable("hub-id") int hubID) {
         Hub hub = hubService.findById(hubID);
         return hub != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get hub by ID successfully", hub)) :

@@ -186,4 +186,19 @@ public class UserServiceImp extends BaseServiceImp<User, Integer> implements Use
         return null;
     }
 
+    @Override
+    public List<Order> getOrdersByEmployeeID(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        if (user == null) {
+            throw new ElementNotFoundException("User not found");
+        }
+        return user.getEmployeeOrders();
+    }
+
+    @Override
+    public User getEmployeeByOrderID(int orderID) {
+        // chua co order service
+        return null;
+    }
+
 }

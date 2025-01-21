@@ -59,7 +59,7 @@ public class BuildingController {
     // lấy tất cả building chưa xóa
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-active")
-    public ResponseEntity<ObjectResponse> getAllHubsActive() {
+    public ResponseEntity<ObjectResponse> getAllBuildingsActive() {
         List<Building> buildings = buildingService.getBuildingsActive();
         return !buildings.isEmpty() ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings active successfully", buildings)) :
@@ -69,7 +69,7 @@ public class BuildingController {
     // khôi phục building
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/undelete/{building-id}")
-    public ResponseEntity<ObjectResponse> unDeleteHubByID(@PathVariable("building-id") int buildingID) {
+    public ResponseEntity<ObjectResponse> unDeleteBuildingByID(@PathVariable("building-id") int buildingID) {
         return buildingService.undeleteBuilding(buildingID) != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete building successfully", buildingService.findById(buildingID))) :
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Undelete building failed", null));
@@ -94,7 +94,7 @@ public class BuildingController {
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create building successfully", building));
         } catch (ElementNotFoundException e) {
             log.error("Error while creating building", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create building failed. Hub not found", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create building failed. Building not found", null));
         } catch (Exception e) {
             log.error("Error while creating building", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create building failed", null));
@@ -113,7 +113,7 @@ public class BuildingController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update building failed. Building is null", null));
         } catch (ElementNotFoundException e) {
             log.error("Error while updating building", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update building failed. Hub not found", null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update building failed. Building not found", null));
         } catch (Exception e) {
             log.error("Error while updating building", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update building failed", null));
@@ -123,7 +123,7 @@ public class BuildingController {
     // xóa building
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/delete/{building-id}")
-    public ResponseEntity<ObjectResponse> deleteHubByID(@PathVariable("building-id") int buildingID) {
+    public ResponseEntity<ObjectResponse> deleteBuildingByID(@PathVariable("building-id") int buildingID) {
         try {
             Building building = buildingService.findById(buildingID);
             if(building != null) {

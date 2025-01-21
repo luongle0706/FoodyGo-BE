@@ -3,9 +3,8 @@ package com.foodygo.service;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
-import com.foodygo.entity.Customer;
-import com.foodygo.entity.OrderActivity;
-import com.foodygo.entity.User;
+import com.foodygo.entity.*;
+
 import java.util.List;
 
 public interface UserService extends BaseService<User, Integer> {
@@ -38,4 +37,7 @@ public interface UserService extends BaseService<User, Integer> {
 
     User getUserByOrderActivityID(int orderActivityID);
 
+    List<Order> getOrdersByEmployeeID(int userID);
+
+    User getEmployeeByOrderID(int orderID);
 }
