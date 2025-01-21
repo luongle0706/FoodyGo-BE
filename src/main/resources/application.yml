@@ -25,3 +25,32 @@ jwt:
   algorithms: HmacSHA256
   # header: Authorization
   # prefix: Bearer
+# Firebase
+firebase:
+  bucket:
+    name: swd391-f046d.appspot.com
+  content:
+    type: image/png
+  get:
+    stream: swd391-f046d-firebase-adminsdk-drdyq-6dc6c24b5a.json
+    url: https://firebasestorage.googleapis.com/v0/b/swd391-f046d.appspot.com/o/%s?alt=media
+    folder: 1
+  file:
+    format: .png
+
+# BufferedImage
+buffer-image:
+  type: png
+  fill-rect:
+    width: 200
+    height: 200
+    color:
+      background: ff793f
+      text: 05c46b
+    font:
+      text: Arial
+    size:
+      text: 100
+    x: 0
+    y: 0
+  devide: 2

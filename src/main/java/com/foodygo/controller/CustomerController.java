@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,7 +77,6 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get user by customer ID failed", null));
     }
 
-
     // lấy wallet từ customer id
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-wallet/{customer-id}")
@@ -96,8 +96,6 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by wallet ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
     }
-
-
 
     // lấy tất cả các customers chưa bị xóa
     @PreAuthorize("hasRole('USER')")
@@ -134,7 +132,10 @@ public class CustomerController {
     public ResponseEntity<ObjectResponse> createCustomer(@Valid @RequestBody CustomerCreateRequest customerCreateRequest) {
         try {
             Customer customer = customerService.createCustomer(customerCreateRequest);
-            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create customer successfully", customer));
+            if (customer != null) {
+                return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create customer successfully", customer));
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create customer failed. Customer is null.", null));
         } catch (ElementNotFoundException e) {
             log.error("Error while creating customer", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create customer failed. " + e.getMessage(), null));
@@ -146,6 +147,7 @@ public class CustomerController {
 
     // update customer bằng id
     @PreAuthorize("hasRole('USER')")
+//    @PostAuthorize("returnObject.customer.id == customerID")
     @PutMapping("/update/{customer-id}")
     public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("customer-id") int customerID, @RequestBody CustomerUpdateRequest customerUpdateRequest) {
         try {
