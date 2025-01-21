@@ -19,6 +19,11 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
+    public List<Restaurant> getAllRestaurantsPagination(Integer page, Integer items) {
+        return null;
+    }
+
+    @Override
     public Restaurant getRestaurantByProductId(Integer productId) {
         return null;
     }
@@ -36,5 +41,10 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public void deleteRestaurant(Integer restaurantId) {
 
+    }
+
+    @Override
+    public boolean switchRestaurantAvailability(Integer restaurantId) {
+        return false;
     }
 }
