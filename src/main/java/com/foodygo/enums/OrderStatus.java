@@ -1,9 +1,10 @@
 package com.foodygo.enums;
 
 public enum OrderStatus {
-    PREPARING,
+    ORDERED,
+    RESTAURANT_ACCEPTED,
     SHIPPING,
-    ARRIVED,
+    HUB_ARRIVED,
     COMPLETED,
-    CANCELLED,
+    CANCELLED
 }
