@@ -3,6 +3,7 @@ package com.foodygo.controller;
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
@@ -11,6 +12,7 @@ import com.foodygo.service.BuildingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,14 +28,21 @@ public class BuildingController {
 
     private final BuildingService buildingService;
 
+    @Value("${paging.current-page}")
+    private int defaultCurrentPage;
+
+    @Value("${paging.page-size}")
+    private int defaultPageSize;
+
     // lấy tất cả buildings
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all")
-    public ResponseEntity<ObjectResponse> getAllBuildings() {
-        List<Building> buildings = buildingService.findAll();
-        return !buildings.isEmpty() ?
-            ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings successfully", buildings)) :
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all buildings failed", null));
+    public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = buildingService.findAll(resolvedCurrentPage, resolvedPageSize);
+        return ResponseEntity.status(HttpStatus.OK).body(results);
     }
 
     // lấy hub theo building id

@@ -2,12 +2,16 @@ package com.foodygo.service;
 
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.repository.HubRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +26,21 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     public HubServiceImpl(HubRepository hubRepository) {
         super(hubRepository);
         this.hubRepository = hubRepository;
+    }
+
+    @Override
+    public PagingResponse getHubsPaging(int currentPage, int pageSize) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = hubRepository.findAll(pageable);
+
+        return PagingResponse.builder()
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent())
+                .build();
     }
 
     @Override

@@ -8,8 +8,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ObjectResponse {
-    String status;
-    String message;
+public class PagingResponse {
+    int currentPage; // chỉ số page hiện tai: 1, 2, 3, 4...
+    int totalPages;
+    int pageSizes;  // số lượng elements mỗi page
+    long totalElements;
     Object data;
 }

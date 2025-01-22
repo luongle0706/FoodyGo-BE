@@ -1,9 +1,9 @@
 package com.foodygo.enums;
 
-public enum EnumRoleName {
+public enum EnumRoleNameType {
     ROLE_ADMIN,
     ROLE_STAFF,
     ROLE_USER,
     ROLE_MANAGER,
-    ROLE_GUEST
+    ROLE_SELLER
 }
