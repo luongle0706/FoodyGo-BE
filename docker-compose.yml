@@ -1,4 +1,20 @@
 services:
+  spring-boot:
+    container_name: spring-boot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 123456789
+    volumes:
+      - ./spring-boot-data:/app/logs
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    restart: unless-stopped
   mysql:
     container_name: mysql
     image: mysql
@@ -8,7 +24,10 @@ services:
       MYSQL_PASSWORD: mysql
       MYSQL_DATABASE: foodygo
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - ./mysql-data:/var/lib/mysql
+    healthcheck:
+      test: mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD
+      interval: 2s
     restart: unless-stopped

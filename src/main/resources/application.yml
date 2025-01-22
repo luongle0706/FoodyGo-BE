@@ -1,11 +1,10 @@
-
 spring:
   application:
     name: foodygo
   datasource:
-    url: jdbc:mysql://localhost:3306/foodygo
-    username: root
-    password: 123456789
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/foodygo}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:123456789}
   jpa:
     hibernate:
       ddl-auto: update
@@ -62,4 +61,5 @@ springdoc:
   api-docs:
     path: /api-docs
   default-produces-media-type: application/json
-
+server:
+  port: 8080
