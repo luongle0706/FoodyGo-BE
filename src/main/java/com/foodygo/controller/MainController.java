@@ -41,13 +41,13 @@ public class MainController {
 
     // user đăng kí tài khoản
     @PostMapping("/register")
-    public ResponseEntity<ObjectResponse> userRegister(@Valid @RequestBody UserRegisterRequest userRegisterRequest, HttpServletRequest request) {
+    public ResponseEntity<ObjectResponse> userRegister(@Valid @RequestBody UserRegisterRequest userRegisterRequest) {
         try {
             User user = userService.createUser(userRegisterRequest);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create user successfully", user));
         } catch (Exception e) {
             log.error("Error creating user", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create user failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create user failed", null));
         }
     }
 

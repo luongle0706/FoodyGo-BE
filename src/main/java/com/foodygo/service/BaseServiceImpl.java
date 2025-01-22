@@ -4,11 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public class BaseServiceImp <T, ID> implements BaseService <T, ID> {
+public class BaseServiceImpl<T, ID> implements BaseService <T, ID> {
 
     private final JpaRepository<T, ID> repository;
 
-    public BaseServiceImp(JpaRepository<T, ID> repository) {
+    public BaseServiceImpl(JpaRepository<T, ID> repository) {
         this.repository = repository;
     }
 

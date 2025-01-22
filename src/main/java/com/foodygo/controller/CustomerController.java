@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sdw391/v1/customer")
+@RequestMapping("/swd391/v1/customer")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -34,7 +34,7 @@ public class CustomerController {
         List<Customer> results = customerService.findAll();
         return !results.isEmpty() ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all customers successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all customers failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all customers failed", null));
     }
 
     // lấy tất cả các order từ customer id
@@ -44,7 +44,7 @@ public class CustomerController {
         List<Order> results = customerService.getOrdersByCustomerID(customerID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all orders by customer ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all orders by customer ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all orders by customer ID failed", null));
     }
 
     // lấy customer từ order id
@@ -54,7 +54,7 @@ public class CustomerController {
         Customer results = customerService.getCustomerByOrderID(orderID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by order ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get customer by order ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by order ID failed", null));
     }
 
     // lấy building từ customer id
@@ -64,7 +64,7 @@ public class CustomerController {
         Building results = customerService.getBuildingByCustomerID(customerID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get building by customer ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get building by customer ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get building by customer ID failed", null));
     }
 
     // lấy user từ customer id
@@ -74,7 +74,7 @@ public class CustomerController {
         User results = customerService.getUserByCustomerID(customerID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get user by customer ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get user by customer ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by customer ID failed", null));
     }
 
     // lấy wallet từ customer id
@@ -84,7 +84,7 @@ public class CustomerController {
         Wallet results = customerService.getWalletByCustomerID(customerID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get wallet by customer ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get wallet by customer ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get wallet by customer ID failed", null));
     }
 
     // lấy user từ wallet id
@@ -94,7 +94,7 @@ public class CustomerController {
         Customer results = customerService.getCustomerByWalletID(walletID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by wallet ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
     }
 
     // lấy tất cả các customers chưa bị xóa
@@ -104,7 +104,7 @@ public class CustomerController {
         List<Customer> results = customerService.getAllCustomersActive();
         return !results.isEmpty() ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all customers active successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all customers active failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all customers active failed", null));
     }
 
     // khôi phục lại customer đó
@@ -113,7 +113,7 @@ public class CustomerController {
     public ResponseEntity<ObjectResponse> unDeleteCustomerByID(@PathVariable("customer-id") int customerID) {
         return customerService.undeleteCustomer(customerID) != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete customer successfully", customerService.findById(customerID))) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Undelete customer failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete customer failed", null));
     }
 
     // lấy ra customer bằng id
@@ -123,7 +123,7 @@ public class CustomerController {
         Customer customer = customerService.findById(customerID);
         return customer != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by ID successfully", customer)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get customer by ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by ID failed", null));
     }
 
     // tạo ra customer
@@ -135,13 +135,13 @@ public class CustomerController {
             if (customer != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create customer successfully", customer));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create customer failed. Customer is null.", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create customer failed. Customer is null.", null));
         } catch (ElementNotFoundException e) {
             log.error("Error while creating customer", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create customer failed. " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create customer failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error creating customer", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create customer failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create customer failed", null));
         }
     }
 
@@ -155,13 +155,13 @@ public class CustomerController {
             if (customer != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update customer successfully", customer));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update customer failed. Customer is null", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update customer failed. Customer is null", null));
         } catch (ElementNotFoundException e) {
             log.error("Error while updating customer", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update customer failed. " + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update customer failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error updating customer", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update customer failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update customer failed", null));
         }
     }
 
@@ -182,10 +182,10 @@ public class CustomerController {
                 }
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete customer successfully", customerService.save(customer)));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Delete customer failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete customer failed", null));
         } catch (Exception e) {
             log.error("Error deleting customer", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Delete customer failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete customer failed", null));
         }
     }
 

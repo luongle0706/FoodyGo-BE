@@ -4,6 +4,7 @@ import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.entity.*;
+import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.service.CustomerService;
 import com.foodygo.service.UserService;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/sdw391/v1/user")
+@RequestMapping("/swd391/v1/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -38,12 +39,15 @@ public class UserController {
         try {
             User user = userService.updateUser(userUpdateRequest, userID);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update user successfully", user));
+        } catch (AuthenticationException e) {
+            log.error("Error while updating user", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ObjectResponse("Fail", "Update user failed. " + e.getMessage(), null));
         } catch (ElementNotFoundException e) {
             log.error("Error while updating user", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update user failed. User not found", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update user failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error updating user", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update user failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update user failed", null));
         }
     }
 
@@ -54,7 +58,7 @@ public class UserController {
         Customer customer = userService.getCustomerByUserID(userID);
         return customer != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by user ID successfully", customer)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get customer by user ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by user ID failed", null));
     }
 
     // lấy tất cả các order activity từ user id
@@ -64,7 +68,7 @@ public class UserController {
         List<OrderActivity> results = userService.getOrderActivitiesByUserID(userID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all order activities by user ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all order activities by user ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all order activities by user ID failed", null));
     }
 
     // lấy ra order bằng employee id
@@ -74,7 +78,7 @@ public class UserController {
         List<Order> results = userService.getOrdersByEmployeeID(employeeID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get order by employee ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get order by employee ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get order by employee ID failed", null));
     }
 
     // lấy employee by order id
@@ -84,7 +88,7 @@ public class UserController {
        User results = userService.getEmployeeByOrderID(orderID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get employee by order ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get employee by order ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get employee by order ID failed", null));
     }
 
     // lấy user từ order activity id
@@ -94,7 +98,7 @@ public class UserController {
         User results = userService.getUserByOrderActivityID(orderActivityID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get user by order activity ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get user by order activity ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by order activity ID failed", null));
     }
 
     // khôi phục lại user đó, bao gồm unlock và undelete
@@ -103,7 +107,7 @@ public class UserController {
     public ResponseEntity<ObjectResponse> unDeleteUserByID(@PathVariable("user-id") int userID) {
         return userService.undeletedUser(userID) != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete user successfully", userService.findById(userID))) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Undelete user failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete user failed", null));
     }
 
     // tạo ra user với role
@@ -115,7 +119,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create user successfully", user));
         } catch (Exception e) {
             log.error("Error creating user", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create user failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create user failed", null));
         }
     }
 
@@ -130,10 +134,10 @@ public class UserController {
                 user.setNonLocked(false);
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Lock user successfully", userService.save(user)));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Lock user failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Lock user failed", null));
         } catch (Exception e) {
             log.error("Error locking user", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Lock user failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Lock user failed", null));
         }
     }
 
@@ -154,10 +158,10 @@ public class UserController {
                 }
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete user successfully", userService.save(user)));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Delete user failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete user failed", null));
         } catch (Exception e) {
             log.error("Error deleting user", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Delete user failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete user failed", null));
         }
     }
 

@@ -1,44 +1,31 @@
 package com.foodygo.service;
 
+import com.foodygo.configuration.CustomUserDetail;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.entity.*;
 import com.foodygo.enums.EnumRoleName;
+import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.UserRepository;
-import com.google.auth.Credentials;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.*;
 import java.util.List;
 
 @Service
 @Slf4j
-public class UserServiceImp extends BaseServiceImp<User, Integer> implements UserService {
+public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements UserService {
 
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserServiceImp(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -142,6 +129,13 @@ public class UserServiceImp extends BaseServiceImp<User, Integer> implements Use
 
     @Override
     public User updateUser(UserUpdateRequest userUpdateRequest, int userID) {
+
+        CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (customUserDetail.getUserID() != userID) {
+            throw new AuthenticationException("You are not allowed to update other user");
+        }
+
         User user = userRepository.getUserByUserID(userID);
         if (user != null) {
             if (userUpdateRequest.getPassword() != null) {

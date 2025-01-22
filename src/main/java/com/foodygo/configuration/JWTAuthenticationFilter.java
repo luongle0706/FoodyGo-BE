@@ -39,14 +39,19 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private final List<String> NON_USER = List.of(
             "/swagger-ui/**",
             "/v3/**",
+            "/api-docs/**",
             "/swagger-resources/**",
             "/public/**"
     );
 
     public String getToken(HttpServletRequest request) {
-        String s = request.getHeader("Authorization");
-        if (s != null && s.startsWith("Bearer ") && StringUtils.hasText(s)) {
-            return s.substring(7);
+        try {
+            String s = request.getHeader("Authorization");
+            if (s.startsWith("Bearer ") && StringUtils.hasText(s)) {
+                return s.substring(7);
+            }
+        } catch (Exception e) {
+            throw new AuthenticationException("Invalid JWT token");
         }
         return null;
     }
@@ -62,8 +67,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             if(Strings.hasText(bearerToken) && jwtToken.validate(bearerToken, EnumTokenType.TOKEN)) {
                 String email = jwtToken.getEmailFromJwt(bearerToken, EnumTokenType.TOKEN);
                 CustomUserDetail customUserDetail = (CustomUserDetail) customUserDetailService.loadUserByUsername(email);
-                if(customUserDetail != null) {
-                    if(customUserDetail.getAccessToken() != null && customUserDetail.getAccessToken().equals(bearerToken)) {
+                if (customUserDetail != null) {
+                    if (customUserDetail.getAccessToken() != null && customUserDetail.getAccessToken().equals(bearerToken)) {
                         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                                 new UsernamePasswordAuthenticationToken(customUserDetail, null, customUserDetail.getAuthorities());
                         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -74,6 +79,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     throw new AuthenticationException("You don't have permission");
                 }
+            } else {
+                throw new AuthenticationException("You don't have permission");
             }
         } catch (Exception e) {
             log.error("Fail on set user authentication:{}", e.toString());
@@ -87,5 +94,16 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         AntPathMatcher pathcMatcher = new AntPathMatcher();
         return NON_USER.stream().anyMatch(pattern -> pathcMatcher.match(pattern,uri));
     }
+
+//    private boolean testIsAuthentication(String uri){
+//        AntPathMatcher pathMatcher = new AntPathMatcher();
+//        boolean isMatched = NON_USER.stream().anyMatch(pattern -> {
+//            boolean matched = pathMatcher.match(pattern, uri);
+//            log.debug("Check pattern ne: {} URI: {}, matched: {}", pattern, uri, matched);
+//            return matched;
+//        });
+//        log.debug("Final match result for URI ne {}: {}", uri, isMatched);
+//        return isMatched;
+//    }
 
 }

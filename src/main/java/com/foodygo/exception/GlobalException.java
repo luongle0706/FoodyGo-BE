@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -24,12 +25,17 @@ public class GlobalException {
 
     @ExceptionHandler(ElementNotFoundException.class)
     public ResponseEntity<ErrorResponse> elementNotFoundException(ElementNotFoundException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new Date(), "Failed", "Can not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Can not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(ElementExistException.class)
     public ResponseEntity<ErrorResponse> elementExistException(ElementExistException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element existed", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> noResourceFoundException(NoResourceFoundException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new Date(), "Failed", "Resource not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(ExpiredJwtException.class)

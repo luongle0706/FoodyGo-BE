@@ -30,7 +30,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implements CustomerService {
+public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final BuildingService buildingService;
@@ -88,7 +88,7 @@ public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implem
     @Value("${buffer-image.devide}")
     private int bufferImageDevide;
 
-    public CustomerServiceImp(CustomerRepository customerRepository, BuildingService buildingService, UserService userService) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService) {
         super(customerRepository);
         this.customerRepository = customerRepository;
         this.buildingService = buildingService;
@@ -272,7 +272,7 @@ public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implem
         String folder = folderContainImage + "/" + fileName;  // 1 is folder and fileName is "randomString + "extension""
         BlobId blobId = BlobId.of(bucketName, folder); // blodId is a path to file in firebase
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(contentType).build();  // blodInfo contains blodID and more
-        InputStream inputStream = CustomerServiceImp.class.getClassLoader().getResourceAsStream(fileConfigFirebase); // change the file name with your one
+        InputStream inputStream = CustomerServiceImpl.class.getClassLoader().getResourceAsStream(fileConfigFirebase); // change the file name with your one
         Credentials credentials = GoogleCredentials.fromStream(inputStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         storage.create(blobInfo, Files.readAllBytes(file.toPath()));
@@ -285,7 +285,7 @@ public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implem
         String folder = folderContainImage + "/" + urlImage;
         BlobId blobId = BlobId.of(bucketName, folder); // Replace with your bucker name
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(contentType).build();
-        InputStream inputStream = CustomerServiceImp.class.getClassLoader().getResourceAsStream(fileConfigFirebase); // change the file name with your one
+        InputStream inputStream = CustomerServiceImpl.class.getClassLoader().getResourceAsStream(fileConfigFirebase); // change the file name with your one
         Credentials credentials = GoogleCredentials.fromStream(inputStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         return storage.delete(blobId);
@@ -298,7 +298,7 @@ public class CustomerServiceImp extends BaseServiceImp<Customer, Integer> implem
         BlobId blobId = BlobId.of(bucketName, folder); // Replace with your bucket name
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(contentType).build();    // type media does not see the picture on firebase
 
-        InputStream inputStream = CustomerServiceImp.class.getClassLoader().getResourceAsStream(fileConfigFirebase); // change the file name with your one
+        InputStream inputStream = CustomerServiceImpl.class.getClassLoader().getResourceAsStream(fileConfigFirebase); // change the file name with your one
         Credentials credentials = GoogleCredentials.fromStream(inputStream);
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 

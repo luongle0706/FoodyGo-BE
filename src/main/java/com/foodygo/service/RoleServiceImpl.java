@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class RoleServiceImp implements RoleService {
+public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
 

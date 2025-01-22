@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sdw391/v1/building")
+@RequestMapping("/swd391/v1/building")
 public class BuildingController {
 
     private final BuildingService buildingService;
@@ -33,7 +33,7 @@ public class BuildingController {
         List<Building> buildings = buildingService.findAll();
         return !buildings.isEmpty() ?
             ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings successfully", buildings)) :
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all buildings failed", null));
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all buildings failed", null));
     }
 
     // lấy hub theo building id
@@ -43,7 +43,7 @@ public class BuildingController {
         Hub hub = buildingService.getHubByBuildingID(buildingID);
         return hub != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all hub by building ID successfully", hub)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all hub by building ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all hub by building ID failed", null));
     }
 
     // lấy tất cả customer trong building
@@ -53,7 +53,7 @@ public class BuildingController {
         List<Customer> results = buildingService.getCustomersByBuildingID(buildingID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all customer by building ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all customer by building ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all customer by building ID failed", null));
     }
 
     // lấy tất cả building chưa xóa
@@ -63,7 +63,7 @@ public class BuildingController {
         List<Building> buildings = buildingService.getBuildingsActive();
         return !buildings.isEmpty() ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings active successfully", buildings)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get all buildings active failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all buildings active failed", null));
     }
 
     // khôi phục building
@@ -72,7 +72,7 @@ public class BuildingController {
     public ResponseEntity<ObjectResponse> unDeleteBuildingByID(@PathVariable("building-id") int buildingID) {
         return buildingService.undeleteBuilding(buildingID) != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete building successfully", buildingService.findById(buildingID))) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Undelete building failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete building failed", null));
     }
 
     // get building by id
@@ -82,7 +82,7 @@ public class BuildingController {
         Building building = buildingService.findById(buildingID);
         return building != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get building by ID successfully", building)) :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Get building by ID failed", null));
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get building by ID failed", null));
     }
 
     // create building
@@ -94,10 +94,10 @@ public class BuildingController {
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create building successfully", building));
         } catch (ElementNotFoundException e) {
             log.error("Error while creating building", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create building failed. Building not found", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed. Building not found", null));
         } catch (Exception e) {
             log.error("Error while creating building", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Create building failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed", null));
         }
     }
 
@@ -110,13 +110,13 @@ public class BuildingController {
             if (building != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update building successfully", buildingService.save(building)));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update building failed. Building is null", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. Building is null", null));
         } catch (ElementNotFoundException e) {
             log.error("Error while updating building", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update building failed. Building not found", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. Building not found", null));
         } catch (Exception e) {
             log.error("Error while updating building", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Update building failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed", null));
         }
     }
 
@@ -130,10 +130,10 @@ public class BuildingController {
                 building.setDeleted(true);
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete building successfully", buildingService.save(building)));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Delete building failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete building failed", null));
         } catch (Exception e) {
             log.error("Error while deleting building", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ObjectResponse("Fail", "Delete building failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete building failed", null));
         }
     }
 

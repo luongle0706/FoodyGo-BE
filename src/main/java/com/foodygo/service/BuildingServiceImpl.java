@@ -16,12 +16,12 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class BuildingServiceImp extends BaseServiceImp<Building, Integer> implements BuildingService {
+public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> implements BuildingService {
 
     private final BuildingRepository buildingRepository;
     private final HubService hubService;
 
-    public BuildingServiceImp(BuildingRepository buildingRepository, HubService hubService) {
+    public BuildingServiceImpl(BuildingRepository buildingRepository, HubService hubService) {
         super(buildingRepository);
         this.buildingRepository = buildingRepository;
         this.hubService = hubService;

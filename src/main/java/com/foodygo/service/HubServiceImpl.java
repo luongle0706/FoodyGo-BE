@@ -15,11 +15,11 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class HubServiceImp extends BaseServiceImp<Hub, Integer> implements HubService {
+public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements HubService {
 
     private final HubRepository hubRepository;
 
-    public HubServiceImp(HubRepository hubRepository) {
+    public HubServiceImpl(HubRepository hubRepository) {
         super(hubRepository);
         this.hubRepository = hubRepository;
     }
