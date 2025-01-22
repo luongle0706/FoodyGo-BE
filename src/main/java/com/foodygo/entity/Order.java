@@ -19,6 +19,7 @@ import java.util.List;
 public class Order extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
     LocalDateTime time;

@@ -16,6 +16,7 @@ import java.util.List;
 public class Restaurant extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
     String name;

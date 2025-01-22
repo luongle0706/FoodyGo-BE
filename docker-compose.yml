@@ -1,20 +1,4 @@
 services:
-  spring-boot:
-    container_name: spring-boot
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 123456789
-    volumes:
-      - ./spring-boot-data:/app/logs
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysql
-    restart: unless-stopped
   mysql:
     container_name: mysql
     image: mysql
@@ -26,8 +10,55 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./mysql-data:/var/lib/mysql
+      - ./data/mysql-data:/var/lib/mysql
     healthcheck:
       test: mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD
-      interval: 2s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
+  spring-boot-builder:
+    container_name: spring-boot-builder
+    build:
+      context: .
+      dockerfile: docker/builder/Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../maven-cache:/root/.m2
+      - ./data/spring-boot-data:/temp/build-output
+  spring-boot-runner:
+    container_name: spring-boot-runner
+    build:
+      context: .
+      dockerfile: docker/runner/Dockerfile
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 123456789
+    ports:
+      - "8080:8080"
+    depends_on:
+      spring-boot-builder:
+        condition: service_completed_successfully
+    volumes:
+      - ./data/spring-boot-data:/temp/build-output
+    restart: no
+#  spring-boot:
+#    container_name: spring-boot
+#    build:
+#      context: .
+#      dockerfile: docker/prod/Dockerfile
+#    environment:
+#      MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
+#      MYSQL_USER: root
+#      MYSQL_PASSWORD: 123456789
+#    volumes:
+#      - ./data/spring-boot-data:/app/logs
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    restart: no

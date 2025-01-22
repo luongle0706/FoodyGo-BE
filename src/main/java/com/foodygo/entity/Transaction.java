@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class Transaction extends BaseEntity {
 
     @Id
+            @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
     String description;

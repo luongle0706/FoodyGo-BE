@@ -61,5 +61,10 @@ springdoc:
   api-docs:
     path: /api-docs
   default-produces-media-type: application/json
+
+# Preferences
+application:
+  default-page-size: 30
+
 server:
   port: 8080
