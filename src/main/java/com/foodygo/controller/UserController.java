@@ -22,17 +22,17 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/swd391/v1/user")
+@RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final CustomerService customerService;
 
-    @Value("${paging.current-page}")
+    @Value("${application.default-current-page}")
     private int defaultCurrentPage;
 
-    @Value("${paging.page-size}")
+    @Value("${application.default-page-size}")
     private int defaultPageSize;
 
     @GetMapping("/test")
@@ -92,7 +92,7 @@ public class UserController {
 
     // lấy tất cả các order activity từ user id
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/get-all-order-activity/{user-id}")
+    @GetMapping("/get-all-order-activities/{user-id}")
     public ResponseEntity<ObjectResponse> getOrderActivitiesByUserID(@PathVariable("user-id") int userID) {
         List<OrderActivity> results = userService.getOrderActivitiesByUserID(userID);
         return results != null ?

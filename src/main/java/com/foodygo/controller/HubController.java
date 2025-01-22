@@ -23,15 +23,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/swd391/v1/hub")
+@RequestMapping("/api/v1/hub")
 public class HubController {
 
     private final HubService hubService;
 
-    @Value("${paging.current-page}")
+    @Value("${application.default-current-page}")
     private int defaultCurrentPage;
 
-    @Value("${paging.page-size}")
+    @Value("${application.default-page-size}")
     private int defaultPageSize;
 
     // lấy tất cả các hubs

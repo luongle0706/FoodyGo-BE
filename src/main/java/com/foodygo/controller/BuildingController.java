@@ -23,15 +23,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/swd391/v1/building")
+@RequestMapping("/api/v1/building")
 public class BuildingController {
 
     private final BuildingService buildingService;
 
-    @Value("${paging.current-page}")
+    @Value("${application.default-current-page}")
     private int defaultCurrentPage;
 
-    @Value("${paging.page-size}")
+    @Value("${application.default-page-size}")
     private int defaultPageSize;
 
     // lấy tất cả buildings
@@ -47,7 +47,7 @@ public class BuildingController {
 
     // lấy hub theo building id
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/get-all-hub/{building-id}")
+    @GetMapping("/get-all-hubs/{building-id}")
     public ResponseEntity<ObjectResponse> getHubByBuildingID(@PathVariable("building-id") int buildingID) {
         Hub hub = buildingService.getHubByBuildingID(buildingID);
         return hub != null ?

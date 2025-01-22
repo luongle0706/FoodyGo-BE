@@ -64,7 +64,9 @@ springdoc:
 
 # Preferences
 application:
+  default-current-page: 1
   default-page-size: 30
+
 
 server:
   port: 8080
