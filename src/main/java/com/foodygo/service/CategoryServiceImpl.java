@@ -34,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO getCategoryDTOById(Integer categoryId) {
         Category category = getCategoryById(categoryId);
         if (category == null) {
-            throw new ElementNotFoundException("Category not found witht id " + categoryId);
+            throw new ElementNotFoundException("Category not found with id " + categoryId);
         }
         return CategoryMapper.INSTANCE.toDTO(category);
     }

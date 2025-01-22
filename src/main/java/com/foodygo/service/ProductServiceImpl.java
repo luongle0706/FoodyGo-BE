@@ -2,59 +2,102 @@ package com.foodygo.service;
 
 import com.foodygo.dto.ProductDTO;
 import com.foodygo.entity.Product;
+import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.mapper.ProductMapper;
+import com.foodygo.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements  ProductService {
+
+    private final ProductRepository productRepository;
+
     @Override
     public Product getProductById(Integer productId) {
-        return null;
+        return productRepository.findByIdAndDeletedFalse(productId)
+                .orElseThrow(() -> new ElementNotFoundException("Product not found with id " + productId));
+    }
+
+    @Override
+    public ProductDTO getProductDTOById(Integer productId) {
+        return ProductMapper.INSTANCE.toDTO(getProductById(productId));
     }
 
     @Override
     public List<Product> getAllProducts() {
-        return null;
+        return productRepository.findByDeletedFalse();
     }
 
     @Override
-    public List<Product> getAllProductsPagination(Integer page, Integer items) {
-        return null;
+    public Page<ProductDTO> getAllProductsPagination(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findByDeletedFalse(pageable).map(ProductMapper.INSTANCE::toDTO);
     }
 
     @Override
     public List<Product> getAllProductsByRestaurantId(Integer restaurantId) {
-        return null;
+        return productRepository.findByRestaurantIdAndDeletedFalse(restaurantId);
     }
 
     @Override
-    public List<Product> getAllProductsByRestaurantIdPagination(Integer restaurantId, Integer page, Integer items) {
-        return null;
+    public Page<ProductDTO> getAllProductsByRestaurantIdPagination(Integer restaurantId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findByRestaurantIdAndDeletedFalse(restaurantId, pageable).map(ProductMapper.INSTANCE::toDTO);
     }
 
     @Override
     public List<Product> getAllProductsByCategoryId(Integer categoryId) {
-        return null;
+        return productRepository.findByCategoryIdAndDeletedFalse(categoryId);
     }
 
     @Override
-    public List<Product> getAllProductsByCategoryIdPagination(Integer categoryId, Integer page, Integer items) {
-        return null;
-    }
-
-    @Override
-    public void updateProductInfo(ProductDTO productDTO) {
-
+    public Page<ProductDTO> getAllProductsByCategoryIdPagination(Integer categoryId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findByCategoryIdAndDeletedFalse(categoryId, pageable).map(ProductMapper.INSTANCE::toDTO);
     }
 
     @Override
     public void createProduct(ProductDTO productDTO) {
-
+        Product product = Product.builder()
+                .code(productDTO.code())
+                .name(productDTO.name())
+                .price(productDTO.price())
+                .description(productDTO.description())
+                .prepareTime(productDTO.prepareTime())
+                .build();
+        productRepository.save(product);
     }
 
     @Override
-    public void deleteProduct(Integer product) {
+    public void updateProductInfo(ProductDTO productDTO) {
+        Product product = getProductById(productDTO.id());
+        product.setCode(productDTO.code());
+        product.setName(productDTO.name());
+        product.setPrice(productDTO.price());
+        product.setDescription(productDTO.description());
+        product.setPrepareTime(productDTO.prepareTime());
+        productRepository.save(product);
+    }
 
+    @Override
+    public void deleteProduct(Integer productId) {
+        Product product = getProductById(productId);
+        product.setDeleted(true);
+        productRepository.save(product);
+    }
+
+    @Override
+    public boolean switchProductAvailability(Integer productId) {
+        Product product = getProductById(productId);
+        product.setAvailable(!product.isAvailable());
+        productRepository.save(product);
+        return product.isAvailable();
     }
 }
