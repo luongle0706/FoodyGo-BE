@@ -29,8 +29,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired private JWTToken jwtToken;
-    @Autowired private CustomUserDetailService customUserDetailService;
+    @Autowired
+    private JWTToken jwtToken;
+    @Autowired
+    private CustomUserDetailService customUserDetailService;
 
     @Autowired
     @Qualifier("handlerExceptionResolver")
@@ -59,12 +61,16 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
-            if(isAuthentication(request.getRequestURI())) {
+            if (request.getServletPath().equals("/")) {
+                response.sendRedirect(request.getContextPath() + "/swagger-ui/index.html");
+                return;
+            }
+            if (isAuthentication(request.getRequestURI())) {
                 filterChain.doFilter(request, response);
                 return;
             }
             String bearerToken = getToken(request);
-            if(Strings.hasText(bearerToken) && jwtToken.validate(bearerToken, EnumTokenType.TOKEN)) {
+            if (Strings.hasText(bearerToken) && jwtToken.validate(bearerToken, EnumTokenType.TOKEN)) {
                 String email = jwtToken.getEmailFromJwt(bearerToken, EnumTokenType.TOKEN);
                 CustomUserDetail customUserDetail = (CustomUserDetail) customUserDetailService.loadUserByUsername(email);
                 if (customUserDetail != null) {
@@ -90,9 +96,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isAuthentication(String uri){
+    private boolean isAuthentication(String uri) {
         AntPathMatcher pathcMatcher = new AntPathMatcher();
-        return NON_USER.stream().anyMatch(pattern -> pathcMatcher.match(pattern,uri));
+        return NON_USER.stream().anyMatch(pattern -> pathcMatcher.match(pattern, uri));
     }
 
 //    private boolean testIsAuthentication(String uri){
