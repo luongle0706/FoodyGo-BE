@@ -45,20 +45,3 @@ services:
     volumes:
       - ./data/spring-boot-data:/temp/build-output
     restart: no
-#  spring-boot:
-#    container_name: spring-boot
-#    build:
-#      context: .
-#      dockerfile: docker/prod/Dockerfile
-#    environment:
-#      MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
-#      MYSQL_USER: root
-#      MYSQL_PASSWORD: 123456789
-#    volumes:
-#      - ./data/spring-boot-data:/app/logs
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      mysql:
-#        condition: service_healthy
-#    restart: no
