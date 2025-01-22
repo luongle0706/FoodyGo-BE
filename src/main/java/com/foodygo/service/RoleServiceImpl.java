@@ -1,7 +1,7 @@
 package com.foodygo.service;
 
 import com.foodygo.entity.Role;
-import com.foodygo.enums.EnumRoleName;
+import com.foodygo.enums.EnumRoleNameType;
 import com.foodygo.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
 
     @Override
-    public Role getRoleByRoleName(EnumRoleName roleName) {
+    public Role getRoleByRoleName(EnumRoleNameType roleName) {
         return roleRepository.getRoleByRoleName(roleName);
     }
 

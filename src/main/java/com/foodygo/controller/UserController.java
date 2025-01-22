@@ -3,6 +3,7 @@ package com.foodygo.controller;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
 import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementNotFoundException;
@@ -11,6 +12,7 @@ import com.foodygo.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,13 +29,30 @@ public class UserController {
     private final UserService userService;
     private final CustomerService customerService;
 
+    @Value("${paging.current-page}")
+    private int defaultCurrentPage;
+
+    @Value("${paging.page-size}")
+    private int defaultPageSize;
+
     @GetMapping("/test")
     public String testne() {
         return "testne";
     }
 
+    // lấy tất cả các user
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/get-all")
+    public ResponseEntity<PagingResponse> getAllUsers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = userService.findAll(resolvedCurrentPage, resolvedPageSize);
+        return ResponseEntity.status(HttpStatus.OK).body(results);
+    }
+
     // update user bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{user-id}")
     public ResponseEntity<ObjectResponse> updateUser(@PathVariable("user-id") int userID, @RequestBody UserUpdateRequest userUpdateRequest) {
         try {
@@ -59,6 +78,16 @@ public class UserController {
         return customer != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by user ID successfully", customer)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by user ID failed", null));
+    }
+
+    // lấy ra user bằng role
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/get-user-by-role/{role-name}")
+    public ResponseEntity<ObjectResponse> getUserByRole(@PathVariable("role-name") String roleName) {
+        List<User> results = userService.getUsersByRole(roleName);
+        return results != null ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get user by role name successfully", results)) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by role name failed", null));
     }
 
     // lấy tất cả các order activity từ user id
@@ -102,7 +131,7 @@ public class UserController {
     }
 
     // khôi phục lại user đó, bao gồm unlock và undelete
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/undelete/{user-id}")
     public ResponseEntity<ObjectResponse> unDeleteUserByID(@PathVariable("user-id") int userID) {
         return userService.undeletedUser(userID) != null ?
@@ -111,7 +140,7 @@ public class UserController {
     }
 
     // tạo ra user với role
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createUserWithRole(@Valid @RequestBody UserCreateRequest userCreateRequest) {
         try {
@@ -124,7 +153,7 @@ public class UserController {
     }
 
     // set deleted = true and enabled = false
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/lock/{user-id}")
     public ResponseEntity<ObjectResponse> lockUserByID(@PathVariable("user-id") int userID) {
         try {
@@ -142,7 +171,7 @@ public class UserController {
     }
 
     // xóa user, tức set deleted = true and enabled = false và xóa luôn Customer
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{user-id}")
     public ResponseEntity<ObjectResponse> deleteUserByID(@PathVariable("user-id") int userID) {
         try {

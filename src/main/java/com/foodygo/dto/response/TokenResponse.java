@@ -1,17 +1,16 @@
 package com.foodygo.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Value
+@NoArgsConstructor(force = true)
 @AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class TokenResponse {
-    private String code;
-    private String message;
-    private String token;
-    private String refreshToken;
+    String code;
+    String message;
+    String token;
+    String refreshToken;
 }

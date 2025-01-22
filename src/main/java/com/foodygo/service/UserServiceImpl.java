@@ -5,7 +5,7 @@ import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.entity.*;
-import com.foodygo.enums.EnumRoleName;
+import com.foodygo.enums.EnumRoleNameType;
 import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
@@ -35,16 +35,16 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     @Override
     public List<User> getUsersByRole(String role) {
         List<User> listsByRole = userRepository.findAll();
-        Role role_admin = roleService.getRoleByRoleName(EnumRoleName.ROLE_ADMIN);
-        Role role_manager = roleService.getRoleByRoleName(EnumRoleName.ROLE_MANAGER);
+        Role role_admin = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_ADMIN);
+        Role role_manager = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_MANAGER);
 
-        if (role.equals(EnumRoleName.ROLE_STAFF.name())) {
+        if (role.equals(EnumRoleNameType.ROLE_STAFF.name())) {
             for (User user : userRepository.findAll()) {
                 if (user.getRole().equals(role_admin) || user.getRole().equals(role_manager)) {
                     listsByRole.remove(user);
                 }
             }
-        }  else if (role.equals(EnumRoleName.ROLE_ADMIN.name())) {
+        }  else if (role.equals(EnumRoleNameType.ROLE_ADMIN.name())) {
                 return userRepository.findAll();
         }
         return listsByRole;
@@ -114,7 +114,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         if (checkExistingUser != null) {
             throw new ElementExistException("User already exists");
         }
-        Role role = roleService.getRoleByRoleName(EnumRoleName.ROLE_USER);
+        Role role = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_USER);
         User user = User.builder()
                 .email(userRegisterRequest.getEmail())
                 .password(bCryptPasswordEncoder.encode(userRegisterRequest.getPassword()))

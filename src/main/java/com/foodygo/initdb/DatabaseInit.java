@@ -4,9 +4,9 @@ import com.foodygo.entity.Category;
 import com.foodygo.entity.Restaurant;
 import com.foodygo.entity.Role;
 import com.foodygo.entity.User;
-import com.foodygo.enums.EnumRoleName;
 import com.foodygo.repository.CategoryRepository;
 import com.foodygo.repository.RestaurantRepository;
+import com.foodygo.enums.EnumRoleNameType;
 import com.foodygo.repository.RoleRepository;
 import com.foodygo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
-
 @Component
 @RequiredArgsConstructor
 public class DatabaseInit {
@@ -31,30 +30,86 @@ public class DatabaseInit {
     public CommandLineRunner database() {
         return args -> {
             if (roleRepository.count() == 0) {
-                Role roleAdmin = new Role(EnumRoleName.ROLE_ADMIN, null);
-                Role roleStaff = new Role(EnumRoleName.ROLE_STAFF, null);
-                Role roleUser = new Role(EnumRoleName.ROLE_USER, null);
-                Role roleManager = new Role(EnumRoleName.ROLE_MANAGER, null);
+                Role roleAdmin = new Role(EnumRoleNameType.ROLE_ADMIN, null);
+                Role roleStaff = new Role(EnumRoleNameType.ROLE_STAFF, null);
+                Role roleUser = new Role(EnumRoleNameType.ROLE_USER, null);
+                Role roleManager = new Role(EnumRoleNameType.ROLE_MANAGER, null);
+                Role roleSeller = new Role(EnumRoleNameType.ROLE_SELLER, null);
 
                 roleRepository.save(roleAdmin);
                 roleRepository.save(roleStaff);
                 roleRepository.save(roleUser);
                 roleRepository.save(roleManager);
+                roleRepository.save(roleSeller);
             }
 
             if (userRepository.count() == 0) {
-                Role role = roleRepository.getRoleByRoleName(EnumRoleName.ROLE_USER);
+                Role roleUser = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_USER);
+                Role roleAdmin = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_ADMIN);
+                Role roleStaff = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_STAFF);
+                Role roleManager = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_MANAGER);
+                Role roleSeller = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_SELLER);
+
                 User user = User.builder()
-                        .fullName("HOANG SON HA")
+                        .fullName("User")
                         .accessToken(null)
                         .refreshToken(null)
-                        .email("hoangsonhadev@gmail.com")
+                        .email("user@gmail.com")
                         .password(bCryptPasswordEncoder.encode("123456"))
                         .enabled(true)
                         .nonLocked(true)
-                        .role(role)
+                        .role(roleUser)
                         .build();
                 userRepository.save(user);
+
+                User admin = User.builder()
+                        .fullName("Admin")
+                        .accessToken(null)
+                        .refreshToken(null)
+                        .email("admin@gmail.com")
+                        .password(bCryptPasswordEncoder.encode("123456"))
+                        .enabled(true)
+                        .nonLocked(true)
+                        .role(roleAdmin)
+                        .build();
+                userRepository.save(admin);
+
+                User manager = User.builder()
+                        .fullName("Manager")
+                        .accessToken(null)
+                        .refreshToken(null)
+                        .email("manager@gmail.com")
+                        .password(bCryptPasswordEncoder.encode("123456"))
+                        .enabled(true)
+                        .nonLocked(true)
+                        .role(roleManager)
+                        .build();
+                userRepository.save(manager);
+
+                User staff = User.builder()
+                        .fullName("HOANG SON HA")
+                        .accessToken(null)
+                        .refreshToken(null)
+                        .email("staff@gmail.com")
+                        .password(bCryptPasswordEncoder.encode("123456"))
+                        .enabled(true)
+                        .nonLocked(true)
+                        .role(roleStaff)
+                        .build();
+                userRepository.save(staff);
+
+                User seller = User.builder()
+                        .fullName("Seller")
+                        .accessToken(null)
+                        .refreshToken(null)
+                        .email("seller@gmail.com")
+                        .password(bCryptPasswordEncoder.encode("123456"))
+                        .enabled(true)
+                        .nonLocked(true)
+                        .role(roleSeller)
+                        .build();
+                userRepository.save(seller);
+
             }
 
             Random random = new Random();
