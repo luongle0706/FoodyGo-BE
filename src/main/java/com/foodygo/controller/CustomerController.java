@@ -1,11 +1,13 @@
 package com.foodygo.controller;
 
+import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.CustomerService;
 import com.foodygo.service.UserService;
 import jakarta.validation.Valid;
@@ -120,9 +122,16 @@ public class CustomerController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/undelete/{customer-id}")
     public ResponseEntity<ObjectResponse> unDeleteCustomerByID(@PathVariable("customer-id") int customerID) {
-        return customerService.undeleteCustomer(customerID) != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete customer successfully", customerService.findById(customerID))) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete customer failed", null));
+        try {
+            CustomerDTO customerDTO = customerService.undeleteCustomer(customerID);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete customer successfully", customerDTO));
+        } catch (ElementNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete customer failed. " + e.getMessage(), null));
+        } catch (UnchangedStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete customer failed. " + e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete customer failed", null));
+        }
     }
 
     // lấy ra customer bằng id

@@ -1,15 +1,18 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
 import com.foodygo.entity.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface CustomerService extends BaseService<Customer, Integer> {
     List<Customer> getAllCustomersActive();
 
-    Customer undeleteCustomer(Integer customerID);
+    CustomerDTO undeleteCustomer(Integer customerID);
 
     User getUserByCustomerID(Integer customerID);
 

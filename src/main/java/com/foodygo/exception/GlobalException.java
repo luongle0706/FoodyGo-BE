@@ -33,6 +33,11 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element existed", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
+    @ExceptionHandler(UnchangedStateException.class)
+    public ResponseEntity<ErrorResponse> unchangedStateException(UnchangedStateException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element unchanged", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> noResourceFoundException(NoResourceFoundException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new Date(), "Failed", "Resource not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));

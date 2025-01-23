@@ -2,13 +2,17 @@ package com.foodygo.service;
 
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.repository.BuildingRepository;
+import com.foodygo.repository.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,11 +24,13 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
 
     private final BuildingRepository buildingRepository;
     private final HubService hubService;
+    private final CustomerRepository customerRepository;
 
-    public BuildingServiceImpl(BuildingRepository buildingRepository, HubService hubService) {
+    public BuildingServiceImpl(BuildingRepository buildingRepository, HubService hubService, CustomerRepository customerRepository) {
         super(buildingRepository);
         this.buildingRepository = buildingRepository;
         this.hubService = hubService;
+        this.customerRepository = customerRepository;
     }
 
     @Override
@@ -110,12 +116,29 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
     }
 
     @Override
-    public List<Customer> getCustomersByBuildingID(Integer buildingID) {
+    public PagingResponse getCustomersByBuildingID(Integer buildingID, Integer currentPage, Integer pageSize) {
+
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = customerRepository.findAllByBuildingId(buildingID, pageable);
+
+        return PagingResponse.builder()
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent())
+                .build();
+    }
+
+    @Override
+    public Building deleteBuilding(Integer buildingID) {
         Building building = buildingRepository.findBuildingById(buildingID);
-        if (building != null) {
-            return building.getCustomers();
+        if (building == null) {
+            throw new ElementNotFoundException("Building not found");
         }
-        return null;
+        building.setDeleted(true);
+        return buildingRepository.save(building);
     }
 
 }

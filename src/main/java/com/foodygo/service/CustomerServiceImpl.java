@@ -1,9 +1,12 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
 import com.foodygo.entity.*;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.UnchangedStateException;
+import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.repository.CustomerRepository;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -13,6 +16,8 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +40,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     private final CustomerRepository customerRepository;
     private final BuildingService buildingService;
     private final UserService userService;
+    private final CustomerMapper customerMapper;
 
     // Firebase
 
@@ -88,11 +94,12 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     @Value("${buffer-image.devide}")
     private int bufferImageDevide;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService, CustomerMapper customerMapper) {
         super(customerRepository);
         this.customerRepository = customerRepository;
         this.buildingService = buildingService;
         this.userService = userService;
+        this.customerMapper = customerMapper;
     }
 
     @Override
@@ -108,15 +115,16 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public Customer undeleteCustomer(Integer customerID) {
+    public CustomerDTO undeleteCustomer(Integer customerID) {
         Customer customer = customerRepository.findCustomerById((customerID));
-        if (customer != null) {
-            if (customer.isDeleted()) {
-                customer.setDeleted(false);
-                return customerRepository.save(customer);
-            }
+        if (customer == null) {
+            throw new ElementNotFoundException("Customer not found");
         }
-        return null;
+        if (!customer.isDeleted()) {
+            throw new UnchangedStateException("Customer is not deleted");
+        }
+        customer.setDeleted(false);
+        return customerMapper.customerToCustomerDTO(customerRepository.save(customer));
     }
 
     @Override

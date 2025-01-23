@@ -2,6 +2,7 @@ package com.foodygo.service;
 
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
@@ -19,6 +20,8 @@ public interface BuildingService extends BaseService<Building, Integer> {
 
     Hub getHubByBuildingID(Integer buildingID);
 
-    List<Customer> getCustomersByBuildingID(Integer buildingID);
+    PagingResponse getCustomersByBuildingID(Integer buildingID, Integer currentPage, Integer pageSize);
+
+    Building deleteBuilding(Integer buildingID);
 
 }

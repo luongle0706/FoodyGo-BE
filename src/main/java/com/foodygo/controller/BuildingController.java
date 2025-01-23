@@ -58,11 +58,13 @@ public class BuildingController {
     // lấy tất cả customer trong building
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-customers/{building-id}")
-    public ResponseEntity<ObjectResponse> getCustomersByBuildingID(@PathVariable("building-id") int buildingID) {
-        List<Customer> results = buildingService.getCustomersByBuildingID(buildingID);
-        return results != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all customer by building ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all customer by building ID failed", null));
+    public ResponseEntity<PagingResponse> getCustomersByBuildingID(@PathVariable("building-id") int buildingID,
+                                                                   @RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                                   @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = buildingService.getCustomersByBuildingID(buildingID, resolvedCurrentPage, resolvedPageSize);
+        return ResponseEntity.status(HttpStatus.OK).body(results);
     }
 
     // lấy tất cả building chưa xóa
@@ -134,12 +136,11 @@ public class BuildingController {
     @DeleteMapping("/delete/{building-id}")
     public ResponseEntity<ObjectResponse> deleteBuildingByID(@PathVariable("building-id") int buildingID) {
         try {
-            Building building = buildingService.findById(buildingID);
-            if(building != null) {
-                building.setDeleted(true);
-                return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete building successfully", buildingService.save(building)));
-            }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete building failed", null));
+            Building building = buildingService.deleteBuilding(buildingID);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete building successfully", buildingService.save(building)));
+        } catch (ElementNotFoundException e) {
+            log.error("Error while deleting building", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete building failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error while deleting building", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete building failed", null));

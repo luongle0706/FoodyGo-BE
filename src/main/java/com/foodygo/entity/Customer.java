@@ -27,6 +27,7 @@ public class Customer extends BaseEntity {
     Building building;
 
     @OneToOne
+    @JsonBackReference
     User user;
 
     @OneToOne(mappedBy = "customer")

@@ -3,6 +3,7 @@ package com.foodygo.controller;
 import com.foodygo.configuration.CustomUserDetail;
 import com.foodygo.configuration.JWTAuthenticationFilter;
 import com.foodygo.configuration.JWTToken;
+import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserLoginRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.response.ObjectResponse;
@@ -24,7 +25,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/public")
+@RequestMapping("/api/v1/public")
 @Slf4j
 @RequiredArgsConstructor
 public class MainController {
@@ -43,11 +44,11 @@ public class MainController {
     @PostMapping("/register")
     public ResponseEntity<ObjectResponse> userRegister(@Valid @RequestBody UserRegisterRequest userRegisterRequest) {
         try {
-            User user = userService.createUser(userRegisterRequest);
-            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create user successfully", user));
+            UserDTO user = userService.registerUser(userRegisterRequest);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Register user successfully", user));
         } catch (Exception e) {
-            log.error("Error creating user", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create user failed", null));
+            log.error("Error register user", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Register user failed", null));
         }
     }
 
