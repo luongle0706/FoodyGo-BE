@@ -53,6 +53,16 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(results);
     }
 
+    // lấy tất cả các user active
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/get-all-active")
+    public ResponseEntity<ObjectResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                      @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        List<User> result = userService.getAllUsersActive();
+        return !result.isEmpty() ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all user active successfully", result)) :
+                                   ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Failed", "Get all user active failed", null));
+    }
+
     // update user bằng id
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{user-id}")
@@ -97,7 +107,7 @@ public class UserController {
     @GetMapping("/get-all-order-activities/{user-id}")
     public ResponseEntity<ObjectResponse> getOrderActivitiesByUserID(@PathVariable("user-id") int userID) {
         List<OrderActivity> results = userService.getOrderActivitiesByUserID(userID);
-        return results != null ?
+        return !results.isEmpty() ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all order activities by user ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all order activities by user ID failed", null));
     }
@@ -107,7 +117,7 @@ public class UserController {
     @GetMapping("/get-order/{employee-id}")
     public ResponseEntity<ObjectResponse> getOrderByEmployeeID(@PathVariable("employee-id") int employeeID) {
         List<Order> results = userService.getOrdersByEmployeeID(employeeID);
-        return results != null ?
+        return !results.isEmpty() ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get order by employee ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get order by employee ID failed", null));
     }

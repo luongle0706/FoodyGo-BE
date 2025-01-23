@@ -6,7 +6,9 @@ import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
+import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -15,6 +17,8 @@ public interface UserService extends BaseService<User, Integer> {
     PagingResponse findAllUsers(Integer currentPage, Integer pageSize);
 
 //    List<User> getUsersByRole(Integer roleID);
+
+    List<User> getAllUsersActive();
 
     User getUserByEmail(String email);
 
@@ -31,6 +35,12 @@ public interface UserService extends BaseService<User, Integer> {
     UserDTO registerUser(UserRegisterRequest userRegisterRequest);
 
     UserDTO updateUser(UserUpdateRequest userUpdateRequest, int userID);
+
+    TokenResponse refreshToken(String refreshToken);
+
+    TokenResponse login(String email, String password);
+
+    boolean logout(HttpServletRequest request);
 
     UserDTO createUserWithRole(UserCreateRequest userCreateRequest);
 

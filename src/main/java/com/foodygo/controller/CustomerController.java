@@ -1,6 +1,7 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
@@ -62,7 +63,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-customer/{order-id}")
     public ResponseEntity<ObjectResponse> getCustomerByOrderID(@PathVariable("order-id") int orderID) {
-        Customer results = customerService.getCustomerByOrderID(orderID);
+        CustomerDTO results = customerService.getCustomerByOrderID(orderID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by order ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by order ID failed", null));
@@ -80,7 +81,7 @@ public class CustomerController {
 
     // lấy user từ customer id
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/get-user/{customer-id}")
+    @GetMapping("/get-user-by-customer/{customer-id}")
     public ResponseEntity<ObjectResponse> getUserByCustomerID(@PathVariable("customer-id") int customerID) {
         User results = customerService.getUserByCustomerID(customerID);
         return results != null ?
@@ -100,9 +101,9 @@ public class CustomerController {
 
     // lấy user từ wallet id
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/get-user/{wallet-id}")
+    @GetMapping("/get-user-by-wallet/{wallet-id}")
     public ResponseEntity<ObjectResponse> getCustomerByWalletID(@PathVariable("wallet-id") int walletID) {
-        Customer results = customerService.getCustomerByWalletID(walletID);
+        CustomerDTO results = customerService.getCustomerByWalletID(walletID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by wallet ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
@@ -149,7 +150,7 @@ public class CustomerController {
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createCustomer(@Valid @RequestBody CustomerCreateRequest customerCreateRequest) {
         try {
-            Customer customer = customerService.createCustomer(customerCreateRequest);
+            CustomerDTO customer = customerService.createCustomer(customerCreateRequest);
             if (customer != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create customer successfully", customer));
             }
@@ -169,7 +170,7 @@ public class CustomerController {
     @PutMapping("/update/{customer-id}")
     public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("customer-id") int customerID, @RequestBody CustomerUpdateRequest customerUpdateRequest) {
         try {
-            Customer customer = customerService.updateCustomer(customerUpdateRequest, customerID);
+            CustomerDTO customer = customerService.updateCustomer(customerUpdateRequest, customerID);
             if (customer != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update customer successfully", customer));
             }
@@ -188,21 +189,13 @@ public class CustomerController {
     @DeleteMapping("/delete/{customer-id}")
     public ResponseEntity<ObjectResponse> deleteCustomerByID(@PathVariable("customer-id") int customerID) {
         try {
-            Customer customer = customerService.findById(customerID);
-            User user = customer.getUser();
-            if(customer != null) {
-                customer.setDeleted(true);
-                if(user != null) {
-                    user.setDeleted(true);
-                    user.setEnabled(false);
-                    user.setNonLocked(false);
-                    userService.save(user);
-                }
-                return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete customer successfully", customerService.save(customer)));
-            }
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete customer failed", null));
+            CustomerDTO customer = customerService.deleteCustomer(customerID);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete customer successfully", customer));
+        } catch (ElementNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete customer ailed. " + e.getMessage(), null));
+        } catch (UnchangedStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete customer failed. " + e.getMessage(), null));
         } catch (Exception e) {
-            log.error("Error deleting customer", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Delete customer failed", null));
         }
     }

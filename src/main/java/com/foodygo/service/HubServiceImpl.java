@@ -1,5 +1,6 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
@@ -7,6 +8,9 @@ import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementExistException;
+import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.UnchangedStateException;
+import com.foodygo.mapper.HubMapper;
 import com.foodygo.repository.HubRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -22,10 +26,12 @@ import java.util.List;
 public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements HubService {
 
     private final HubRepository hubRepository;
+    private final HubMapper hubMapper;
 
-    public HubServiceImpl(HubRepository hubRepository) {
+    public HubServiceImpl(HubRepository hubRepository, HubMapper hubMapper) {
         super(hubRepository);
         this.hubRepository = hubRepository;
+        this.hubMapper = hubMapper;
     }
 
     @Override
@@ -56,19 +62,20 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     }
 
     @Override
-    public Hub undeleteHub(Integer hubID) {
+    public HubDTO undeleteHub(Integer hubID) {
         Hub hub = hubRepository.findHubById(hubID);
-        if (hub != null) {
-            if (hub.isDeleted()) {
-                hub.setDeleted(false);
-                return hubRepository.save(hub);
-            }
+        if (hub == null) {
+            throw new ElementNotFoundException("Hub can not found");
         }
-        return null;
+        if (!hub.isDeleted()) {
+            throw new UnchangedStateException("Hub is not deleted");
+        }
+        hub.setDeleted(false);
+        return hubMapper.HubToHubDTO(hubRepository.save(hub));
     }
 
     @Override
-    public Hub createHub(HubCreateRequest hubCreateRequest) {
+    public HubDTO createHub(HubCreateRequest hubCreateRequest) {
         Hub checkExist = hubRepository.findHubByName(hubCreateRequest.getName());
         if (checkExist != null) {
             throw new ElementExistException("There is already a hub with the name " + hubCreateRequest.getName());
@@ -77,11 +84,11 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
                 .name(hubCreateRequest.getName())
                 .address(hubCreateRequest.getAddress())
                 .build();
-        return hubRepository.save(hub);
+        return hubMapper.HubToHubDTO(hubRepository.save(hub));
     }
 
     @Override
-    public Hub updateHub(HubUpdateRequest hubUpdateRequest, int hubID) {
+    public HubDTO updateHub(HubUpdateRequest hubUpdateRequest, int hubID) {
         Hub hub = hubRepository.findHubById(hubID);
         if (hub != null) {
             if (hubUpdateRequest.getName() != null) {
@@ -93,7 +100,7 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
             if(hubUpdateRequest.getDescription() != null) {
                 hub.setDescription(hubUpdateRequest.getDescription());
             }
-            return hubRepository.save(hub);
+            return hubMapper.HubToHubDTO(hubRepository.save(hub));
         }
         return null;
     }
@@ -117,7 +124,7 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     }
 
     @Override
-    public Hub getHubByOrderID(Integer orderID) {
+    public HubDTO getHubByOrderID(Integer orderID) {
         // chua co OrderService
         return null;
     }

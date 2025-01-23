@@ -1,12 +1,17 @@
 package com.foodygo.service;
 
+import com.foodygo.configuration.CustomUserDetail;
 import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
+import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.entity.*;
+import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.CustomerMapper;
+import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -18,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +49,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     private final BuildingService buildingService;
     private final UserService userService;
     private final CustomerMapper customerMapper;
+    private final UserMapper userMapper;
 
     // Firebase
 
@@ -94,12 +103,13 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     @Value("${buffer-image.devide}")
     private int bufferImageDevide;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService, CustomerMapper customerMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService, CustomerMapper customerMapper, UserMapper userMapper) {
         super(customerRepository);
         this.customerRepository = customerRepository;
         this.buildingService = buildingService;
         this.userService = userService;
         this.customerMapper = customerMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -128,12 +138,12 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public User getUserByCustomerID(Integer customerID) {
+    public UserDTO getUserByCustomerID(Integer customerID) {
         Customer customer = customerRepository.findCustomerById(customerID);
-        if (customer != null) {
-            return customer.getUser();
+        if (customer == null) {
+           throw new ElementNotFoundException("Customer not found");
         }
-        return null;
+        return userMapper.userToUserDTO(customer.getUser());
     }
 
     private Customer getCustomer(Integer customerID) {
@@ -161,7 +171,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public Customer createCustomer(CustomerCreateRequest customerCreateRequest) {
+    public CustomerDTO createCustomer(CustomerCreateRequest customerCreateRequest) {
         Building building = getBuilding(customerCreateRequest.getBuildingID());
         User user = getUser(customerCreateRequest.getUserID());
         try {
@@ -177,7 +187,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
                     .building(building)
                     .user(user)
                     .build();
-            return customerRepository.save(customer);
+            return customerMapper.customerToCustomerDTO(customerRepository.save(customer));
         } catch (Exception e) {
             log.error("Customer creation failed", e);
             return null;
@@ -185,8 +195,14 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public Customer updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID) {
+    public CustomerDTO updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID) {
         Customer customer = getCustomer(customerID);
+
+        CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (customUserDetail.getUserID() != customer.getUser().getUserID()) {
+            throw new AuthenticationException("You are not allowed to update other customer");
+        }
         try {
             if(customerUpdateRequest.getImage() != null) {
                 String oldAvatar = customer.getImage();
@@ -204,7 +220,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
                 User user = getUser(customerUpdateRequest.getUserID());
                 customer.setUser(user);
             }
-            return customerRepository.save(customer);
+            return customerMapper.customerToCustomerDTO(customerRepository.save(customer));
         } catch (Exception e) {
             log.error("Customer update failed", e);
             return null;
@@ -218,7 +234,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public Customer getCustomerByOrderID(Integer orderID) {
+    public CustomerDTO getCustomerByOrderID(Integer orderID) {
         // chua có order service
         return null;
     }
@@ -251,9 +267,29 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public Customer getCustomerByWalletID(Integer walletID) {
+    public CustomerDTO getCustomerByWalletID(Integer walletID) {
         // chưa có wallet service
         return null;
+    }
+
+    @Override
+    public CustomerDTO deleteCustomer(Integer customerID) {
+        Customer customer = customerRepository.findCustomerById(customerID);
+        if (customer == null) {
+            throw new ElementNotFoundException("Customer not found");
+        }
+        if (customer.isDeleted()) {
+            throw new UnchangedStateException("Customer is not deleted");
+        }
+        User user = customer.getUser();
+        if (user != null) {
+            user.setDeleted(true);
+            user.setEnabled(false);
+            user.setNonLocked(false);
+        }
+        customer.setDeleted(true);
+        userService.save(user);
+        return customerMapper.customerToCustomerDTO(customerRepository.save(customer));
     }
 
 //    @Override

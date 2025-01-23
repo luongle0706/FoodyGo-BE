@@ -1,5 +1,7 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.BuildingDTO;
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
@@ -8,6 +10,9 @@ import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.UnchangedStateException;
+import com.foodygo.mapper.BuildingMapper;
+import com.foodygo.mapper.HubMapper;
 import com.foodygo.repository.BuildingRepository;
 import com.foodygo.repository.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +30,16 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
     private final BuildingRepository buildingRepository;
     private final HubService hubService;
     private final CustomerRepository customerRepository;
+    private final BuildingMapper buildingMapper;
+    private final HubMapper hubMapper;
 
-    public BuildingServiceImpl(BuildingRepository buildingRepository, HubService hubService, CustomerRepository customerRepository) {
+    public BuildingServiceImpl(BuildingRepository buildingRepository, HubService hubService, CustomerRepository customerRepository, BuildingMapper buildingMapper, HubMapper hubMapper) {
         super(buildingRepository);
         this.buildingRepository = buildingRepository;
         this.hubService = hubService;
         this.customerRepository = customerRepository;
+        this.buildingMapper = buildingMapper;
+        this.hubMapper = hubMapper;
     }
 
     @Override
@@ -46,19 +55,20 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
     }
 
     @Override
-    public Building undeleteBuilding(Integer buildingID) {
+    public BuildingDTO undeleteBuilding(Integer buildingID) {
         Building building = buildingRepository.findBuildingById(buildingID);
-        if (building != null) {
-            if (building.isDeleted()) {
-                building.setDeleted(false);
-                return buildingRepository.save(building);
-            }
+        if (building == null) {
+            throw new ElementNotFoundException("Hub can not found");
         }
-        return null;
+        if (!building.isDeleted()) {
+            throw new UnchangedStateException("Hub is not deleted");
+        }
+        building.setDeleted(false);
+        return buildingMapper.buildingToBuildingDTO(buildingRepository.save(building));
     }
 
     @Override
-    public Building createBuilding(BuildingCreateRequest buildingCreateRequest) {
+    public BuildingDTO createBuilding(BuildingCreateRequest buildingCreateRequest) {
         Building checkExist = buildingRepository.findBuildingByName(buildingCreateRequest.getName());
         if (checkExist != null) {
             throw new ElementExistException("There is already a building with the name " + buildingCreateRequest.getName());
@@ -78,11 +88,11 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
                 throw new ElementNotFoundException("Hub not found");
             }
         }
-        return buildingRepository.save(building);
+        return buildingMapper.buildingToBuildingDTO(buildingRepository.save(building));
     }
 
     @Override
-    public Building updateBuilding(BuildingUpdateRequest buildingUpdateRequest, int buildingID) {
+    public BuildingDTO updateBuilding(BuildingUpdateRequest buildingUpdateRequest, int buildingID) {
         Building building = buildingRepository.findBuildingById(buildingID);
         if (building != null) {
             if (buildingUpdateRequest.getName() != null) {
@@ -101,16 +111,16 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
                         throw new ElementNotFoundException("Hub not found");
                     }
                 }
-            return buildingRepository.save(building);
+            return buildingMapper.buildingToBuildingDTO(buildingRepository.save(building));
         }
         return null;
     }
 
     @Override
-    public Hub getHubByBuildingID(Integer buildingID) {
+    public HubDTO getHubByBuildingID(Integer buildingID) {
         Building building = buildingRepository.findBuildingById(buildingID);
         if (building != null) {
-            return building.getHub();
+            return hubMapper.HubToHubDTO(building.getHub());
         }
         return null;
     }
@@ -132,13 +142,13 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
     }
 
     @Override
-    public Building deleteBuilding(Integer buildingID) {
+    public BuildingDTO deleteBuilding(Integer buildingID) {
         Building building = buildingRepository.findBuildingById(buildingID);
         if (building == null) {
             throw new ElementNotFoundException("Building not found");
         }
         building.setDeleted(true);
-        return buildingRepository.save(building);
+        return buildingMapper.buildingToBuildingDTO(buildingRepository.save(building));
     }
 
 }

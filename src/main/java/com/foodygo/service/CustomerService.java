@@ -1,6 +1,7 @@
 package com.foodygo.service;
 
 import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
 import com.foodygo.entity.*;
@@ -14,15 +15,15 @@ public interface CustomerService extends BaseService<Customer, Integer> {
 
     CustomerDTO undeleteCustomer(Integer customerID);
 
-    User getUserByCustomerID(Integer customerID);
+    UserDTO getUserByCustomerID(Integer customerID);
 
-    Customer createCustomer(CustomerCreateRequest customerCreateRequest);
+    CustomerDTO createCustomer(CustomerCreateRequest customerCreateRequest);
 
-    Customer updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID);
+    CustomerDTO updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID);
 
     List<Order> getOrdersByCustomerID(Integer customerID);
 
-    Customer getCustomerByOrderID(Integer orderID);
+    CustomerDTO getCustomerByOrderID(Integer orderID);
 
     Building getBuildingByCustomerID(int customerID);
 
@@ -30,7 +31,9 @@ public interface CustomerService extends BaseService<Customer, Integer> {
 
     Wallet getWalletByCustomerID(Integer customerID);
 
-    Customer getCustomerByWalletID(Integer walletID);
+    CustomerDTO getCustomerByWalletID(Integer walletID);
+
+    CustomerDTO deleteCustomer(Integer customerID);
 
 //    List<Deposit> getDepositByCustomerID(Integer customerID);
 //

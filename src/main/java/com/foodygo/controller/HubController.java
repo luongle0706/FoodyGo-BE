@@ -1,5 +1,7 @@
 package com.foodygo.controller;
 
+import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
@@ -8,6 +10,7 @@ import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.HubService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +72,7 @@ public class HubController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-hub/{order-id}")
     public ResponseEntity<ObjectResponse> getHubByOrderID(@PathVariable("order-id") int orderID) {
-        Hub results = hubService.getHubByOrderID(orderID);
+        HubDTO results = hubService.getHubByOrderID(orderID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get hub by order ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get hub by order ID failed", null));
@@ -89,9 +92,16 @@ public class HubController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/undelete/{hub-id}")
     public ResponseEntity<ObjectResponse> unDeleteHubByID(@PathVariable("hub-id") int hubID) {
-        return hubService.undeleteHub(hubID) != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete hub successfully", hubService.findById(hubID))) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed", null));
+        try {
+            HubDTO hub = hubService.undeleteHub(hubID);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete hub successfully", hub));
+        } catch (ElementNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed. " + e.getMessage(), null));
+        } catch (UnchangedStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed. " + e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed", null));
+        }
     }
 
     // lấy ra hub bằng id
@@ -109,7 +119,7 @@ public class HubController {
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createHub(@Valid @RequestBody HubCreateRequest hubCreateRequest) {
         try {
-            Hub hub = hubService.createHub(hubCreateRequest);
+            HubDTO hub = hubService.createHub(hubCreateRequest);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create hub successfully", hub));
         } catch (Exception e) {
             log.error("Error creating hub", e);
@@ -122,7 +132,7 @@ public class HubController {
     @PutMapping("/update/{hub-id}")
     public ResponseEntity<ObjectResponse> updateHub(@PathVariable("hub-id") int hubID, @RequestBody HubUpdateRequest hubUpdateRequest) {
         try {
-            Hub hub = hubService.updateHub(hubUpdateRequest, hubID);
+            HubDTO hub = hubService.updateHub(hubUpdateRequest, hubID);
             if (hub != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update hub successfully", hub));
             }

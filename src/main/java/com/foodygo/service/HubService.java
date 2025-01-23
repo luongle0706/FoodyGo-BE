@@ -1,5 +1,6 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
@@ -15,16 +16,16 @@ public interface HubService extends BaseService<Hub, Integer> {
 
     List<Hub> getHubsActive();
 
-    Hub undeleteHub(Integer hubID);
+    HubDTO undeleteHub(Integer hubID);
 
-    Hub createHub(HubCreateRequest hubCreateRequest);
+    HubDTO createHub(HubCreateRequest hubCreateRequest);
 
-    Hub updateHub(HubUpdateRequest hubUpdateRequest, int hubID);
+    HubDTO updateHub(HubUpdateRequest hubUpdateRequest, int hubID);
 
     List<Building> getBuildingsByHubID(Integer hubID);
 
     List<Order> getOrdersByHubID(Integer hubID);
 
-    Hub getHubByOrderID(Integer orderID);
+    HubDTO getHubByOrderID(Integer orderID);
 
 }

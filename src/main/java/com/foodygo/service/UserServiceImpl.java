@@ -1,6 +1,8 @@
 package com.foodygo.service;
 
 import com.foodygo.configuration.CustomUserDetail;
+import com.foodygo.configuration.JWTAuthenticationFilter;
+import com.foodygo.configuration.JWTToken;
 import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
@@ -8,8 +10,10 @@ import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
+import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
 import com.foodygo.enums.EnumRoleNameType;
+import com.foodygo.enums.EnumTokenType;
 import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
@@ -18,18 +22,22 @@ import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
 import com.foodygo.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -41,8 +49,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     private final UserMapper userMapper;
     private final CustomerMapper customerMapper;
     private final CustomerRepository customerRepository;
+    private final JWTToken jwtToken;
+    private final JWTAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationManager authenticationManager;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
+                           UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
+                           JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -50,6 +63,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         this.userMapper = userMapper;
         this.customerMapper = customerMapper;
         this.customerRepository = customerRepository;
+        this.jwtToken = jwtToken;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -67,6 +83,18 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                         .map(userMapper::userToUserDTO)
                         .toList())
                 .build();
+    }
+
+    @Override
+    public List<User> getAllUsersActive() {
+        List<User> users = userRepository.findAll();
+        List<User> activeUsers = new ArrayList<User>();
+        for (User user : users) {
+            if(!user.isDeleted() && user.isNonLocked() && user.isEnabled()) {
+                activeUsers.add(user);
+            }
+        }
+        return activeUsers;
     }
 
 //    private String getRoleByRoleID(Integer roleID) {
@@ -187,6 +215,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        // admin se co quyen update tat ca
+
         if (customUserDetail.getUserID() != userID) {
             throw new AuthenticationException("You are not allowed to update other user");
         }
@@ -206,6 +236,64 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         } else {
             throw new ElementNotFoundException("User not found");
         }
+    }
+
+    @Override
+    public TokenResponse refreshToken(String refreshToken) {
+        TokenResponse tokenResponse = new TokenResponse("Failed", "Refresh token failed", null, null);
+        String email = jwtToken.getEmailFromJwt(refreshToken, EnumTokenType.REFRESH_TOKEN);
+        User user = userRepository.getUserByEmail(email);
+        if (user != null) {
+            if (StringUtils.hasText(refreshToken) && user.getRefreshToken().equals(refreshToken)) {
+                if (jwtToken.validate(refreshToken, EnumTokenType.REFRESH_TOKEN)) {
+                    CustomUserDetail customUserDetail = CustomUserDetail.mapUserToUserDetail(user);
+                    if (customUserDetail != null) {
+                        String newToken = jwtToken.generatedToken(customUserDetail);
+                        user.setAccessToken(newToken);
+                        userRepository.save(user);
+                        tokenResponse = new TokenResponse("Success", "Refresh token successfully", newToken, refreshToken);
+                    }
+                }
+            }
+        }
+        return tokenResponse;
+    }
+
+    @Override
+    public TokenResponse login(String email, String password) {
+        TokenResponse tokenResponse = new TokenResponse("Failed", "Login failed", null, null);
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(email, password);
+        Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        CustomUserDetail userDetails = (CustomUserDetail) authentication.getPrincipal();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        //SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String token = jwtToken.generatedToken(userDetails);
+        String refreshToken = jwtToken.generatedRefreshToken(userDetails);
+        User user = userRepository.getUserByEmail(userDetails.getEmail());
+        if (user != null) {
+            user.setRefreshToken(refreshToken);
+            user.setAccessToken(token);
+            userRepository.save(user);
+            tokenResponse = new TokenResponse("Success", "Login successfully", token, refreshToken);
+        }
+        return tokenResponse;
+    }
+
+    @Override
+    public boolean logout(HttpServletRequest request) {
+        String token = jwtAuthenticationFilter.getToken(request);
+        String email = jwtToken.getEmailFromJwt(token, EnumTokenType.TOKEN);
+        User user = userRepository.getUserByEmail(email);
+        if (user == null) {
+            throw new ElementNotFoundException("User not found");
+        }
+        user.setAccessToken(null);
+        user.setRefreshToken(null);
+        User checkUser = userRepository.save(user);
+
+        return checkUser.getAccessToken() == null;
     }
 
     @Override
