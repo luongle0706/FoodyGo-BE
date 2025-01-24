@@ -21,6 +21,8 @@ public class DatabaseInit {
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final AddonSectionRepository addonSectionRepository;
+    private final AddonItemRepository addonItemRepository;
     private final HubRepository hubRepository;
     private final BuildingRepository buildingRepository;
 
@@ -177,6 +179,23 @@ public class DatabaseInit {
                                 .category(category)
                                 .build();
                         productRepository.save(product);
+
+                        AddonSection addonSection = AddonSection.builder()
+                                .name("Sample addon section no." + j)
+                                .maxChoice(((int) (Math.random() * 3)) + 1)
+                                .product(product)
+                                .build();
+                        addonSectionRepository.save(addonSection);
+
+                        for (int k = 0; k < 3; k++) {
+                            AddonItem addonItem = AddonItem.builder()
+                                    .name("Sample addon item no." + k)
+                                    .price(Math.random() * 5 + 1)
+                                    .quantity(100)
+                                    .section(addonSection)
+                                    .build();
+                            addonItemRepository.save(addonItem);
+                        }
                     }
                 }
             }
