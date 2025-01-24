@@ -3,6 +3,7 @@ package com.foodygo.service;
 import com.foodygo.dto.ProductDTO;
 import com.foodygo.entity.Product;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -11,13 +12,13 @@ public interface ProductService {
     ProductDTO getProductDTOById(Integer productId);
 
     List<Product> getAllProducts();
-    Page<ProductDTO> getAllProductsPagination(Integer page, Integer size);
+    Page<ProductDTO> getAllProductDTOs(Pageable pageable);
 
     List<Product> getAllProductsByRestaurantId(Integer restaurantId);
-    Page<ProductDTO> getAllProductsByRestaurantIdPagination(Integer restaurantId, Integer page, Integer size);
+    Page<ProductDTO> getAllProductDTOsByRestaurantId(Integer restaurantId, Pageable pageable);
 
     List<Product> getAllProductsByCategoryId(Integer categoryId);
-    Page<ProductDTO> getAllProductsByCategoryIdPagination(Integer categoryId, Integer page, Integer size);
+    Page<ProductDTO> getAllProductDTOsByCategoryId(Integer categoryId, Pageable pageable);
 
     void updateProductInfo(ProductDTO productDTO);
 
