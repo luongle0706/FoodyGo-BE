@@ -1,5 +1,6 @@
 package com.foodygo.controller;
 
+import com.foodygo.dto.BuildingDTO;
 import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
@@ -30,7 +31,6 @@ import java.util.List;
 public class CustomerController {
 
     private final CustomerService customerService;
-    private final UserService userService;
 
     @Value("${application.default-current-page}")
     private int defaultCurrentPage;
@@ -45,8 +45,21 @@ public class CustomerController {
                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = customerService.findAll(resolvedCurrentPage, resolvedPageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(results);
+        PagingResponse results = customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
+
+    // lấy tất cả các customers chưa bị xóa
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/get-all-active")
+    public ResponseEntity<PagingResponse> getAllCustomersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // lấy tất cả các order từ customer id
@@ -73,7 +86,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-building/{customer-id}")
     public ResponseEntity<ObjectResponse> getBuildingByCustomerID(@PathVariable("customer-id") int customerID) {
-        Building results = customerService.getBuildingByCustomerID(customerID);
+        BuildingDTO results = customerService.getBuildingByCustomerID(customerID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get building by customer ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get building by customer ID failed", null));
@@ -83,7 +96,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-user-by-customer/{customer-id}")
     public ResponseEntity<ObjectResponse> getUserByCustomerID(@PathVariable("customer-id") int customerID) {
-        User results = customerService.getUserByCustomerID(customerID);
+        UserDTO results = customerService.getUserByCustomerID(customerID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get user by customer ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by customer ID failed", null));
@@ -107,16 +120,6 @@ public class CustomerController {
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by wallet ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
-    }
-
-    // lấy tất cả các customers chưa bị xóa
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/get-all-active")
-    public ResponseEntity<ObjectResponse> getAllCustomersActive() {
-        List<Customer> results = customerService.getAllCustomersActive();
-        return !results.isEmpty() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all customers active successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all customers active failed", null));
     }
 
     // khôi phục lại customer đó

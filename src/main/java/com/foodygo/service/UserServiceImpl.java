@@ -8,7 +8,6 @@ import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
-import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
@@ -26,8 +25,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,7 +33,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -74,7 +70,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
         var pageData = userRepository.findAll(pageable);
 
-        return PagingResponse.builder()
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all users paging successfully")
                 .currentPage(currentPage)
                 .pageSizes(pageSize)
                 .totalElements(pageData.getTotalElements())
@@ -82,56 +80,85 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .data(pageData.getContent().stream()
                         .map(userMapper::userToUserDTO)
                         .toList())
-                .build();
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all users paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(userMapper::userToUserDTO)
+                                .toList())
+                        .build();
     }
 
     @Override
-    public List<User> getAllUsersActive() {
-        List<User> users = userRepository.findAll();
-        List<User> activeUsers = new ArrayList<User>();
-        for (User user : users) {
-            if(!user.isDeleted() && user.isNonLocked() && user.isEnabled()) {
-                activeUsers.add(user);
-            }
-        }
-        return activeUsers;
+    public PagingResponse getAllUsersActive(Integer currentPage, Integer pageSize) {
+
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = userRepository.findAllByDeletedFalse(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all users active paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(userMapper::userToUserDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all users active paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(userMapper::userToUserDTO)
+                                .toList())
+                        .build();
     }
 
-//    private String getRoleByRoleID(Integer roleID) {
-//        if (roleID == null) {
-//            throw new ElementNotFoundException("Role ID is null");
-//        }
-//        return switch (roleID) {
-//            case 1 -> "ROLE_ADMIN";
-//            case 2 -> "ROLE_STAFF";
-//            case 3 -> "ROLE_USER";
-//            case 4 -> "ROLE_MANAGER";
-//            case 5 -> "ROLE_SELLER";
-//            default -> throw new ElementNotFoundException("Role ID is not valid");
-//        };
-//    }
+    private String getRoleByRoleID(Integer roleID) {
+        if (roleID == null) {
+            throw new ElementNotFoundException("Role ID is null");
+        }
+        return switch (roleID) {
+            case 1 -> "ROLE_ADMIN";
+            case 2 -> "ROLE_STAFF";
+            case 3 -> "ROLE_USER";
+            case 4 -> "ROLE_MANAGER";
+            case 5 -> "ROLE_SELLER";
+            default -> throw new ElementNotFoundException("Role ID is not valid");
+        };
+    }
 
-//    @Override
-//    public List<User> getUsersByRole(Integer roleID) {
-//
-//        String role = getRoleByRoleID(roleID);
-//
-//        List<User> listsByRole = userRepository.findAll();
-//        Role role_admin = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_ADMIN);
-//        Role role_manager = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_MANAGER);
-//        Role role_staff = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_STAFF);
-//
-//        if (role.equals(EnumRoleNameType.ROLE_STAFF.name())) {
-//            for (User user : userRepository.findAll()) {
-//                if (user.getRole().equals(role_admin) || user.getRole().equals(role_manager)) {
-//                    listsByRole.remove(user);
-//                }
-//            }
-//        }  else if (role.equals(EnumRoleNameType.ROLE_ADMIN.name())) {
-//                return userRepository.findAll();
-//        }
-//        return listsByRole;
-//    }
+    @Override
+    public List<User> getUsersByRole(Integer roleID) {
+
+        String role = getRoleByRoleID(roleID);
+
+        List<User> listsByRole = userRepository.findAll();
+        Role role_admin = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_ADMIN);
+        Role role_manager = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_MANAGER);
+
+        if (role.equals(EnumRoleNameType.ROLE_STAFF.name())) {
+            for (User user : userRepository.findAll()) {
+                if (user.getRole().equals(role_admin) || user.getRole().equals(role_manager)) {
+                    listsByRole.remove(user);
+                }
+            }
+        }  else if (role.equals(EnumRoleNameType.ROLE_ADMIN.name())) {
+                return userRepository.findAll();
+        }
+        return listsByRole;
+    }
 
     @Override
     public boolean lockedUser(int id) {
@@ -155,8 +182,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
 
     @Override
-    public User getUserByEmail(String email) {
-        return userRepository.getUserByEmail(email);
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.getUserByEmail(email);
+        if (user == null) {
+            throw new ElementNotFoundException("User with email " + email + " not found");
+        }
+        return userMapper.userToUserDTO(user);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
@@ -11,6 +12,7 @@ import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.CustomerService;
+import com.foodygo.service.RoleService;
 import com.foodygo.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final RoleService roleService;
 
     @Value("${application.default-current-page}")
     private int defaultCurrentPage;
@@ -50,21 +53,34 @@ public class UserController {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
         PagingResponse results = userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(results);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
+
+    // lấy tất cả roles
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/get-all-roles")
+    public ResponseEntity<ObjectResponse> getAllRoles() {
+        List<Role> results = roleService.getAllRoles();
+        return !results.isEmpty() ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all roles successfully", results)) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all roles failed", null));
     }
 
     // lấy tất cả các user active
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-all-active")
-    public ResponseEntity<ObjectResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                      @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        List<User> result = userService.getAllUsersActive();
-        return !result.isEmpty() ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all user active successfully", result)) :
-                                   ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Failed", "Get all user active failed", null));
+    public ResponseEntity<PagingResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // update user bằng id
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/update/{user-id}")
     public ResponseEntity<ObjectResponse> updateUser(@PathVariable("user-id") int userID, @RequestBody UserUpdateRequest userUpdateRequest) {
         try {
@@ -103,7 +119,7 @@ public class UserController {
 //    }
 
     // lấy tất cả các order activity từ user id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/get-all-order-activities/{user-id}")
     public ResponseEntity<ObjectResponse> getOrderActivitiesByUserID(@PathVariable("user-id") int userID) {
         List<OrderActivity> results = userService.getOrderActivitiesByUserID(userID);
@@ -113,7 +129,7 @@ public class UserController {
     }
 
     // lấy ra order bằng employee id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-order/{employee-id}")
     public ResponseEntity<ObjectResponse> getOrderByEmployeeID(@PathVariable("employee-id") int employeeID) {
         List<Order> results = userService.getOrdersByEmployeeID(employeeID);
@@ -123,7 +139,7 @@ public class UserController {
     }
 
     // lấy employee by order id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-employee/{order-id}")
     public ResponseEntity<ObjectResponse> getEmployeeByOrderID(@PathVariable("order-id") int orderID) {
         UserDTO results = userService.getEmployeeByOrderID(orderID);
@@ -133,7 +149,7 @@ public class UserController {
     }
 
     // lấy user từ order activity id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/get-user/{order-activity-id}")
     public ResponseEntity<ObjectResponse> getUserByOrderActivityID(@PathVariable("order-activity-id") int orderActivityID) {
         UserDTO results = userService.getUserByOrderActivityID(orderActivityID);
@@ -165,6 +181,9 @@ public class UserController {
         try {
             UserDTO user = userService.createUserWithRole(userCreateRequest);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create user successfully", user));
+        } catch (ElementNotFoundException e) {
+            log.error("Error creating user", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create user failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error creating user", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create user failed", null));

@@ -10,7 +10,9 @@ import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
+import com.foodygo.mapper.BuildingMapper;
 import com.foodygo.mapper.HubMapper;
+import com.foodygo.repository.BuildingRepository;
 import com.foodygo.repository.HubRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -27,38 +29,76 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
 
     private final HubRepository hubRepository;
     private final HubMapper hubMapper;
+    private final BuildingRepository buildingRepository;
+    private final BuildingMapper buildingMapper;
 
-    public HubServiceImpl(HubRepository hubRepository, HubMapper hubMapper) {
+    public HubServiceImpl(HubRepository hubRepository, HubMapper hubMapper, BuildingRepository buildingRepository,
+                          BuildingMapper buildingMapper) {
         super(hubRepository);
         this.hubRepository = hubRepository;
         this.hubMapper = hubMapper;
+        this.buildingRepository = buildingRepository;
+        this.buildingMapper = buildingMapper;
     }
 
     @Override
-    public PagingResponse getHubsPaging(int currentPage, int pageSize) {
+    public PagingResponse getHubsPaging(Integer currentPage, Integer pageSize) {
         Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
 
         var pageData = hubRepository.findAll(pageable);
 
-        return PagingResponse.builder()
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all hubs paging successfully")
                 .currentPage(currentPage)
                 .pageSizes(pageSize)
                 .totalElements(pageData.getTotalElements())
                 .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent())
-                .build();
+                .data(pageData.getContent().stream()
+                        .map(hubMapper::hubToHubDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all hubs paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(hubMapper::hubToHubDTO)
+                                .toList())
+                        .build();
     }
 
     @Override
-    public List<Hub> getHubsActive() {
-        List<Hub> hubs = hubRepository.findAll();
-        List<Hub> activeHubs = new ArrayList<Hub>();
-        for (Hub hub : hubs) {
-            if(!hub.isDeleted()) {
-                activeHubs.add(hub);
-            }
-        }
-        return activeHubs;
+    public PagingResponse getHubsActive(Integer currentPage, Integer pageSize) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = hubRepository.findAllByDeletedFalse(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all hubs active paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(hubMapper::hubToHubDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all hubs active paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(hubMapper::hubToHubDTO)
+                                .toList())
+                        .build();
     }
 
     @Override
@@ -71,7 +111,7 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
             throw new UnchangedStateException("Hub is not deleted");
         }
         hub.setDeleted(false);
-        return hubMapper.HubToHubDTO(hubRepository.save(hub));
+        return hubMapper.hubToHubDTO(hubRepository.save(hub));
     }
 
     @Override
@@ -84,7 +124,7 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
                 .name(hubCreateRequest.getName())
                 .address(hubCreateRequest.getAddress())
                 .build();
-        return hubMapper.HubToHubDTO(hubRepository.save(hub));
+        return hubMapper.hubToHubDTO(hubRepository.save(hub));
     }
 
     @Override
@@ -100,18 +140,40 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
             if(hubUpdateRequest.getDescription() != null) {
                 hub.setDescription(hubUpdateRequest.getDescription());
             }
-            return hubMapper.HubToHubDTO(hubRepository.save(hub));
+            return hubMapper.hubToHubDTO(hubRepository.save(hub));
         }
         return null;
     }
 
     @Override
-    public List<Building> getBuildingsByHubID(Integer hubID) {
-        Hub hub = hubRepository.findHubById(hubID);
-        if (hub != null) {
-            return hub.getBuildings();
-        }
-        return null;
+    public PagingResponse getBuildingsByHubID(Integer hubID, Integer currentPage, Integer pageSize) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = buildingRepository.findAllByHub_Id(hubID, pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all building paging by hub ID successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(buildingMapper::buildingToBuildingDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all building paging by hub ID failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(buildingMapper::buildingToBuildingDTO)
+                                .toList())
+                        .build();
+
     }
 
     @Override

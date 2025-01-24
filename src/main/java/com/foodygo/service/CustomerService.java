@@ -1,17 +1,19 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.BuildingDTO;
 import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface CustomerService extends BaseService<Customer, Integer> {
-    List<Customer> getAllCustomersActive();
+    PagingResponse getAllCustomers(Integer currentPage, Integer pageSize);
+
+    PagingResponse getAllCustomersActive(Integer currentPage, Integer pageSize);
 
     CustomerDTO undeleteCustomer(Integer customerID);
 
@@ -25,9 +27,9 @@ public interface CustomerService extends BaseService<Customer, Integer> {
 
     CustomerDTO getCustomerByOrderID(Integer orderID);
 
-    Building getBuildingByCustomerID(int customerID);
+    BuildingDTO getBuildingByCustomerID(int customerID);
 
-    User getUserByCustomerID(int customerID);
+    UserDTO getUserByCustomerID(int customerID);
 
     Wallet getWalletByCustomerID(Integer customerID);
 

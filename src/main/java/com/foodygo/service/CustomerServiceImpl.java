@@ -1,15 +1,18 @@
 package com.foodygo.service;
 
 import com.foodygo.configuration.CustomUserDetail;
+import com.foodygo.dto.BuildingDTO;
 import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
 import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
+import com.foodygo.mapper.BuildingMapper;
 import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
@@ -22,6 +25,7 @@ import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +54,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     private final UserService userService;
     private final CustomerMapper customerMapper;
     private final UserMapper userMapper;
+    private final BuildingMapper buildingMapper;
 
     // Firebase
 
@@ -103,25 +108,75 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     @Value("${buffer-image.devide}")
     private int bufferImageDevide;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService, CustomerMapper customerMapper, UserMapper userMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService, CustomerMapper customerMapper, UserMapper userMapper, BuildingMapper buildingMapper) {
         super(customerRepository);
         this.customerRepository = customerRepository;
         this.buildingService = buildingService;
         this.userService = userService;
         this.customerMapper = customerMapper;
         this.userMapper = userMapper;
+        this.buildingMapper = buildingMapper;
     }
 
     @Override
-    public List<Customer> getAllCustomersActive() {
-        List<Customer> customers = customerRepository.findAll();
-        List<Customer> activeCustomers = new ArrayList<Customer>();
-        for (Customer customer : customers) {
-            if(!customer.isDeleted()) {
-                activeCustomers.add(customer);
-            }
-        }
-        return activeCustomers;
+    public PagingResponse getAllCustomers(Integer currentPage, Integer pageSize) {
+
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = customerRepository.findAll(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all customers paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(customerMapper::customerToCustomerDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all customers paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(customerMapper::customerToCustomerDTO)
+                                .toList())
+                        .build();
+    }
+
+    @Override
+    public PagingResponse getAllCustomersActive(Integer currentPage, Integer pageSize) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = customerRepository.findAllByDeletedFalse(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all customers active paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(customerMapper::customerToCustomerDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all customers active paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(customerMapper::customerToCustomerDTO)
+                                .toList())
+                        .build();
     }
 
     @Override
@@ -240,30 +295,21 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public Building getBuildingByCustomerID(int customerID) {
+    public BuildingDTO getBuildingByCustomerID(int customerID) {
         Customer customer = getCustomer(customerID);
-        if (customer != null) {
-            return customer.getBuilding();
-        }
-        return null;
+        return buildingMapper.buildingToBuildingDTO(customer.getBuilding());
     }
 
     @Override
-    public User getUserByCustomerID(int customerID) {
+    public UserDTO getUserByCustomerID(int customerID) {
         Customer customer = getCustomer(customerID);
-        if (customer != null) {
-            return customer.getUser();
-        }
-        return null;
+        return userMapper.userToUserDTO(customer.getUser());
     }
 
     @Override
     public Wallet getWalletByCustomerID(Integer customerID) {
         Customer customer = getCustomer(customerID);
-        if (customer != null) {
-            return customer.getWallet();
-        }
-        return null;
+        return customer.getWallet();
     }
 
     @Override

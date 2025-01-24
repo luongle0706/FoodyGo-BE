@@ -6,12 +6,12 @@ import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
-import com.foodygo.entity.Customer;
 import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.BuildingMapper;
+import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.HubMapper;
 import com.foodygo.repository.BuildingRepository;
 import com.foodygo.repository.CustomerRepository;
@@ -19,9 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -32,26 +29,77 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
     private final CustomerRepository customerRepository;
     private final BuildingMapper buildingMapper;
     private final HubMapper hubMapper;
+    private final CustomerMapper customerMapper;
 
-    public BuildingServiceImpl(BuildingRepository buildingRepository, HubService hubService, CustomerRepository customerRepository, BuildingMapper buildingMapper, HubMapper hubMapper) {
+    public BuildingServiceImpl(BuildingRepository buildingRepository, HubService hubService, CustomerRepository customerRepository,
+                               BuildingMapper buildingMapper, HubMapper hubMapper, CustomerMapper customerMapper) {
         super(buildingRepository);
         this.buildingRepository = buildingRepository;
         this.hubService = hubService;
         this.customerRepository = customerRepository;
         this.buildingMapper = buildingMapper;
         this.hubMapper = hubMapper;
+        this.customerMapper = customerMapper;
     }
 
     @Override
-    public List<Building> getBuildingsActive() {
-        List<Building> buildings = buildingRepository.findAll();
-        List<Building> activeBuildings = new ArrayList<Building>();
-        for (Building building : buildings) {
-            if(!building.isDeleted()) {
-                activeBuildings.add(building);
-            }
-        }
-        return activeBuildings;
+    public PagingResponse getAllBuildings(Integer currentPage, Integer pageSize) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = buildingRepository.findAll(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all buildings active paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(buildingMapper::buildingToBuildingDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all buildings active paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(buildingMapper::buildingToBuildingDTO)
+                                .toList())
+                        .build();
+    }
+
+    @Override
+    public PagingResponse getBuildingsActive(Integer currentPage, Integer pageSize) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = buildingRepository.findAllByDeletedFalse(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all buildings active paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(buildingMapper::buildingToBuildingDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all buildings active paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(buildingMapper::buildingToBuildingDTO)
+                                .toList())
+                        .build();
     }
 
     @Override
@@ -120,7 +168,7 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
     public HubDTO getHubByBuildingID(Integer buildingID) {
         Building building = buildingRepository.findBuildingById(buildingID);
         if (building != null) {
-            return hubMapper.HubToHubDTO(building.getHub());
+            return hubMapper.hubToHubDTO(building.getHub());
         }
         return null;
     }
@@ -132,13 +180,28 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
 
         var pageData = customerRepository.findAllByBuildingId(buildingID, pageable);
 
-        return PagingResponse.builder()
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all customers paging successfully")
                 .currentPage(currentPage)
                 .pageSizes(pageSize)
                 .totalElements(pageData.getTotalElements())
                 .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent())
-                .build();
+                .data(pageData.getContent().stream()
+                        .map(customerMapper::customerToCustomerDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all customers paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(customerMapper::customerToCustomerDTO)
+                                .toList())
+                        .build();
     }
 
     @Override

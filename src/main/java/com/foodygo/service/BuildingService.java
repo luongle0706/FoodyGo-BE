@@ -7,10 +7,10 @@ import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
 
-import java.util.List;
-
 public interface BuildingService extends BaseService<Building, Integer> {
-    List<Building> getBuildingsActive();
+    PagingResponse getAllBuildings(Integer currentPage, Integer pageSize);
+
+    PagingResponse getBuildingsActive(Integer currentPage, Integer pageSize);
 
     BuildingDTO undeleteBuilding(Integer buildingID);
 
