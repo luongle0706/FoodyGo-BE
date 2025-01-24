@@ -1,12 +1,16 @@
 services:
   mysql:
     container_name: mysql
-    image: mysql
+    # image: mysql
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
     environment:
       MYSQL_ROOT_PASSWORD: 123456789
       MYSQL_USER: mysql
       MYSQL_PASSWORD: mysql
       MYSQL_DATABASE: foodygo
+      TZ: Asia/Saigon
     ports:
       - "3306:3306"
     volumes:

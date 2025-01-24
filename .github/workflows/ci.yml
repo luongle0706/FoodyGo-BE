@@ -18,4 +18,5 @@ jobs:
             cd /home/theanh/GIT/SWD301-FoodyGo-BE/
             git pull
             docker compose down
+            sudo rm -r -f data
             docker compose up --build -d
