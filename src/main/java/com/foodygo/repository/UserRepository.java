@@ -1,6 +1,8 @@
 package com.foodygo.repository;
 
 import com.foodygo.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +18,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User getUserByUserID(int userID);
 
     User getUserByPhone(String phone);
+
+    Page<User> findAllByDeletedFalse(Pageable pageable);
 
     @Modifying
     @Query("update User set enabled = true where userID = ?1")

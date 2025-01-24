@@ -16,11 +16,11 @@ public interface UserService extends BaseService<User, Integer> {
 
     PagingResponse findAllUsers(Integer currentPage, Integer pageSize);
 
-//    List<User> getUsersByRole(Integer roleID);
+    List<User> getUsersByRole(Integer roleID);
 
-    List<User> getAllUsersActive();
+    PagingResponse getAllUsersActive(Integer currentPage, Integer pageSize);
 
-    User getUserByEmail(String email);
+    UserDTO getUserByEmail(String email);
 
     boolean lockedUser(int id);
 
@@ -57,4 +57,5 @@ public interface UserService extends BaseService<User, Integer> {
     UserDTO getEmployeeByOrderID(int orderID);
 
     UserDTO deleteUser(int userID);
+
 }

@@ -13,4 +13,5 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
     Page<Customer> findAllByBuildingId(Integer building_id, Pageable pageable);
 
+    Page<Customer> findAllByDeletedFalse(Pageable pageable);
 }

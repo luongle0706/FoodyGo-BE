@@ -44,18 +44,22 @@ public class HubController {
                                                      @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = hubService.findAll(resolvedCurrentPage, resolvedPageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(results);
+        PagingResponse results = hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // lấy tất cả các buildings từ hub id
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-buildings/{hub-id}")
-    public ResponseEntity<ObjectResponse> getBuildingsByHubID(@PathVariable("hub-id") int hubID) {
-        List<Building> results = hubService.getBuildingsByHubID(hubID);
-        return results != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings by hub ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all buildings by hub ID failed", null));
+    public ResponseEntity<PagingResponse> getBuildingsByHubID(@PathVariable("hub-id") int hubID,
+                                                              @RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                              @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = hubService.getBuildingsByHubID(hubID, resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // lấy tất cả các orders từ hub id
@@ -81,11 +85,13 @@ public class HubController {
     // lấy tất cả các hubs chưa bị xóa
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/get-all-active")
-    public ResponseEntity<ObjectResponse> getAllHubsActive() {
-        List<Hub> results = hubService.getHubsActive();
-        return !results.isEmpty() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all hubs active successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all hubs active failed", null));
+    public ResponseEntity<PagingResponse> getAllHubsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // khôi phục lại hub đó

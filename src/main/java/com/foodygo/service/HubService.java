@@ -12,9 +12,9 @@ import java.util.List;
 
 public interface HubService extends BaseService<Hub, Integer> {
 
-    PagingResponse getHubsPaging(int currentPage, int pageSize);
+    PagingResponse getHubsPaging(Integer currentPage, Integer pageSize);
 
-    List<Hub> getHubsActive();
+    PagingResponse getHubsActive(Integer currentPage, Integer pageSize);
 
     HubDTO undeleteHub(Integer hubID);
 
@@ -22,7 +22,7 @@ public interface HubService extends BaseService<Hub, Integer> {
 
     HubDTO updateHub(HubUpdateRequest hubUpdateRequest, int hubID);
 
-    List<Building> getBuildingsByHubID(Integer hubID);
+    PagingResponse getBuildingsByHubID(Integer hubID, Integer currentPage, Integer pageSize);
 
     List<Order> getOrdersByHubID(Integer hubID);
 

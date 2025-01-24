@@ -9,5 +9,5 @@ import org.mapstruct.Mapping;
 public interface HubMapper {
 
     @Mapping(source = "id", target = "id")
-    HubDTO HubToHubDTO(Hub hub);
+    HubDTO hubToHubDTO(Hub hub);
 }

@@ -42,13 +42,26 @@ public class BuildingController {
                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = buildingService.findAll(resolvedCurrentPage, resolvedPageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(results);
+        PagingResponse results = buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
+
+    // lấy tất cả building chưa xóa
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/get-all-active")
+    public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // lấy hub theo building id
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/get-all-hubs/{building-id}")
+    @GetMapping("/get-hub/{building-id}")
     public ResponseEntity<ObjectResponse> getHubByBuildingID(@PathVariable("building-id") int buildingID) {
         HubDTO hub = buildingService.getHubByBuildingID(buildingID);
         return hub != null ?
@@ -65,17 +78,8 @@ public class BuildingController {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
         PagingResponse results = buildingService.getCustomersByBuildingID(buildingID, resolvedCurrentPage, resolvedPageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(results);
-    }
-
-    // lấy tất cả building chưa xóa
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/get-all-active")
-    public ResponseEntity<ObjectResponse> getAllBuildingsActive() {
-        List<Building> buildings = buildingService.getBuildingsActive();
-        return !buildings.isEmpty() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings active successfully", buildings)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all buildings active failed", null));
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // khôi phục building
