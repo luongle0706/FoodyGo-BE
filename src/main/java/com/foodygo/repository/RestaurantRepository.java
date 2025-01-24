@@ -16,4 +16,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     List<Restaurant> findByDeletedFalse();
     Page<Restaurant> findByDeletedFalse(Pageable pageable);
 
+    List<Restaurant> findByNameContainingIgnoreCase(String name);
+    Page<Restaurant> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }

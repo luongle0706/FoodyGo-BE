@@ -7,7 +7,6 @@ import com.foodygo.mapper.RestaurantMapper;
 import com.foodygo.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -36,9 +35,18 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public Page<RestaurantDTO> getAllRestaurantDTOsPagination(Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<RestaurantDTO> getAllRestaurantDTOs(Pageable pageable) {
         return restaurantRepository.findByDeletedFalse(pageable).map(RestaurantMapper.INSTANCE::toDTO);
+    }
+
+    @Override
+    public List<Restaurant> searchRestaurantsByName(String name) {
+        return restaurantRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public Page<RestaurantDTO> searchRestaurantsByName(String name, Pageable pageable) {
+        return restaurantRepository.findByNameContainingIgnoreCase(name, pageable).map(RestaurantMapper.INSTANCE::toDTO);
     }
 
     @Override

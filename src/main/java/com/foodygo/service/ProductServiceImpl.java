@@ -36,8 +36,7 @@ public class ProductServiceImpl implements  ProductService {
     }
 
     @Override
-    public Page<ProductDTO> getAllProductsPagination(Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<ProductDTO> getAllProductDTOs(Pageable pageable) {
         return productRepository.findByDeletedFalse(pageable).map(ProductMapper.INSTANCE::toDTO);
     }
 
@@ -47,8 +46,7 @@ public class ProductServiceImpl implements  ProductService {
     }
 
     @Override
-    public Page<ProductDTO> getAllProductsByRestaurantIdPagination(Integer restaurantId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<ProductDTO> getAllProductDTOsByRestaurantId(Integer restaurantId, Pageable pageable) {
         return productRepository.findByRestaurantIdAndDeletedFalse(restaurantId, pageable).map(ProductMapper.INSTANCE::toDTO);
     }
 
@@ -58,8 +56,7 @@ public class ProductServiceImpl implements  ProductService {
     }
 
     @Override
-    public Page<ProductDTO> getAllProductsByCategoryIdPagination(Integer categoryId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<ProductDTO> getAllProductDTOsByCategoryId(Integer categoryId, Pageable pageable) {
         return productRepository.findByCategoryIdAndDeletedFalse(categoryId, pageable).map(ProductMapper.INSTANCE::toDTO);
     }
 
