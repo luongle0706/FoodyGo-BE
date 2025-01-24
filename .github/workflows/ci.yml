@@ -16,7 +16,8 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /home/theanh/GIT/SWD301-FoodyGo-BE/
-            git pull
             docker compose down
             sudo rm -r -f data
+            git reset --hard HEAD
+            git pull
             docker compose up --build -d
