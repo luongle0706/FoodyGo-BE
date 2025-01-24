@@ -1,12 +1,10 @@
 package com.foodygo.controller;
 
-import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
-import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementNotFoundException;
@@ -38,7 +36,7 @@ public class HubController {
     private int defaultPageSize;
 
     // lấy tất cả các hubs
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all")
     public ResponseEntity<PagingResponse> getAllHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                      @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -50,7 +48,7 @@ public class HubController {
     }
 
     // lấy tất cả các buildings từ hub id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all-buildings/{hub-id}")
     public ResponseEntity<PagingResponse> getBuildingsByHubID(@PathVariable("hub-id") int hubID,
                                                               @RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -63,7 +61,7 @@ public class HubController {
     }
 
     // lấy tất cả các orders từ hub id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all-orders/{hub-id}")
     public ResponseEntity<ObjectResponse> getOrdersByHubID(@PathVariable("hub-id") int hubID) {
         List<Order> results = hubService.getOrdersByHubID(hubID);
@@ -73,7 +71,7 @@ public class HubController {
     }
 
     // lấy hub từ order id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/get-hub/{order-id}")
     public ResponseEntity<ObjectResponse> getHubByOrderID(@PathVariable("order-id") int orderID) {
         HubDTO results = hubService.getHubByOrderID(orderID);
@@ -83,7 +81,7 @@ public class HubController {
     }
 
     // lấy tất cả các hubs chưa bị xóa
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/get-all-active")
     public ResponseEntity<PagingResponse> getAllHubsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -95,7 +93,7 @@ public class HubController {
     }
 
     // khôi phục lại hub đó
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/undelete/{hub-id}")
     public ResponseEntity<ObjectResponse> unDeleteHubByID(@PathVariable("hub-id") int hubID) {
         try {
@@ -111,7 +109,7 @@ public class HubController {
     }
 
     // lấy ra hub bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get/{hub-id}")
     public ResponseEntity<ObjectResponse> getHubByID(@PathVariable("hub-id") int hubID) {
         Hub hub = hubService.findById(hubID);
@@ -121,7 +119,7 @@ public class HubController {
     }
 
     // tạo ra hub
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createHub(@Valid @RequestBody HubCreateRequest hubCreateRequest) {
         try {
@@ -134,7 +132,7 @@ public class HubController {
     }
 
     // update hub bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/update/{hub-id}")
     public ResponseEntity<ObjectResponse> updateHub(@PathVariable("hub-id") int hubID, @RequestBody HubUpdateRequest hubUpdateRequest) {
         try {
@@ -153,7 +151,7 @@ public class HubController {
     }
 
     // xóa hub, tức set deleted = true
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @DeleteMapping("/delete/{hub-id}")
     public ResponseEntity<ObjectResponse> deleteHubByID(@PathVariable("hub-id") int hubID) {
         try {

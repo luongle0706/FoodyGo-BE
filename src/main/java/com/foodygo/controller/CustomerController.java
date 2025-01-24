@@ -11,7 +11,6 @@ import com.foodygo.entity.*;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.CustomerService;
-import com.foodygo.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,7 @@ public class CustomerController {
     private int defaultPageSize;
 
     // lấy tất cả các customer
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all")
     public ResponseEntity<PagingResponse> getAllCustomers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -51,7 +50,7 @@ public class CustomerController {
     }
 
     // lấy tất cả các customers chưa bị xóa
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all-active")
     public ResponseEntity<PagingResponse> getAllCustomersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                                 @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -63,7 +62,7 @@ public class CustomerController {
     }
 
     // lấy tất cả các order từ customer id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all-orders/{customer-id}")
     public ResponseEntity<ObjectResponse> getOrdersByCustomerID(@PathVariable("customer-id") int customerID) {
         List<Order> results = customerService.getOrdersByCustomerID(customerID);
@@ -73,7 +72,7 @@ public class CustomerController {
     }
 
     // lấy customer từ order id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-customer/{order-id}")
     public ResponseEntity<ObjectResponse> getCustomerByOrderID(@PathVariable("order-id") int orderID) {
         CustomerDTO results = customerService.getCustomerByOrderID(orderID);
@@ -83,7 +82,7 @@ public class CustomerController {
     }
 
     // lấy building từ customer id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-building/{customer-id}")
     public ResponseEntity<ObjectResponse> getBuildingByCustomerID(@PathVariable("customer-id") int customerID) {
         BuildingDTO results = customerService.getBuildingByCustomerID(customerID);
@@ -93,7 +92,7 @@ public class CustomerController {
     }
 
     // lấy user từ customer id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-user-by-customer/{customer-id}")
     public ResponseEntity<ObjectResponse> getUserByCustomerID(@PathVariable("customer-id") int customerID) {
         UserDTO results = customerService.getUserByCustomerID(customerID);
@@ -103,7 +102,7 @@ public class CustomerController {
     }
 
     // lấy wallet từ customer id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/get-wallet/{customer-id}")
     public ResponseEntity<ObjectResponse> getWalletByCustomerID(@PathVariable("customer-id") int customerID) {
         Wallet results = customerService.getWalletByCustomerID(customerID);
@@ -113,7 +112,7 @@ public class CustomerController {
     }
 
     // lấy user từ wallet id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/get-user-by-wallet/{wallet-id}")
     public ResponseEntity<ObjectResponse> getCustomerByWalletID(@PathVariable("wallet-id") int walletID) {
         CustomerDTO results = customerService.getCustomerByWalletID(walletID);
@@ -123,7 +122,7 @@ public class CustomerController {
     }
 
     // khôi phục lại customer đó
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/undelete/{customer-id}")
     public ResponseEntity<ObjectResponse> unDeleteCustomerByID(@PathVariable("customer-id") int customerID) {
         try {
@@ -139,7 +138,7 @@ public class CustomerController {
     }
 
     // lấy ra customer bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF') or hasRole('SELLER')")
     @GetMapping("/get/{customer-id}")
     public ResponseEntity<ObjectResponse> getCustomerByID(@PathVariable("customer-id") int customerID) {
         Customer customer = customerService.findById(customerID);
@@ -149,7 +148,7 @@ public class CustomerController {
     }
 
     // tạo ra customer
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createCustomer(@Valid @RequestBody CustomerCreateRequest customerCreateRequest) {
         try {
@@ -168,7 +167,7 @@ public class CustomerController {
     }
 
     // update customer bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
 //    @PostAuthorize("returnObject.customer.id == customerID")
     @PutMapping("/update/{customer-id}")
     public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("customer-id") int customerID, @RequestBody CustomerUpdateRequest customerUpdateRequest) {
@@ -188,7 +187,7 @@ public class CustomerController {
     }
 
     // xóa customer, tức set deleted = true và xóa luôn user
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{customer-id}")
     public ResponseEntity<ObjectResponse> deleteCustomerByID(@PathVariable("customer-id") int customerID) {
         try {

@@ -5,6 +5,7 @@ import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
+import com.foodygo.dto.request.UserUpdateRoleRequest;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
@@ -35,6 +36,8 @@ public interface UserService extends BaseService<User, Integer> {
     UserDTO registerUser(UserRegisterRequest userRegisterRequest);
 
     UserDTO updateUser(UserUpdateRequest userUpdateRequest, int userID);
+
+    UserDTO updateUserRole(UserUpdateRoleRequest userUpdateRoleRequest, int userID);
 
     TokenResponse refreshToken(String refreshToken);
 

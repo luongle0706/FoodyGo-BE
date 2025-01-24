@@ -36,7 +36,7 @@ public class BuildingController {
     private int defaultPageSize;
 
     // lấy tất cả buildings
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all")
     public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -48,7 +48,7 @@ public class BuildingController {
     }
 
     // lấy tất cả building chưa xóa
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all-active")
     public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                                 @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -60,7 +60,7 @@ public class BuildingController {
     }
 
     // lấy hub theo building id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-hub/{building-id}")
     public ResponseEntity<ObjectResponse> getHubByBuildingID(@PathVariable("building-id") int buildingID) {
         HubDTO hub = buildingService.getHubByBuildingID(buildingID);
@@ -70,7 +70,7 @@ public class BuildingController {
     }
 
     // lấy tất cả customer trong building
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all-customers/{building-id}")
     public ResponseEntity<PagingResponse> getCustomersByBuildingID(@PathVariable("building-id") int buildingID,
                                                                    @RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -83,7 +83,7 @@ public class BuildingController {
     }
 
     // khôi phục building
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/undelete/{building-id}")
     public ResponseEntity<ObjectResponse> unDeleteBuildingByID(@PathVariable("building-id") int buildingID) {
         try {
@@ -99,7 +99,7 @@ public class BuildingController {
     }
 
     // get building by id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get/{building-id}")
     public ResponseEntity<ObjectResponse> getBuildingByID(@PathVariable("building-id") int buildingID) {
         Building building = buildingService.findById(buildingID);
@@ -109,7 +109,7 @@ public class BuildingController {
     }
 
     // create building
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createBuilding(@Valid @RequestBody BuildingCreateRequest buildingCreateRequest) {
         try {
@@ -125,7 +125,7 @@ public class BuildingController {
     }
 
     // update building theo id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/update/{building-id}")
     public ResponseEntity<ObjectResponse> updateBuilding(@Valid @RequestBody BuildingUpdateRequest buildingUpdateRequest, @PathVariable("building-id") int buildingID) {
         try {
@@ -144,7 +144,7 @@ public class BuildingController {
     }
 
     // xóa building
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @DeleteMapping("/delete/{building-id}")
     public ResponseEntity<ObjectResponse> deleteBuildingByID(@PathVariable("building-id") int buildingID) {
         try {

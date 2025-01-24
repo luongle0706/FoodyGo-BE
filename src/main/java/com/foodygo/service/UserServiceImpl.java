@@ -8,6 +8,7 @@ import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
+import com.foodygo.dto.request.UserUpdateRoleRequest;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
@@ -246,8 +247,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        // admin se co quyen update tat ca
-
         if (customUserDetail.getUserID() != userID) {
             throw new AuthenticationException("You are not allowed to update other user");
         }
@@ -267,6 +266,32 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         } else {
             throw new ElementNotFoundException("User not found");
         }
+    }
+
+    @Override
+    public UserDTO updateUserRole(UserUpdateRoleRequest userUpdateRoleRequest, int userID) {
+        User user = userRepository.getUserByUserID(userID);
+
+        if (user == null) {
+            throw new ElementNotFoundException("User not found");
+        }
+        if (userUpdateRoleRequest.getPassword() != null) {
+            user.setPassword(bCryptPasswordEncoder.encode(userUpdateRoleRequest.getPassword()));
+        }
+        if (userUpdateRoleRequest.getPhone() != null) {
+            user.setPhone(userUpdateRoleRequest.getPhone());
+        }
+        if(userUpdateRoleRequest.getFullName() != null) {
+            user.setFullName(userUpdateRoleRequest.getFullName());
+        }
+        if(userUpdateRoleRequest.getRoleID() > 0) {
+            Role role = roleService.getRoleByRoleId(userUpdateRoleRequest.getRoleID());
+            if (role == null) {
+                throw new ElementNotFoundException("Role not found");
+            }
+            user.setRole(role);
+        }
+        return userMapper.userToUserDTO(userRepository.save(user));
     }
 
     @Override

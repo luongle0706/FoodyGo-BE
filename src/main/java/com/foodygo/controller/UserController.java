@@ -1,17 +1,16 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.CustomerDTO;
-import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
+import com.foodygo.dto.request.UserUpdateRoleRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
 import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
-import com.foodygo.service.CustomerService;
 import com.foodygo.service.RoleService;
 import com.foodygo.service.UserService;
 import jakarta.validation.Valid;
@@ -80,7 +79,7 @@ public class UserController {
     }
 
     // update user bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PutMapping("/update/{user-id}")
     public ResponseEntity<ObjectResponse> updateUser(@PathVariable("user-id") int userID, @RequestBody UserUpdateRequest userUpdateRequest) {
         try {
@@ -89,6 +88,22 @@ public class UserController {
         } catch (AuthenticationException e) {
             log.error("Error while updating user", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ObjectResponse("Fail", "Update user failed. " + e.getMessage(), null));
+        } catch (ElementNotFoundException e) {
+            log.error("Error while updating user", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update user failed. " + e.getMessage(), null));
+        } catch (Exception e) {
+            log.error("Error updating user", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update user failed", null));
+        }
+    }
+
+    // update user với role
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/update-role/{user-id}")
+    public ResponseEntity<ObjectResponse> updateUserRole(@PathVariable("user-id") int userID, @RequestBody UserUpdateRoleRequest userUpdateRoleRequest) {
+        try {
+            UserDTO user = userService.updateUserRole(userUpdateRoleRequest, userID);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update user successfully", user));
         } catch (ElementNotFoundException e) {
             log.error("Error while updating user", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update user failed. " + e.getMessage(), null));
