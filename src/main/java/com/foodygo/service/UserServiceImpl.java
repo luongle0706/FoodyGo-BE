@@ -1,19 +1,38 @@
 package com.foodygo.service;
 
 import com.foodygo.configuration.CustomUserDetail;
+import com.foodygo.configuration.JWTAuthenticationFilter;
+import com.foodygo.configuration.JWTToken;
+import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
+import com.foodygo.dto.request.UserUpdateRoleRequest;
+import com.foodygo.dto.response.PagingResponse;
+import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
 import com.foodygo.enums.EnumRoleNameType;
+import com.foodygo.enums.EnumTokenType;
 import com.foodygo.exception.AuthenticationException;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.UnchangedStateException;
+import com.foodygo.mapper.CustomerMapper;
+import com.foodygo.mapper.UserMapper;
+import com.foodygo.repository.CustomerRepository;
 import com.foodygo.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -24,16 +43,108 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserMapper userMapper;
+    private final CustomerMapper customerMapper;
+    private final CustomerRepository customerRepository;
+    private final JWTToken jwtToken;
+    private final JWTAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationManager authenticationManager;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
+                           UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
+                           JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userMapper = userMapper;
+        this.customerMapper = customerMapper;
+        this.customerRepository = customerRepository;
+        this.jwtToken = jwtToken;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
-    public List<User> getUsersByRole(String role) {
+    public PagingResponse findAllUsers(Integer currentPage, Integer pageSize) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = userRepository.findAll(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all users paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(userMapper::userToUserDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all users paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(userMapper::userToUserDTO)
+                                .toList())
+                        .build();
+    }
+
+    @Override
+    public PagingResponse getAllUsersActive(Integer currentPage, Integer pageSize) {
+
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        var pageData = userRepository.findAllByDeletedFalse(pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all users active paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(userMapper::userToUserDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all users active paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(userMapper::userToUserDTO)
+                                .toList())
+                        .build();
+    }
+
+    private String getRoleByRoleID(Integer roleID) {
+        if (roleID == null) {
+            throw new ElementNotFoundException("Role ID is null");
+        }
+        return switch (roleID) {
+            case 1 -> "ROLE_ADMIN";
+            case 2 -> "ROLE_STAFF";
+            case 3 -> "ROLE_USER";
+            case 4 -> "ROLE_MANAGER";
+            case 5 -> "ROLE_SELLER";
+            default -> throw new ElementNotFoundException("Role ID is not valid");
+        };
+    }
+
+    @Override
+    public List<User> getUsersByRole(Integer roleID) {
+
+        String role = getRoleByRoleID(roleID);
+
         List<User> listsByRole = userRepository.findAll();
         Role role_admin = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_ADMIN);
         Role role_manager = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_MANAGER);
@@ -72,8 +183,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
 
     @Override
-    public User getUserByEmail(String email) {
-        return userRepository.getUserByEmail(email);
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.getUserByEmail(email);
+        if (user == null) {
+            throw new ElementNotFoundException("User with email " + email + " not found");
+        }
+        return userMapper.userToUserDTO(user);
     }
 
     @Override
@@ -109,7 +224,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     }
 
     @Override
-    public User createUser(UserRegisterRequest userRegisterRequest) {
+    public UserDTO registerUser(UserRegisterRequest userRegisterRequest) {
         User checkExistingUser = userRepository.getUserByEmail(userRegisterRequest.getEmail());
         if (checkExistingUser != null) {
             throw new ElementExistException("User already exists");
@@ -124,11 +239,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .nonLocked(true)
                 .role(role)
                 .build();
-        return userRepository.save(user);
+        return userMapper.userToUserDTO(userRepository.save(user));
     }
 
     @Override
-    public User updateUser(UserUpdateRequest userUpdateRequest, int userID) {
+    public UserDTO updateUser(UserUpdateRequest userUpdateRequest, int userID) {
 
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -147,14 +262,98 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
             if(userUpdateRequest.getFullName() != null) {
                 user.setFullName(userUpdateRequest.getFullName());
             }
-            return userRepository.save(user);
+            return userMapper.userToUserDTO(userRepository.save(user));
         } else {
             throw new ElementNotFoundException("User not found");
         }
     }
 
     @Override
-    public User createUserWithRole(UserCreateRequest userCreateRequest) {
+    public UserDTO updateUserRole(UserUpdateRoleRequest userUpdateRoleRequest, int userID) {
+        User user = userRepository.getUserByUserID(userID);
+
+        if (user == null) {
+            throw new ElementNotFoundException("User not found");
+        }
+        if (userUpdateRoleRequest.getPassword() != null) {
+            user.setPassword(bCryptPasswordEncoder.encode(userUpdateRoleRequest.getPassword()));
+        }
+        if (userUpdateRoleRequest.getPhone() != null) {
+            user.setPhone(userUpdateRoleRequest.getPhone());
+        }
+        if(userUpdateRoleRequest.getFullName() != null) {
+            user.setFullName(userUpdateRoleRequest.getFullName());
+        }
+        if(userUpdateRoleRequest.getRoleID() > 0) {
+            Role role = roleService.getRoleByRoleId(userUpdateRoleRequest.getRoleID());
+            if (role == null) {
+                throw new ElementNotFoundException("Role not found");
+            }
+            user.setRole(role);
+        }
+        return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    @Override
+    public TokenResponse refreshToken(String refreshToken) {
+        TokenResponse tokenResponse = new TokenResponse("Failed", "Refresh token failed", null, null);
+        String email = jwtToken.getEmailFromJwt(refreshToken, EnumTokenType.REFRESH_TOKEN);
+        User user = userRepository.getUserByEmail(email);
+        if (user != null) {
+            if (StringUtils.hasText(refreshToken) && user.getRefreshToken().equals(refreshToken)) {
+                if (jwtToken.validate(refreshToken, EnumTokenType.REFRESH_TOKEN)) {
+                    CustomUserDetail customUserDetail = CustomUserDetail.mapUserToUserDetail(user);
+                    if (customUserDetail != null) {
+                        String newToken = jwtToken.generatedToken(customUserDetail);
+                        user.setAccessToken(newToken);
+                        userRepository.save(user);
+                        tokenResponse = new TokenResponse("Success", "Refresh token successfully", newToken, refreshToken);
+                    }
+                }
+            }
+        }
+        return tokenResponse;
+    }
+
+    @Override
+    public TokenResponse login(String email, String password) {
+        TokenResponse tokenResponse = new TokenResponse("Failed", "Login failed", null, null);
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(email, password);
+        Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        CustomUserDetail userDetails = (CustomUserDetail) authentication.getPrincipal();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        //SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String token = jwtToken.generatedToken(userDetails);
+        String refreshToken = jwtToken.generatedRefreshToken(userDetails);
+        User user = userRepository.getUserByEmail(userDetails.getEmail());
+        if (user != null) {
+            user.setRefreshToken(refreshToken);
+            user.setAccessToken(token);
+            userRepository.save(user);
+            tokenResponse = new TokenResponse("Success", "Login successfully", token, refreshToken);
+        }
+        return tokenResponse;
+    }
+
+    @Override
+    public boolean logout(HttpServletRequest request) {
+        String token = jwtAuthenticationFilter.getToken(request);
+        String email = jwtToken.getEmailFromJwt(token, EnumTokenType.TOKEN);
+        User user = userRepository.getUserByEmail(email);
+        if (user == null) {
+            throw new ElementNotFoundException("User not found");
+        }
+        user.setAccessToken(null);
+        user.setRefreshToken(null);
+        User checkUser = userRepository.save(user);
+
+        return checkUser.getAccessToken() == null;
+    }
+
+    @Override
+    public UserDTO createUserWithRole(UserCreateRequest userCreateRequest) {
         User checkExistingUser = userRepository.getUserByEmail(userCreateRequest.getEmail());
         if (checkExistingUser != null) {
             throw new ElementExistException("User already exists");
@@ -169,26 +368,29 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .nonLocked(true)
                 .role(role)
                 .build();
-        return userRepository.save(user);
+        return userMapper.userToUserDTO(userRepository.save(user));
     }
 
     @Override
-    public User undeletedUser(int userID) {
+    public UserDTO undeletedUser(int userID) {
         User user = userRepository.getUserByUserID(userID);
-        if (user != null && !user.isNonLocked() && !user.isEnabled() && user.isDeleted()) {
-            user.setNonLocked(true);
-            user.setDeleted(false);
-            user.setEnabled(true);
-            return userRepository.save(user);
+        if (user == null) {
+            throw new ElementNotFoundException("User not found");
         }
-        return null;
+        if(user.isNonLocked() && user.isEnabled() && !user.isDeleted()) {
+            throw new UnchangedStateException("User already deleted");
+        }
+        user.setNonLocked(true);
+        user.setDeleted(false);
+        user.setEnabled(true);
+        return userMapper.userToUserDTO(userRepository.save(user));
     }
 
     @Override
-    public Customer getCustomerByUserID(int userID) {
+    public CustomerDTO getCustomerByUserID(int userID) {
         User user = userRepository.getUserByUserID(userID);
         if (user != null) {
-            return user.getCustomer();
+            return customerMapper.customerToCustomerDTO(user.getCustomer());
         }
         return null;
     }
@@ -200,7 +402,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     }
 
     @Override
-    public User getUserByOrderActivityID(int orderActivityID) {
+    public UserDTO getUserByOrderActivityID(int orderActivityID) {
         // chua co order activity
         return null;
     }
@@ -215,9 +417,26 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     }
 
     @Override
-    public User getEmployeeByOrderID(int orderID) {
+    public UserDTO getEmployeeByOrderID(int orderID) {
         // chua co order service
         return null;
+    }
+
+    @Override
+    public UserDTO deleteUser(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        Customer customer = user.getCustomer();
+        if(user == null) {
+            throw new ElementNotFoundException("User not found");
+        }
+        user.setDeleted(true);
+        user.setEnabled(false);
+        user.setNonLocked(false);
+        if (customer != null) {
+            customer.setDeleted(true);
+            customerRepository.save(customer);
+        }
+        return userMapper.userToUserDTO(userRepository.save(user));
     }
 
 }

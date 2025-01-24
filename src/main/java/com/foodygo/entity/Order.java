@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
+@Entity(name = "orders")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor

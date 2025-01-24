@@ -1,13 +1,14 @@
 package com.foodygo.controller;
 
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
-import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.HubService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,28 +36,32 @@ public class HubController {
     private int defaultPageSize;
 
     // lấy tất cả các hubs
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all")
     public ResponseEntity<PagingResponse> getAllHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                      @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = hubService.findAll(resolvedCurrentPage, resolvedPageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(results);
+        PagingResponse results = hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // lấy tất cả các buildings từ hub id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all-buildings/{hub-id}")
-    public ResponseEntity<ObjectResponse> getBuildingsByHubID(@PathVariable("hub-id") int hubID) {
-        List<Building> results = hubService.getBuildingsByHubID(hubID);
-        return results != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all buildings by hub ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all buildings by hub ID failed", null));
+    public ResponseEntity<PagingResponse> getBuildingsByHubID(@PathVariable("hub-id") int hubID,
+                                                              @RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                              @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = hubService.getBuildingsByHubID(hubID, resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // lấy tất cả các orders từ hub id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all-orders/{hub-id}")
     public ResponseEntity<ObjectResponse> getOrdersByHubID(@PathVariable("hub-id") int hubID) {
         List<Order> results = hubService.getOrdersByHubID(hubID);
@@ -66,36 +71,45 @@ public class HubController {
     }
 
     // lấy hub từ order id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/get-hub/{order-id}")
     public ResponseEntity<ObjectResponse> getHubByOrderID(@PathVariable("order-id") int orderID) {
-        Hub results = hubService.getHubByOrderID(orderID);
+        HubDTO results = hubService.getHubByOrderID(orderID);
         return results != null ?
                 ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get hub by order ID successfully", results)) :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get hub by order ID failed", null));
     }
 
     // lấy tất cả các hubs chưa bị xóa
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/get-all-active")
-    public ResponseEntity<ObjectResponse> getAllHubsActive() {
-        List<Hub> results = hubService.getHubsActive();
-        return !results.isEmpty() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all hubs active successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all hubs active failed", null));
+    public ResponseEntity<PagingResponse> getAllHubsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
     // khôi phục lại hub đó
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/undelete/{hub-id}")
     public ResponseEntity<ObjectResponse> unDeleteHubByID(@PathVariable("hub-id") int hubID) {
-        return hubService.undeleteHub(hubID) != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete hub successfully", hubService.findById(hubID))) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed", null));
+        try {
+            HubDTO hub = hubService.undeleteHub(hubID);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Undelete hub successfully", hub));
+        } catch (ElementNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed. " + e.getMessage(), null));
+        } catch (UnchangedStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed. " + e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Undelete hub failed", null));
+        }
     }
 
     // lấy ra hub bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get/{hub-id}")
     public ResponseEntity<ObjectResponse> getHubByID(@PathVariable("hub-id") int hubID) {
         Hub hub = hubService.findById(hubID);
@@ -105,11 +119,11 @@ public class HubController {
     }
 
     // tạo ra hub
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createHub(@Valid @RequestBody HubCreateRequest hubCreateRequest) {
         try {
-            Hub hub = hubService.createHub(hubCreateRequest);
+            HubDTO hub = hubService.createHub(hubCreateRequest);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create hub successfully", hub));
         } catch (Exception e) {
             log.error("Error creating hub", e);
@@ -118,11 +132,11 @@ public class HubController {
     }
 
     // update hub bằng id
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/update/{hub-id}")
     public ResponseEntity<ObjectResponse> updateHub(@PathVariable("hub-id") int hubID, @RequestBody HubUpdateRequest hubUpdateRequest) {
         try {
-            Hub hub = hubService.updateHub(hubUpdateRequest, hubID);
+            HubDTO hub = hubService.updateHub(hubUpdateRequest, hubID);
             if (hub != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update hub successfully", hub));
             }
@@ -137,7 +151,7 @@ public class HubController {
     }
 
     // xóa hub, tức set deleted = true
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('MANAGER')")
     @DeleteMapping("/delete/{hub-id}")
     public ResponseEntity<ObjectResponse> deleteHubByID(@PathVariable("hub-id") int hubID) {
         try {

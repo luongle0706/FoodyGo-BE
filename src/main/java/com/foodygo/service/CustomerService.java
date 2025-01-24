@@ -1,33 +1,41 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.BuildingDTO;
+import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
+import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
 
 import java.util.List;
 
 public interface CustomerService extends BaseService<Customer, Integer> {
-    List<Customer> getAllCustomersActive();
+    PagingResponse getAllCustomers(Integer currentPage, Integer pageSize);
 
-    Customer undeleteCustomer(Integer customerID);
+    PagingResponse getAllCustomersActive(Integer currentPage, Integer pageSize);
 
-    User getUserByCustomerID(Integer customerID);
+    CustomerDTO undeleteCustomer(Integer customerID);
 
-    Customer createCustomer(CustomerCreateRequest customerCreateRequest);
+    UserDTO getUserByCustomerID(Integer customerID);
 
-    Customer updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID);
+    CustomerDTO createCustomer(CustomerCreateRequest customerCreateRequest);
+
+    CustomerDTO updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID);
 
     List<Order> getOrdersByCustomerID(Integer customerID);
 
-    Customer getCustomerByOrderID(Integer orderID);
+    CustomerDTO getCustomerByOrderID(Integer orderID);
 
-    Building getBuildingByCustomerID(int customerID);
+    BuildingDTO getBuildingByCustomerID(int customerID);
 
-    User getUserByCustomerID(int customerID);
+    UserDTO getUserByCustomerID(int customerID);
 
     Wallet getWalletByCustomerID(Integer customerID);
 
-    Customer getCustomerByWalletID(Integer walletID);
+    CustomerDTO getCustomerByWalletID(Integer walletID);
+
+    CustomerDTO deleteCustomer(Integer customerID);
 
 //    List<Deposit> getDepositByCustomerID(Integer customerID);
 //

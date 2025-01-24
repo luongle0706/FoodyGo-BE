@@ -1,17 +1,27 @@
 package com.foodygo.service;
 
+import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
+import com.foodygo.dto.request.UserUpdateRoleRequest;
+import com.foodygo.dto.response.PagingResponse;
+import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
 public interface UserService extends BaseService<User, Integer> {
 
-    List<User> getUsersByRole(String role);
+    PagingResponse findAllUsers(Integer currentPage, Integer pageSize);
 
-    User getUserByEmail(String email);
+    List<User> getUsersByRole(Integer roleID);
+
+    PagingResponse getAllUsersActive(Integer currentPage, Integer pageSize);
+
+    UserDTO getUserByEmail(String email);
 
     boolean lockedUser(int id);
 
@@ -23,21 +33,32 @@ public interface UserService extends BaseService<User, Integer> {
 
     boolean checkEmailOrPhone(String s);
 
-    User createUser(UserRegisterRequest userRegisterRequest);
+    UserDTO registerUser(UserRegisterRequest userRegisterRequest);
 
-    User updateUser(UserUpdateRequest userUpdateRequest, int userID);
+    UserDTO updateUser(UserUpdateRequest userUpdateRequest, int userID);
 
-    User createUserWithRole(UserCreateRequest userCreateRequest);
+    UserDTO updateUserRole(UserUpdateRoleRequest userUpdateRoleRequest, int userID);
 
-    User undeletedUser(int userID);
+    TokenResponse refreshToken(String refreshToken);
 
-    Customer getCustomerByUserID(int userID);
+    TokenResponse login(String email, String password);
+
+    boolean logout(HttpServletRequest request);
+
+    UserDTO createUserWithRole(UserCreateRequest userCreateRequest);
+
+    UserDTO undeletedUser(int userID);
+
+    CustomerDTO getCustomerByUserID(int userID);
 
     List<OrderActivity> getOrderActivitiesByUserID(int userID);
 
-    User getUserByOrderActivityID(int orderActivityID);
+    UserDTO getUserByOrderActivityID(int orderActivityID);
 
     List<Order> getOrdersByEmployeeID(int userID);
 
-    User getEmployeeByOrderID(int orderID);
+    UserDTO getEmployeeByOrderID(int orderID);
+
+    UserDTO deleteUser(int userID);
+
 }

@@ -4,6 +4,7 @@ import com.foodygo.dto.response.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,16 @@ public class GlobalException {
     @ExceptionHandler(ElementExistException.class)
     public ResponseEntity<ErrorResponse> elementExistException(ElementExistException e, WebRequest request) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element existed", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> elementExistException(AccessDeniedException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(new Date(), "Failed", "You don't have permission to assess this api", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+    }
+
+    @ExceptionHandler(UnchangedStateException.class)
+    public ResponseEntity<ErrorResponse> unchangedStateException(UnchangedStateException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element unchanged", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

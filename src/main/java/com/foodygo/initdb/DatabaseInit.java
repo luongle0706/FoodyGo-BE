@@ -1,20 +1,15 @@
 package com.foodygo.initdb;
 
-import com.foodygo.entity.Category;
-import com.foodygo.entity.Restaurant;
-import com.foodygo.entity.Role;
-import com.foodygo.entity.User;
-import com.foodygo.repository.CategoryRepository;
-import com.foodygo.repository.RestaurantRepository;
+import com.foodygo.entity.*;
+import com.foodygo.repository.*;
 import com.foodygo.enums.EnumRoleNameType;
-import com.foodygo.repository.RoleRepository;
-import com.foodygo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Random;
 @Component
 @RequiredArgsConstructor
@@ -25,9 +20,11 @@ public class DatabaseInit {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
+    private final HubRepository hubRepository;
+    private final BuildingRepository buildingRepository;
 
     @Bean
-    public CommandLineRunner database() {
+    public CommandLineRunner database(CustomerRepository customerRepository) {
         return args -> {
             if (roleRepository.count() == 0) {
                 Role roleAdmin = new Role(EnumRoleNameType.ROLE_ADMIN, null);
@@ -109,7 +106,43 @@ public class DatabaseInit {
                         .role(roleSeller)
                         .build();
                 userRepository.save(seller);
+            }
 
+            if (hubRepository.count() == 0) {
+                for (int i = 1; i <= 10; i++) {
+                    Hub hub = Hub.builder()
+                            .address("Hub Address " + i)
+                            .name("Hub " + i)
+                            .description("Hub Description " + i)
+                            .build();
+                    Hub savedHub = hubRepository.save(hub);
+
+                    for (int j = 1; j <= 5; j++) {
+                        Building building = Building.builder()
+                                .name("Building " + j + " in hub " + i)
+                                .description("Building Description " + j)
+                                .hub(savedHub)
+                                .build();
+                        buildingRepository.save(building);
+                    }
+                }
+            }
+
+            if (customerRepository.count() == 0) {
+
+                List<User> userList = userRepository.findAll();
+
+                Building building = buildingRepository.findBuildingById(1);
+
+                for (int i = 0; i < 5 && i < userList.size(); i++) {
+                    User user = userList.get(i);
+
+                    Customer customer = Customer.builder()
+                            .building(building)
+                            .user(user)
+                            .build();
+                    customerRepository.save(customer);
+                }
             }
 
             Random random = new Random();
