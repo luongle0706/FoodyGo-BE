@@ -20,6 +20,7 @@ public class DatabaseInit {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final HubRepository hubRepository;
     private final BuildingRepository buildingRepository;
 
@@ -165,6 +166,17 @@ public class DatabaseInit {
                                 .restaurant(savedRestaurant)
                                 .build();
                         categoryRepository.save(category);
+
+                        Product product = Product.builder()
+                                .code("R" + restaurant.getId() + "P" + j)
+                                .name("Sample product no. " + j)
+                                .price(Math.random() * 50 + 1)
+                                .description("Sample product no. " + j + " from restaurant " + restaurant.getId())
+                                .prepareTime(Math.random() * 50 + 1)
+                                .restaurant(restaurant)
+                                .category(category)
+                                .build();
+                        productRepository.save(product);
                     }
                 }
             }
