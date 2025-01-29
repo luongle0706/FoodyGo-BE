@@ -38,4 +38,7 @@ public class Deposit extends BaseEntity {
 
     @OneToMany(mappedBy = "deposit")
     List<Transaction> transactions;
+
+    @ManyToOne
+    Customer customer;
 }

@@ -38,4 +38,7 @@ public class Customer extends BaseEntity {
     @JsonBackReference
     List<Order> orders;
 
+    @OneToMany(mappedBy = "customer")
+    List<Deposit> deposits;
+
 }
