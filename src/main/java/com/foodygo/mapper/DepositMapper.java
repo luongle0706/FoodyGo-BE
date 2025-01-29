@@ -1,6 +1,7 @@
 package com.foodygo.mapper;
 
 
+import com.foodygo.dto.response.TopUpHistoryDTO;
 import com.foodygo.entity.Deposit;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -10,5 +11,7 @@ import org.mapstruct.factory.Mappers;
 public interface DepositMapper {
 
     DepositMapper INSTANCE = Mappers.getMapper(DepositMapper.class);
+
+    TopUpHistoryDTO toTopUpHistoryDTO(Deposit deposit);
 
 }

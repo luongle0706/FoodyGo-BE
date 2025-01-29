@@ -1,5 +1,7 @@
 package com.foodygo.service;
 import com.foodygo.entity.Transaction;
+import com.foodygo.entity.Wallet;
+import com.foodygo.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,26 +11,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
+    private final TransactionRepository transactionRepository;
+
     @Override
     public Transaction createTransaction(Transaction transaction) {
-        return null;
+        return transactionRepository.save(transaction);
     }
 
     @Override
     public Transaction getTransactionById(Integer id) {
-        return null;
+        return transactionRepository.findById(id).orElse(null);
     }
 
     @Override
-    public List<Transaction> getTransactionByCustomerId(Integer customerId) {
-        return null;
+    public List<Transaction> getTransactionByWallet(Wallet wallet) {
+        return transactionRepository.findByWallet(wallet);
     }
-
-    @Override
-    public List<Transaction> getTransactionByRestaurantId(Integer restaurantId) {
-        return null;
-    }
-
-
 
 }

@@ -3,15 +3,19 @@ package com.foodygo.service;
 import com.foodygo.dto.response.DeductHistory;
 import com.foodygo.dto.response.TopUpHistoryDTO;
 import com.foodygo.entity.Customer;
+import com.foodygo.entity.Deposit;
 import com.foodygo.entity.Restaurant;
 import com.foodygo.entity.Wallet;
 import com.foodygo.enums.WalletType;
 import com.foodygo.exception.IdNotFoundException;
+import com.foodygo.mapper.DepositMapper;
 import com.foodygo.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -163,7 +167,11 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public List<TopUpHistoryDTO> getTopUpHistory(Customer customer) {
-        return List.of();
+        List<Deposit> historyDeposits = depositService.getDepositByCustomer(customer);
+        List<TopUpHistoryDTO> topUpHistory = historyDeposits.stream()
+                .map(DepositMapper.INSTANCE::toTopUpHistoryDTO)
+                .collect(Collectors.toList());
+        return topUpHistory;
     }
 
     @Override

@@ -9,4 +9,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor(force = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TopUpHistoryDTO {
+    Integer id;
+    String description;
+    Double amount;
+    String time;
+    String method;
+    Double remaining;
 }
