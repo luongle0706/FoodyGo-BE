@@ -3,8 +3,8 @@ spring:
     name: foodygo
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/foodygo}
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:12345}
+    username: ${MYSQL_USER:mysql}
+    password: ${MYSQL_PASSWORD:mysql}
   jpa:
     hibernate:
       ddl-auto: update
