@@ -10,5 +10,6 @@ public interface TransactionService {
     Transaction createTransaction(Transaction transaction);
     Transaction getTransactionById(Integer id);
     List<Transaction> getTransactionByWallet(Wallet wallet);
+    void deleteTransactionsByOrderId(Integer orderId);
 
 }

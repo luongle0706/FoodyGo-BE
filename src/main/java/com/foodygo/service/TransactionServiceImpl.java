@@ -28,4 +28,9 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findByWallet(wallet);
     }
 
+    @Override
+    public void deleteTransactionsByOrderId(Integer orderId) {
+        transactionRepository.deleteByOrderId(orderId);
+    }
+
 }

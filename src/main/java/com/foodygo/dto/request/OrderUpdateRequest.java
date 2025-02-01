@@ -3,6 +3,7 @@ package com.foodygo.dto.request;
 import com.foodygo.enums.OrderStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +22,7 @@ public class OrderUpdateRequest {
     String customerPhone;
     String shipperPhone;
     String notes;
-    String image;
+    MultipartFile image;
     Integer employeeId;
     Integer userId;
     Integer restaurantId;

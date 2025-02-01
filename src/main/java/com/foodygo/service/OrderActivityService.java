@@ -2,12 +2,11 @@ package com.foodygo.service;
 
 import com.foodygo.dto.request.OrderActivityCreateRequest;
 import com.foodygo.dto.response.OrderActivityResponse;
-import com.foodygo.entity.OrderActivity;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface OrderActivityService {
     void logOrderStatusChange(OrderActivityCreateRequest orderActivityCreateRequest);
-    List<OrderActivityResponse> getOrderActivitiesByOrderId(Integer orderId);
-    void deleteAllOrderActivitiesByOrderId(List<OrderActivity> orderActivities);
+    Page<OrderActivityResponse> getOrderActivitiesByOrderId(Integer orderId, Pageable pageable);
+    void deleteOrderActivitiesByOrderId(Integer orderId);
 }

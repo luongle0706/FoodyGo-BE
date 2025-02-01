@@ -1,10 +1,8 @@
 package com.foodygo.service;
 
 import com.foodygo.dto.request.*;
-import com.foodygo.dto.response.OrderDetailResponse;
 import com.foodygo.dto.response.OrderResponse;
 import com.foodygo.entity.Order;
-import com.foodygo.entity.OrderActivity;
 import com.foodygo.entity.OrderDetail;
 import com.foodygo.enums.OrderStatus;
 import com.foodygo.exception.IdNotFoundException;
@@ -13,11 +11,14 @@ import com.foodygo.mapper.OrderMapper;
 import com.foodygo.repository.HubRepository;
 import com.foodygo.repository.OrderDetailRepository;
 import com.foodygo.repository.OrderRepository;
+import com.foodygo.utils.QuanTest_FirebaseStorageService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.Temperature;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +32,13 @@ public class OrderServiceImpl implements OrderService{
     private final CustomerService  customerService;
     private final RestaurantService restaurantService;
     private final ProductService productService;
+    private final OrderDetailService orderDetailService;
+    private final TransactionService transactionService;
+    private final OrderActivityService orderActivityService;
+    private final QuanTest_FirebaseStorageService firebaseStorageService;
     private final HubRepository hubRepository;
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
-    private final OrderActivityService orderActivityService;
-    private final OrderMapper orderMapper;
 
     @Override
     @Transactional
@@ -59,7 +62,7 @@ public class OrderServiceImpl implements OrderService{
         orderDetailRepository.saveAll(orderDetails);
         order.setOrderDetails(orderDetails);
         orderRepository.save(order);
-        return orderMapper.INSTANCE.toDto(order);
+        return OrderMapper.INSTANCE.toDto(order);
     }
 
     @Override
@@ -71,17 +74,27 @@ public class OrderServiceImpl implements OrderService{
         updateOrderDetails(order, orderUpdateRequest.getOrderDetailUpdateRequests());
         orderRepository.save(order);
 
+        String imageUrl = null;
+        if (orderUpdateRequest.getImage() != null && !orderUpdateRequest.getImage().isEmpty()) {
+            try {
+                imageUrl = firebaseStorageService.uploadFile(orderUpdateRequest.getImage());
+            } catch (IOException e) {
+                throw new RuntimeException("Update image failed", e);
+            }
+        }
+
+        //create order activity
         OrderActivityCreateRequest orderActivityCreateRequest = OrderActivityCreateRequest.builder()
                 .orderId(orderId)
                 .userId(getUserIdFromRequest(orderUpdateRequest))
                 .fromStatus(oldStatus)
                 .toStatus(orderUpdateRequest.getStatus())
-                .image(orderUpdateRequest.getImage())
+                .image(imageUrl)
                 .build();
 
         orderActivityService.logOrderStatusChange(orderActivityCreateRequest);
 
-        return orderMapper.toDto(order);
+        return OrderMapper.INSTANCE.toDto(order);
     }
 
     private Integer getUserIdFromRequest(OrderUpdateRequest orderUpdateRequest) {
@@ -125,16 +138,37 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
+    @Transactional
     public void deleteOrder(Integer id) {
         Order order = getOrderById(id);
-        List<OrderDetail> orderDetails = order.getOrderDetails();
-        if (!orderDetails.isEmpty()) {
-            orderDetailRepository.deleteAll(orderDetails);
-        }
-        List<OrderActivity> orderActivities = order.getOrderActivities();
-        if (!orderActivities.isEmpty()) {
-            orderActivityService.deleteAllOrderActivitiesByOrderId(orderActivities);
-        }
+        orderDetailService.deleteOrderDetailsByOrderId(id);
+        orderActivityService.deleteOrderActivitiesByOrderId(id);
+        transactionService.deleteTransactionsByOrderId(id);
         orderRepository.delete(order);
+    }
+
+    @Override
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        Page<Order> orders = orderRepository.findAll(pageable);
+        return orders.map(OrderMapper.INSTANCE::toDto);
+    }
+
+    @Override
+    public Page<OrderResponse> getAllOrdersByEmployeeId(Integer employeeId, Pageable pageable) {
+        Page<Order> orders = orderRepository.findOrdersByEmployeeId(employeeId, pageable);
+        return orders.map(OrderMapper.INSTANCE::toDto);
+    }
+
+    @Override
+    public Page<OrderResponse> getAllOrdersByCustomerId(Integer customerId, Pageable pageable) {
+        Page<Order> orders =  orderRepository.findByCustomerId(customerId, pageable);
+        return orders.map(OrderMapper.INSTANCE::toDto);
+
+    }
+
+    @Override
+    public Page<OrderResponse> getAllOrdersByRestaurantId(Integer restaurantId, Pageable pageable) {
+        Page<Order> orders =  orderRepository.findByRestaurantId(restaurantId, pageable);
+        return orders.map(OrderMapper.INSTANCE::toDto);
     }
 }
