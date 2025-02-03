@@ -7,6 +7,8 @@ services:
       MYSQL_USER: mysql
       MYSQL_PASSWORD: mysql
       MYSQL_DATABASE: foodygo
+      REDIS_HOST: redis-container
+      REDIS_PORT: 6379
       TZ: Asia/Saigon
     ports:
       - "3306:3306"
@@ -47,3 +49,19 @@ services:
     volumes:
       - ./data/spring-boot-data:/temp/build-output
     restart: no
+    networks:
+      - foodygo-network
+  redis:
+    image: docker.io/redis:7.2.3
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./redis-data:/data"
+    networks:
+      - foodygo-network
+
+networks:
+  foodygo-network:
+    driver: bridge

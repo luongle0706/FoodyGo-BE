@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 public interface OrderService {
     OrderResponse createOrder(OrderCreateRequest orderCreateRequest);
     OrderResponse updateOrder(Integer orderId, OrderUpdateRequest orderUpdateRequest);
+    OrderResponse getOrderResponseById(Integer id);
     Order getOrderById(Integer id);
     void deleteOrder(Integer id);
     Page<OrderResponse> getAllOrders(Pageable pageable);

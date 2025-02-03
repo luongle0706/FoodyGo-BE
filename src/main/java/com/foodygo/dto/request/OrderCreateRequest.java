@@ -1,8 +1,5 @@
 package com.foodygo.dto.request;
 
-import com.foodygo.entity.*;
-import com.foodygo.enums.OrderStatus;
-import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

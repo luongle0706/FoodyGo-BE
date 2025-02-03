@@ -15,6 +15,10 @@ spring:
   data:
     jdbc:
       dialect: mysql
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000
 jwt:
   secret: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
   expiration: 8640000
@@ -22,9 +26,6 @@ jwt:
     secret: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
     expiration: 864000000
   algorithms: HmacSHA256
-  # header: Authorization
-  # prefix: Bearer
-
 # Firebase
 firebase:
   bucket:
@@ -66,7 +67,6 @@ springdoc:
 application:
   default-current-page: 1
   default-page-size: 30
-
 
 server:
   port: 8080

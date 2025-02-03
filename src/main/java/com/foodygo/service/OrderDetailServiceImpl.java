@@ -26,13 +26,13 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public Page<OrderDetailResponse> getOrderDetailsByOrderId(Integer orderId, Pageable pageable) {
         Page<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(orderId, pageable);
         return orderDetails.map(orderDetail -> new OrderDetailResponse(
-                        orderDetail.getId(),
-                        orderDetail.getOrder().getId(),
-                        orderDetail.getQuantity(),
-                        orderDetail.getPrice(),
-                        orderDetail.getAddonItems(),
-                        orderDetail.getProduct().getName()
-                ));
+                orderDetail.getId(),
+                orderDetail.getOrder().getId(),
+                orderDetail.getQuantity(),
+                orderDetail.getPrice(),
+                orderDetail.getAddonItems(),
+                orderDetail.getProduct().getName()
+        ));
     }
 
     @Override

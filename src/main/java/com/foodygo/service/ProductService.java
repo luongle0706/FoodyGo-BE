@@ -27,4 +27,6 @@ public interface ProductService {
     void deleteProduct(Integer productId);
 
     boolean switchProductAvailability(Integer productId);
+
+    public List<Product> getProductsByIds(List<Integer> productIds);
 }

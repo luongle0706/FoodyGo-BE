@@ -1,25 +1,19 @@
 package com.foodygo.controller;
 
-import com.foodygo.dto.AddonItemDTO;
 import com.foodygo.dto.request.OrderCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
-import com.foodygo.dto.response.OrderResponse;
-import com.foodygo.entity.Order;
 import com.foodygo.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -35,7 +29,7 @@ public class OrderController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    @PostMapping
+    @PostMapping("/add")
     @Operation(summary = "Create Order", description = "Create a new order using the provided data.")
     public ResponseEntity<ObjectResponse> createOrder(
             @RequestBody OrderCreateRequest request
@@ -45,13 +39,13 @@ public class OrderController {
                 .body(
                         ObjectResponse.builder()
                                 .status(CREATED.toString())
-                                .message("Create order")
+                                .message("Create order successfully!")
                                 .data(orderService.createOrder(request))
                                 .build()
                 );
     }
 
-    @PutMapping("/{orderId}")
+    @PutMapping("/update/{orderId}")
     @Operation(summary = "Update Order", description = "Update an existing order with the provided data.")
     public ResponseEntity<ObjectResponse> updateAddonItem(
             @PathVariable Integer orderId,
@@ -62,13 +56,13 @@ public class OrderController {
                 .body(
                         ObjectResponse.builder()
                                 .status(OK.toString())
-                                .message("Update order")
+                                .message("Update order successfully!")
                                 .data(orderService.updateOrder(orderId, orderUpdateRequest))
                                 .build()
                 );
     }
 
-    @DeleteMapping("/{orderId}")
+    @DeleteMapping("/delete/{orderId}")
     @Operation(summary = "Delete Order", description = "Delete an order by its unique ID.")
     public ResponseEntity<ObjectResponse> deleteOrder(
             @PathVariable Integer orderId
@@ -80,9 +74,23 @@ public class OrderController {
                         ObjectResponse.builder()
                                 .status(OK.toString())
                                 .status("Delete order")
+                                .message("Delete successfully!")
                                 .build()
                 );
     }
+
+    @GetMapping("/{orderId}")
+    @Operation(summary = "Get All Orders", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
+    public ResponseEntity<ObjectResponse> getOrderById(@PathVariable Integer orderId) {
+        return ResponseEntity.ok(
+                ObjectResponse.builder()
+                        .status(OK.toString())
+                        .message("Get order by Id")
+                        .data(orderService.getOrderResponseById(orderId))
+                        .build()
+        );
+    }
+
     @GetMapping("/search-all-orders")
     @Operation(summary = "Get All Orders", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
     public ResponseEntity<ObjectResponse> getAllOrders(
@@ -98,7 +106,7 @@ public class OrderController {
                 .body(
                         ObjectResponse.builder()
                                 .status(OK.toString())
-                                .message("Get all orders")
+                                .message("Get all orders successfully!")
                                 .data(orderService.getAllOrders(pageable))
                                 .build()
                 );
@@ -120,7 +128,7 @@ public class OrderController {
                 .body(
                         ObjectResponse.builder()
                                 .status(OK.toString())
-                                .message("Get all orders by employee ID")
+                                .message("Get all orders by employee ID successfully!")
                                 .data(orderService.getAllOrdersByEmployeeId(employeeId, pageable))
                                 .build()
                 );
@@ -142,7 +150,7 @@ public class OrderController {
                 .body(
                         ObjectResponse.builder()
                                 .status(OK.toString())
-                                .message("Get all orders by customer ID")
+                                .message("Get all orders by customer ID successfully!")
                                 .data(orderService.getAllOrdersByCustomerId(customerId, pageable))
                                 .build()
                 );
@@ -164,7 +172,7 @@ public class OrderController {
                 .body(
                         ObjectResponse.builder()
                                 .status(OK.toString())
-                                .message("Get all orders by restaurant ID")
+                                .message("Get all orders by restaurant ID successfully!")
                                 .data(orderService.getAllOrdersByCustomerId(restaurantId, pageable))
                                 .build()
                 );

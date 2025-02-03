@@ -28,4 +28,6 @@ public interface HubService extends BaseService<Hub, Integer> {
 
     HubDTO getHubByOrderID(Integer orderID);
 
+    Hub getHubById(Integer hubID);
+
 }

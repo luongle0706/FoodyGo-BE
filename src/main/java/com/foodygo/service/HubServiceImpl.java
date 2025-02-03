@@ -9,6 +9,7 @@ import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.BuildingMapper;
 import com.foodygo.mapper.HubMapper;
@@ -189,6 +190,11 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     public HubDTO getHubByOrderID(Integer orderID) {
         // chua co OrderService
         return null;
+    }
+
+    @Override
+    public Hub getHubById(Integer hubID) {
+        return hubRepository.findById(hubID).orElseThrow(() -> new IdNotFoundException("Hub not found!"));
     }
 
 }

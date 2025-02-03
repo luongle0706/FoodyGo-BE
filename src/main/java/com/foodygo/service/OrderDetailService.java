@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface OrderDetailService {
     OrderDetailResponse getOrderDetailById(Integer id);
+
     Page<OrderDetailResponse> getOrderDetailsByOrderId(Integer orderId, Pageable pageable);
+
     void deleteOrderDetailsByOrderId(Integer orderId);
 }

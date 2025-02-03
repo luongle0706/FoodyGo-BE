@@ -7,7 +7,6 @@ import com.foodygo.mapper.ProductMapper;
 import com.foodygo.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -97,4 +96,10 @@ public class ProductServiceImpl implements  ProductService {
         productRepository.save(product);
         return product.isAvailable();
     }
+
+    @Override
+    public List<Product> getProductsByIds(List<Integer> productIds) {
+        return productRepository.findAllById(productIds);
+    }
+
 }
