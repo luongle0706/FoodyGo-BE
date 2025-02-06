@@ -1,6 +1,5 @@
 package com.foodygo.entity;
 
-import com.foodygo.enums.DepositMethod;
 import com.foodygo.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,23 +7,23 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Data
-@EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
-@NoArgsConstructor
+@Entity
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "transactions")
 public class Transaction extends BaseEntity {
 
     @Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
     String description;
 
-    LocalDateTime time;
+    LocalDateTime time = LocalDateTime.now();
 
     Double amount;
 

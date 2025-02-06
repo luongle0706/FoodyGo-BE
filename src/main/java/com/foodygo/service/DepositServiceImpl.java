@@ -2,31 +2,44 @@ package com.foodygo.service;
 
 import com.foodygo.entity.Customer;
 import com.foodygo.entity.Deposit;
+import com.foodygo.entity.Transaction;
+import com.foodygo.entity.Wallet;
+import com.foodygo.enums.TransactionType;
+import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.repository.DepositRepository;
+import com.foodygo.repository.TransactionRepository;
+import com.foodygo.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class DepositServiceImpl implements DepositService {
 
     private final DepositRepository depositRepository;
+    private final WalletRepository walletRepository;
+    private final TransactionRepository transactionRepository;
 
     @Override
-    public Deposit createDeposit(Deposit deposit) {
+    public Deposit requestDeposit(Deposit deposit) {
         return depositRepository.save(deposit);
     }
 
     @Override
-    public Deposit getDepositById(Integer id) {
-        return depositRepository.findById(id).orElse(null);
-    }
+    public void approveDeposit(Integer depositId) {
+        Deposit deposit = depositRepository.findById(depositId)
+                .orElseThrow(() -> new IdNotFoundException("Deposit not found"));
 
-    @Override
-    public List<Deposit> getDepositByCustomer(Customer customer) {
-        return depositRepository.findDepositsByCustomer(customer);
+        Wallet wallet = deposit.getWallet();
+        wallet.setBalance(wallet.getBalance() + (deposit.getAmount()));
+        walletRepository.save(wallet);
+        Transaction transaction = Transaction.builder()
+                .amount(deposit.getAmount())
+                .remaining(wallet.getBalance())
+                .type(TransactionType.TOP_UP)
+                .wallet(wallet)
+                .build();
+        transactionRepository.save(transaction);
     }
 
 }
