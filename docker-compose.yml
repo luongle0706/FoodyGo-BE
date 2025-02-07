@@ -42,7 +42,7 @@ services:
     environment:
       MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
       MYSQL_USER: root
-      MYSQL_PASSWORD: 123456789
+      MYSQL_P ASSWORD: 123456789
     ports:
       - "8080:8080"
     depends_on:
