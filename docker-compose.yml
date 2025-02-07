@@ -57,3 +57,25 @@ services:
       - "6379:6379"
     volumes:
       - ./data/redis-data:/data
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    tty: true
+    stdin_open: true
+  deepseek:
+    image: ollama/ollama
+    container_name: deepseek
+    restart: unless-stopped
+    command: ["serve"]
+    environment:
+      - OLLAMA_MODEL=deepseek
+    depends_on:
+      - ollama
+volumes:
+  ollama_data:
+    driver: local
