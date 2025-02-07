@@ -22,10 +22,10 @@ spring:
       port: ${REDIS_PORT:6379}
       timeout: 2000
 jwt:
-  secret: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
+  secret: ${JWT_SECRET:0}
   expiration: 8640000
   refresh:
-    secret: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
+    secret: ${JWT_REFRESH_SECRET:0}
     expiration: 864000000
   algorithms: HmacSHA256
 # Firebase
@@ -35,7 +35,7 @@ firebase:
   content:
     type: image/png
   get:
-    stream: swp391-f046d-firebase-adminsdk-drdyq-e270ed7356.json
+    stream: firebase-SWD391.json
     url: https://firebasestorage.googleapis.com/v0/b/swp391-f046d.appspot.com/o/%s?alt=media
     folder: swd391_image_customer
   file:

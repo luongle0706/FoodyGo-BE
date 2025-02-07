@@ -11,14 +11,16 @@ jobs:
       - name: SSH into VPS and deploy
         uses: appleboy/ssh-action@v0.1.5
         with:
-          # host: ${{ secrets.VPS_HOST }}
-          host: 171.250.186.250
+          host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /home/theanh/GIT/SWD301-FoodyGo-BE/
             docker compose down
-            sudo rm -r -f data
-            git reset --hard HEAD
-            git pull
+            git clean -df
+            git fetch --all
+            git reset --hard origin/main
+            
+            echo '${{ secrets.FIREBASE_CREDENTIAL }}' > src/main/resources/firebase-SWD391.json
+            
             docker compose up --build -d
