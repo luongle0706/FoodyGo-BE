@@ -1,6 +1,7 @@
 package com.foodygo.initdb;
 
 import com.foodygo.entity.*;
+import com.foodygo.enums.OrderStatus;
 import com.foodygo.repository.*;
 import com.foodygo.enums.EnumRoleNameType;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 @Component
@@ -25,6 +28,9 @@ public class DatabaseInit {
     private final AddonItemRepository addonItemRepository;
     private final HubRepository hubRepository;
     private final BuildingRepository buildingRepository;
+    private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final OrderActivityRepository orderActivityRepository;
 
     @Bean
     public CommandLineRunner database(CustomerRepository customerRepository) {
@@ -197,6 +203,86 @@ public class DatabaseInit {
                             addonItemRepository.save(addonItem);
                         }
                     }
+                }
+            }
+            if (orderRepository.count() == 0) {
+                List<User> employees = userRepository.findAll();
+                List<Customer> customers = customerRepository.findAll();
+                List<Restaurant> restaurants = restaurantRepository.findAll();
+                List<Hub> hubs = hubRepository.findAll();
+
+                for (int i = 0; i < 20; i++) {
+                    User randomEmployee = employees.get(random.nextInt(employees.size()));
+                    Customer randomCustomer = customers.get(random.nextInt(customers.size()));
+                    Restaurant randomRestaurant = restaurants.get(random.nextInt(restaurants.size()));
+                    Hub randomHub = hubs.get(random.nextInt(hubs.size()));
+                    List<Product> products = productRepository.findByRestaurantIdAndDeletedFalse(randomRestaurant.getId());
+
+                    // Phí dịch vụ & vận chuyển
+                    double shippingFee = random.nextDouble() * 5 + 2;
+                    double serviceFee = random.nextDouble() * 3 + 1;
+                    double totalPrice = 0;
+
+                    // Danh sách OrderDetail
+                    List<OrderDetail> orderDetails = new ArrayList<>();
+                    for (int j = 0; j < random.nextInt(5) + 1; j++) {
+                        Product randomProduct = products.get(random.nextInt(products.size()));
+                        int quantity = random.nextInt(3) + 1;
+                        double price = randomProduct.getPrice() * quantity;
+                        totalPrice += price;
+
+                        OrderDetail orderDetail = OrderDetail.builder()
+                                .product(randomProduct)
+                                .quantity(quantity)
+                                .price(price)
+                                .addonItems("Addon " + j)
+                                .order(null) // Gán sau khi tạo order
+                                .build();
+                        orderDetails.add(orderDetail);
+                    }
+
+                    // Tạo đơn hàng
+                    Order order = Order.builder()
+                            .time(LocalDateTime.now().minusDays(random.nextInt(10)))
+                            .shippingFee(shippingFee)
+                            .serviceFee(serviceFee)
+                            .totalPrice(totalPrice + shippingFee + serviceFee)
+                            .status(OrderStatus.ORDERED)
+                            .expectedDeliveryTime(LocalDateTime.now().plusHours(random.nextInt(5) + 1))
+                            .customerPhone(randomCustomer.getUser().getPhone())
+                            .shipperPhone("+84" + (100000000 + random.nextInt(900000000)))
+                            .notes("Giao hàng trước 6h tối")
+                            .employee(randomEmployee)
+                            .customer(randomCustomer)
+                            .restaurant(randomRestaurant)
+                            .hub(randomHub)
+                            .build();
+                    orderRepository.save(order);
+
+                    // Gán order cho OrderDetail và lưu
+                    for (OrderDetail detail : orderDetails) {
+                        detail.setOrder(order);
+                        orderDetailRepository.save(detail);
+                    }
+
+                    // Tạo lịch sử trạng thái OrderActivity
+                    List<OrderActivity> orderActivities = new ArrayList<>();
+                    OrderStatus[] statuses = OrderStatus.values();
+                    for (int k = 0; k < random.nextInt(4) + 1; k++) {
+                        OrderStatus fromStatus = statuses[random.nextInt(statuses.length)];
+                        OrderStatus toStatus = statuses[random.nextInt(statuses.length)];
+
+                        OrderActivity orderActivity = OrderActivity.builder()
+                                .fromStatus(fromStatus)
+                                .toStatus(toStatus)
+                                .time(order.getTime().plusMinutes(k * 15))
+                                .image("order_activity_" + k + ".png")
+                                .user(randomEmployee)
+                                .order(order)
+                                .build();
+                        orderActivities.add(orderActivity);
+                    }
+                    orderActivityRepository.saveAll(orderActivities);
                 }
             }
         };

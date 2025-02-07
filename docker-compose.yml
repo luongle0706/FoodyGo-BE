@@ -7,6 +7,8 @@ services:
       MYSQL_USER: mysql
       MYSQL_PASSWORD: mysql
       MYSQL_DATABASE: foodygo
+      JWT_SECRET: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
+      JWT_REFRESH_SECRET: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
       REDIS_HOST: redis-container
       REDIS_PORT: 6379
       TZ: Asia/Saigon
@@ -49,8 +51,6 @@ services:
     volumes:
       - ./data/spring-boot-data:/temp/build-output
     restart: no
-    networks:
-      - foodygo-network
   redis:
     image: docker.io/redis:7.2.3
     container_name: redis-container
@@ -58,10 +58,26 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - "./redis-data:/data"
-    networks:
-      - foodygo-network
-
-networks:
-  foodygo-network:
-    driver: bridge
+      - ./data/redis-data:/data
+#  ollama:
+#    image: ollama/ollama
+#    container_name: ollama
+#    restart: unless-stopped
+#    volumes:
+#      - ollama_data:/root/.ollama
+#    ports:
+#      - "11434:11434"
+#    tty: true
+#    stdin_open: true
+#  deepseek:
+#    image: ollama/ollama
+#    container_name: deepseek
+#    restart: unless-stopped
+#    command: ["serve"]
+#    environment:
+#      - OLLAMA_MODEL=deepseek
+#    depends_on:
+#      - ollama
+#volumes:
+#  ollama_data:
+#    driver: local
