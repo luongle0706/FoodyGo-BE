@@ -55,6 +55,9 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user")
     Customer customer;
 
+    @OneToOne(mappedBy = "owner")
+    Restaurant restaurant;
+
     @OneToMany(mappedBy = "employee")
     @JsonBackReference
     List<Order> employeeOrders;

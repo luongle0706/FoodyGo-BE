@@ -30,6 +30,9 @@ public class Restaurant extends BaseEntity {
 
     String image;
 
+    @OneToOne
+    User owner;
+
     @OneToMany(mappedBy = "restaurant")
     List<Wallet> wallets;
 
