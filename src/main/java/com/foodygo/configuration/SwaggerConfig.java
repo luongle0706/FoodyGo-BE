@@ -16,7 +16,12 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info().title("FoodyGo - Food delivery platform for Dormitory B - HCMC National University Dormitory"))
-                .addServersItem(new Server().url("https://foodygo.theanh0804.id.vn"))
+                .addServersItem(
+                        new Server().url("https://foodygo.theanh0804.id.vn")
+                )
+                .addServersItem(
+                        new Server().url("http://localhost:8080")
+                )
                 .addSecurityItem(new SecurityRequirement().addList("FoodyGo Authentication Service"))
                 .components(new Components().addSecuritySchemes("FoodyGo Authentication Service", new SecurityScheme()
                         .name("Dormitory B - HCMC National University Dormitory").type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
