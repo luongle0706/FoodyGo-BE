@@ -3,7 +3,7 @@ services:
   # MYSQL
   mysql:
     container_name: mysql
-    image: mysql
+    image: mysql:8.0.41
     environment:
       MYSQL_ROOT_PASSWORD: 123456789
       MYSQL_USER: mysql
