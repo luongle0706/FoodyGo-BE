@@ -1,4 +1,6 @@
 services:
+
+  # MYSQL
   mysql:
     container_name: mysql
     image: mysql
@@ -7,10 +9,6 @@ services:
       MYSQL_USER: mysql
       MYSQL_PASSWORD: mysql
       MYSQL_DATABASE: foodygo
-      JWT_SECRET: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
-      JWT_REFRESH_SECRET: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
-      REDIS_HOST: redis-container
-      REDIS_PORT: 6379
       TZ: Asia/Saigon
     ports:
       - "3306:3306"
@@ -23,6 +21,8 @@ services:
       retries: 5
     restart: unless-stopped
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-time-zone=+07:00']
+
+  #BUILDER
   spring-boot-builder:
     container_name: spring-boot-builder
     build:
@@ -34,6 +34,8 @@ services:
     volumes:
       - ../maven-cache:/root/.m2
       - ./data/spring-boot-data:/temp/build-output
+
+  # SPRING BOOT RUNNER
   spring-boot-runner:
     container_name: spring-boot-runner
     build:
@@ -43,6 +45,10 @@ services:
       MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
       MYSQL_USER: root
       MYSQL_PASSWORD: 123456789
+#      JWT_SECRET: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
+#      JWT_REFRESH_SECRET: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
+      REDIS_HOST: redis-container
+      REDIS_PORT: 6379
     ports:
       - "8080:8080"
     depends_on:
@@ -51,6 +57,8 @@ services:
     volumes:
       - ./data/spring-boot-data:/temp/build-output
     restart: no
+
+  # REDIS
   redis:
     image: docker.io/redis:7.2.3
     container_name: redis-container
