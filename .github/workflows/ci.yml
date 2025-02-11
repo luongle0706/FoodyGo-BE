@@ -17,7 +17,8 @@ jobs:
           script: |
             cd /home/theanh/GIT/SWD301-FoodyGo-BE/
             docker compose down
-            git clean -df
+            sudo chmod -R 777 .
+            git clean -dfx
             git fetch --all
             git reset --hard origin/main
             
