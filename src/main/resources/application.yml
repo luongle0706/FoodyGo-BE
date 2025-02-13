@@ -74,3 +74,4 @@ application:
 
 server:
   port: 8080
+

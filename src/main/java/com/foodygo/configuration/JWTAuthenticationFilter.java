@@ -5,8 +5,10 @@ import com.foodygo.exception.AuthenticationException;
 import io.jsonwebtoken.lang.Strings;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             "/v3/**",
             "/api-docs/**",
             "/swagger-resources/**",
-            "/api/v1/public/**"
+            "/api/v1/public/**",
+            "/oauth2/**",
+            "/login/oauth2/**",
+            "/login/**",
+            "/login",
+            "/oauth2/authorization/**",
+            "/favicon.ico"
     );
 
     public String getToken(HttpServletRequest request) {
@@ -65,7 +73,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 response.sendRedirect(request.getContextPath() + "/swagger-ui/index.html");
                 return;
             }
-            if (isAuthentication(request.getRequestURI())) {
+            if (testIsAuthentication(request.getRequestURI())) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -96,20 +104,20 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isAuthentication(String uri) {
-        AntPathMatcher pathcMatcher = new AntPathMatcher();
-        return NON_USER.stream().anyMatch(pattern -> pathcMatcher.match(pattern, uri));
-    }
-
-//    private boolean testIsAuthentication(String uri){
-//        AntPathMatcher pathMatcher = new AntPathMatcher();
-//        boolean isMatched = NON_USER.stream().anyMatch(pattern -> {
-//            boolean matched = pathMatcher.match(pattern, uri);
-//            log.debug("Check pattern ne: {} URI: {}, matched: {}", pattern, uri, matched);
-//            return matched;
-//        });
-//        log.debug("Final match result for URI ne {}: {}", uri, isMatched);
-//        return isMatched;
+//    private boolean isAuthentication(String uri) {
+//        AntPathMatcher pathcMatcher = new AntPathMatcher();
+//        return NON_USER.stream().anyMatch(pattern -> pathcMatcher.match(pattern, uri));
 //    }
+
+    private boolean testIsAuthentication(String uri){
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        boolean isMatched = NON_USER.stream().anyMatch(pattern -> {
+            boolean matched = pathMatcher.match(pattern, uri);
+            log.debug("Check pattern ne: {} URI: {}, matched: {}", pattern, uri, matched);
+            return matched;
+        });
+        log.debug("Final match result for URI ne {}: {}", uri, isMatched);
+        return isMatched;
+    }
 
 }

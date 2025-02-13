@@ -8,6 +8,7 @@ import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,9 +63,9 @@ public class MainController {
 
     // logout
     @PostMapping("/logout")
-    public ResponseEntity<ObjectResponse> getLogout(HttpServletRequest request) {
+    public ResponseEntity<ObjectResponse> getLogout(HttpServletRequest request, HttpServletResponse response) {
         try {
-            boolean checkLogout = userService.logout(request);
+            boolean checkLogout = userService.logout(request, response);
             return checkLogout ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Logout successfully", null)) :
                                  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "Logout failed", null));
         } catch (ElementNotFoundException e) {
@@ -73,6 +74,18 @@ public class MainController {
         } catch (Exception e) {
             log.error("Error logout : {}", e.toString());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "Logout failed", null));
+        }
+    }
+
+    // get Token from login Oauth2
+    @GetMapping("/oauth2-token")
+    public ResponseEntity<TokenResponse> getToken() {
+        try {
+            TokenResponse tokenResponse = userService.getTokenLoginFromOauth2();
+            return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
+        } catch (Exception e) {
+            log.error("Cannot login : {}", e.toString());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null));
         }
     }
 

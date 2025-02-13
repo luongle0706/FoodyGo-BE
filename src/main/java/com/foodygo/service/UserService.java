@@ -10,6 +10,7 @@ import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -43,7 +44,9 @@ public interface UserService extends BaseService<User, Integer> {
 
     TokenResponse login(String email, String password);
 
-    boolean logout(HttpServletRequest request);
+    boolean logout(HttpServletRequest request, HttpServletResponse response);
+
+    TokenResponse getTokenLoginFromOauth2();
 
     UserDTO createUserWithRole(UserCreateRequest userCreateRequest);
 

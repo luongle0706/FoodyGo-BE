@@ -1,5 +1,6 @@
 package com.foodygo.configuration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@Slf4j
 public class WebSecurityConfig {
 
     @Bean
@@ -34,7 +36,7 @@ public class WebSecurityConfig {
         return new JWTAuthenticationFilter();
     }
 
-//    private final String[] REQUEST_PUBLIC = {"/login/**", "/verify/**"};
+    //http://localhost:8080/oauth2/authorization/google
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -45,11 +47,19 @@ public class WebSecurityConfig {
                                 requestMatchers("/**").permitAll()
 //                              .requestMatchers(HttpMethod.POST, "/ues", "/*").permitAll()
                                 .anyRequest().authenticated())
-                .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-//                .logout(logout -> logout.logoutUrl("/logout").addLogoutHandler(logoutHandler).logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()));
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("http://localhost:5173/oauth2/callback", true)
+                )
+                .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)); //IF_REQUIRE;
 
         return httpSecurity.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class).build();
     }
 
 }
+
+
+//                .oauth2Login(oauth2 -> {
+////                    oauth2.loginPage("/api/v1/public/login").permitAll();
+////                    oauth2.defaultSuccessUrl("http://localhost:3000/home", true);
+//                    oauth2.successHandler(customOAuth2AuthenticationSuccessHandler);
+//                })

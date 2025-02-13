@@ -14,4 +14,7 @@ public interface UserMapper {
     @Mapping(source = "deleted", target = "deleted")
     @Mapping(source = "userID", target = "userID")
     UserDTO userToUserDTO(User user);
+
+    User UserDTOToUser(UserDTO userDTO);
+
 }
