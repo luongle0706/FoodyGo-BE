@@ -52,10 +52,10 @@ public class CategoryController {
 
     @Operation(summary = "Search categories by name",
             description = "Searches categories by name, with optional pagination and sorting.")
-    @GetMapping("/search-by-name")
+    @GetMapping("/name/{name}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ObjectResponse> getAllCategoriesContainsName(
-            @RequestParam String name,
+            @PathVariable String name,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -76,10 +76,10 @@ public class CategoryController {
 
     @Operation(summary = "Get categories by restaurant ID",
             description = "Retrieves categories for a specific restaurant, with optional pagination and sorting.")
-    @GetMapping("/search-by-restaurant")
+    @GetMapping("/restaurant/{restaurantId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ObjectResponse> getAllCategoriesByRestaurantId(
-            @RequestParam Integer restaurantId,
+            @PathVariable Integer restaurantId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -112,24 +112,6 @@ public class CategoryController {
                                 .status(OK.toString())
                                 .message("Get category by id " + categoryId)
                                 .data(categoryService.getCategoryDTOById(categoryId))
-                                .build()
-                );
-    }
-
-    @Operation(summary = "Get category by name",
-            description = "Retrieves a category by its name.")
-    @GetMapping("/{categoryName}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ObjectResponse> getCategoryByName(
-            @PathVariable String categoryName
-    ) {
-        return ResponseEntity
-                .status(OK)
-                .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get category by name " + categoryName)
-                                .data(categoryService.getCategoryDTOByName(categoryName))
                                 .build()
                 );
     }
