@@ -11,6 +11,8 @@ import com.foodygo.entity.*;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.CustomerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/customer")
+@Tag(name = "Customer", description = "Operations related to Customer management")
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -37,7 +40,14 @@ public class CustomerController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    // lấy tất cả các customer
+    /**
+     * Method get all customers
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all customers", description = "Retrieves all customers, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all")
     public ResponseEntity<PagingResponse> getAllCustomers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -49,7 +59,14 @@ public class CustomerController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // lấy tất cả các customers chưa bị xóa
+    /**
+     * Method get all customers have status is active
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all-active")
     public ResponseEntity<PagingResponse> getAllCustomersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -61,27 +78,49 @@ public class CustomerController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // lấy tất cả các order từ customer id
-    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-all-orders/{customer-id}")
-    public ResponseEntity<ObjectResponse> getOrdersByCustomerID(@PathVariable("customer-id") int customerID) {
-        List<Order> results = customerService.getOrdersByCustomerID(customerID);
-        return results != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all orders by customer ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all orders by customer ID failed", null));
-    }
+//    // lấy tất cả các order từ customer id
+//    /**
+//     * Method get all customers have status is active
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
+//    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
+//    @GetMapping("/get-all-orders/{customer-id}")
+//    public ResponseEntity<ObjectResponse> getOrdersByCustomerID(@PathVariable("customer-id") int customerID) {
+//        List<Order> results = customerService.getOrdersByCustomerID(customerID);
+//        return results != null ?
+//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all orders by customer ID successfully", results)) :
+//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all orders by customer ID failed", null));
+//    }
 
-    // lấy customer từ order id
-    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-customer/{order-id}")
-    public ResponseEntity<ObjectResponse> getCustomerByOrderID(@PathVariable("order-id") int orderID) {
-        CustomerDTO results = customerService.getCustomerByOrderID(orderID);
-        return results != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by order ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by order ID failed", null));
-    }
+//    // lấy customer từ order id
+//    /**
+//     * Method get all customers have status is active
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
+//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
+//    @GetMapping("/get-customer/{order-id}")
+//    public ResponseEntity<ObjectResponse> getCustomerByOrderID(@PathVariable("order-id") int orderID) {
+//        CustomerDTO results = customerService.getCustomerByOrderID(orderID);
+//        return results != null ?
+//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by order ID successfully", results)) :
+//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by order ID failed", null));
+//    }
 
-    // lấy building từ customer id
+    /**
+     * Method get building by customer id
+     *
+     * @param customerID idOfCustomer
+     * @return building or null
+     */
+    @Operation(summary = "Get building by customer id", description = "Retrieves building by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-building/{customer-id}")
     public ResponseEntity<ObjectResponse> getBuildingByCustomerID(@PathVariable("customer-id") int customerID) {
@@ -91,7 +130,13 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get building by customer ID failed", null));
     }
 
-    // lấy user từ customer id
+    /**
+     * Method get user by customer id
+     *
+     * @param customerID idOfCustomer
+     * @return user or null
+     */
+    @Operation(summary = "Get user by customer id", description = "Retrieves user by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-user-by-customer/{customer-id}")
     public ResponseEntity<ObjectResponse> getUserByCustomerID(@PathVariable("customer-id") int customerID) {
@@ -101,7 +146,13 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by customer ID failed", null));
     }
 
-    // lấy wallet từ customer id
+    /**
+     * Method get wallet by customer id
+     *
+     * @param customerID idOfCustomer
+     * @return wallet or null
+     */
+    @Operation(summary = "Get wallet by customer id", description = "Retrieves wallet by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/get-wallet/{customer-id}")
     public ResponseEntity<ObjectResponse> getWalletByCustomerID(@PathVariable("customer-id") int customerID) {
@@ -111,17 +162,30 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get wallet by customer ID failed", null));
     }
 
-    // lấy user từ wallet id
-    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
-    @GetMapping("/get-user-by-wallet/{wallet-id}")
-    public ResponseEntity<ObjectResponse> getCustomerByWalletID(@PathVariable("wallet-id") int walletID) {
-        CustomerDTO results = customerService.getCustomerByWalletID(walletID);
-        return results != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by wallet ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
-    }
+//    // lấy user từ wallet id
+//    /**
+//     * Method get wallet by customer id
+//     *
+//     * @param customerID idOfCustomer
+//     * @return user or null
+//     */
+//    @Operation(summary = "Get wallet by customer id", description = "Retrieves wallet by customer id")
+//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
+//    @GetMapping("/get-user-by-wallet/{wallet-id}")
+//    public ResponseEntity<ObjectResponse> getCustomerByWalletID(@PathVariable("wallet-id") int walletID) {
+//        CustomerDTO results = customerService.getCustomerByWalletID(walletID);
+//        return results != null ?
+//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by wallet ID successfully", results)) :
+//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
+//    }
 
-    // khôi phục lại customer đó
+    /**
+     * Method restore customer by customer id and set deleted = false
+     *
+     * @param customerID idOfCustomer
+     * @return customer or null
+     */
+    @Operation(summary = "restore customer by customer id", description = "restore customer by customer id and set deleted = false")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/undelete/{customer-id}")
     public ResponseEntity<ObjectResponse> unDeleteCustomerByID(@PathVariable("customer-id") int customerID) {
@@ -137,7 +201,13 @@ public class CustomerController {
         }
     }
 
-    // lấy ra customer bằng id
+    /**
+     * Method get customer by customer id
+     *
+     * @param customerID idOfCustomer
+     * @return customer or null
+     */
+    @Operation(summary = "get customer by customer id", description = "get customer by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF') or hasRole('SELLER')")
     @GetMapping("/get/{customer-id}")
     public ResponseEntity<ObjectResponse> getCustomerByID(@PathVariable("customer-id") int customerID) {
@@ -147,7 +217,13 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by ID failed", null));
     }
 
-    // tạo ra customer
+    /**
+     * Method create customer
+     *
+     * @param customerCreateRequest param basic for save customer
+     * @return customer or null
+     */
+    @Operation(summary = "Create customer", description = "Create customer")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createCustomer(@Valid @RequestBody CustomerCreateRequest customerCreateRequest) {
@@ -166,7 +242,14 @@ public class CustomerController {
         }
     }
 
-    // update customer bằng id
+    /**
+     * Method update customer by id
+     *
+     * @param customerID idOfCustomer
+     * @param customerUpdateRequest param basic for save customer
+     * @return customer or null
+     */
+    @Operation(summary = "Update customer by id", description = "Update customer by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
 //    @PostAuthorize("returnObject.customer.id == customerID")
     @PutMapping("/update/{customer-id}")
@@ -186,7 +269,13 @@ public class CustomerController {
         }
     }
 
-    // xóa customer, tức set deleted = true và xóa luôn user
+    /**
+     * Method delete customer by id and set deleted = true and set delete of user = true, enabled = false and nonLocked = false
+     *
+     * @param customerID idOfCustomer
+     * @return customer or null
+     */
+    @Operation(summary = "Delete customer by id", description = "delete customer by id and set deleted = true and set delete of user = true, enabled = false and nonLocked = false")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{customer-id}")
     public ResponseEntity<ObjectResponse> deleteCustomerByID(@PathVariable("customer-id") int customerID) {

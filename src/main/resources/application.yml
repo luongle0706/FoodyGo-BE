@@ -21,9 +21,22 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 2000
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 478830836024-e2fa5s2erqeal7bupi7tim4ap64d0cha.apps.googleusercontent.com
+            client-secret: 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
+            scope: profile, email
+          facebook:
+            client-id: 1149933542880208
+            client-secret: 3702bfea20fcef39700480798a065733
+            scope: public_profile, email
+            redirect-uri: http://localhost:5173/oauth2/callback
 jwt:
   secret: ${JWT_SECRET:753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465}
-  expiration: 8640000
+  expiration: 60000 #8640000
   refresh:
     secret: ${JWT_REFRESH_SECRET:123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321}
     expiration: 864000000
@@ -74,3 +87,4 @@ application:
 
 server:
   port: 8080
+

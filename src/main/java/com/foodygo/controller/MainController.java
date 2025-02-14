@@ -7,7 +7,10 @@ import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,16 +22,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/public")
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Authentication")
 public class MainController {
 
     private final UserService userService;
 
-    @GetMapping("/test")
-    public String testne() {
-        return "testne2";
-    }
-
-    // user đăng kí tài khoản
+    /**
+     * Method Register account
+     *
+     * @param userRegisterRequest userRegisterRequest
+     * @return user or null
+     */
+    @Operation(summary = "Register account", description = "User register an account to login")
     @PostMapping("/register")
     public ResponseEntity<ObjectResponse> userRegister(@Valid @RequestBody UserRegisterRequest userRegisterRequest) {
         try {
@@ -40,15 +45,27 @@ public class MainController {
         }
     }
 
-    // token refresh
-    @PostMapping("/refresh_token")
+    /**
+     * Method Refresh token
+     *
+     * @param request request
+     * @return token or null
+     */
+    @Operation(summary = "Refresh token", description = "Generate a new token when token exp")
+    @PostMapping("/refresh-token")
     public ResponseEntity<TokenResponse> refreshToken(HttpServletRequest request) {
         String refreshToken = request.getHeader("RefreshToken");
         TokenResponse tokenResponse = userService.refreshToken(refreshToken);
         return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
     }
 
-    // login
+    /**
+     * Method login
+     *
+     * @param userLogin userLogin
+     * @return token, refreshToken or null
+     */
+    @Operation(summary = "Login", description = "Login")
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> loginPage(@Valid @RequestBody UserLoginRequest userLogin) {
         try {
@@ -60,11 +77,18 @@ public class MainController {
         }
     }
 
-    // logout
+    /**
+     * Method logout
+     *
+     * @param request request
+     * @param response response
+     * @return success or failed
+     */
+    @Operation(summary = "Logout", description = "Logout")
     @PostMapping("/logout")
-    public ResponseEntity<ObjectResponse> getLogout(HttpServletRequest request) {
+    public ResponseEntity<ObjectResponse> getLogout(HttpServletRequest request, HttpServletResponse response) {
         try {
-            boolean checkLogout = userService.logout(request);
+            boolean checkLogout = userService.logout(request, response);
             return checkLogout ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Logout successfully", null)) :
                                  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "Logout failed", null));
         } catch (ElementNotFoundException e) {
@@ -73,6 +97,23 @@ public class MainController {
         } catch (Exception e) {
             log.error("Error logout : {}", e.toString());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "Logout failed", null));
+        }
+    }
+
+    /**
+     * Method get Token from login Oauth2
+     *
+     * @return token, refreshToken or null
+     */
+    @Operation(summary = "Logout", description = "Logout")
+    @GetMapping("/oauth2-token")
+    public ResponseEntity<TokenResponse> getToken() {
+        try {
+            TokenResponse tokenResponse = userService.getTokenLoginFromOauth2();
+            return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
+        } catch (Exception e) {
+            log.error("Cannot login : {}", e.toString());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null));
         }
     }
 

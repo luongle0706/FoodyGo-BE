@@ -5,8 +5,10 @@ import com.foodygo.exception.AuthenticationException;
 import io.jsonwebtoken.lang.Strings;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             "/v3/**",
             "/api-docs/**",
             "/swagger-resources/**",
-            "/api/v1/public/**"
+            "/api/v1/public/**",
+            "/oauth2/**",
+            "/login/oauth2/**",
+            "/login/**",
+            "/login",
+            "/oauth2/authorization/**",
+            "/favicon.ico"
     );
 
     public String getToken(HttpServletRequest request) {

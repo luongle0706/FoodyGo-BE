@@ -13,6 +13,8 @@ import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.RoleService;
 import com.foodygo.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
+@Tag(name = "User", description = "Operations related to user management")
 public class UserController {
 
     private final UserService userService;
@@ -39,12 +42,14 @@ public class UserController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    @GetMapping("/test")
-    public String testne() {
-        return "testne";
-    }
-
-    // lấy tất cả các user
+    /**
+     * Method get all users
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all users", description = "Retrieves all users, with optional pagination")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-all")
     public ResponseEntity<PagingResponse> getAllUsers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -56,7 +61,12 @@ public class UserController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // lấy tất cả roles
+    /**
+     * Method get all roles
+     *
+     * @return list or empty
+     */
+    @Operation(summary = "Get all roles", description = "Retrieves all roles")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-all-roles")
     public ResponseEntity<ObjectResponse> getAllRoles() {
@@ -66,7 +76,14 @@ public class UserController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all roles failed", null));
     }
 
-    // lấy tất cả các user active
+    /**
+     * Method get all users have status is active
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all users active", description = "Retrieves all users have status is active")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-all-active")
     public ResponseEntity<PagingResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -78,7 +95,14 @@ public class UserController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // update user bằng id
+    /**
+     * Method update user with basic info not include role by id
+     *
+     * @param userID idOfUser
+     * @param userUpdateRequest requestUpdateUser
+     * @return user or null
+     */
+    @Operation(summary = "Update user with basic info not include role", description = "Update user with basic info not include role by id")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @PutMapping("/update/{user-id}")
     public ResponseEntity<ObjectResponse> updateUser(@PathVariable("user-id") int userID, @RequestBody UserUpdateRequest userUpdateRequest) {
@@ -97,7 +121,14 @@ public class UserController {
         }
     }
 
-    // update user với role
+    /**
+     * Method update user with basic info and role by id
+     *
+     * @param userID idOfUser
+     * @param userUpdateRoleRequest requestUpdateUser
+     * @return user or null
+     */
+    @Operation(summary = "Update user with basic info and role", description = "Update user with basic info and role by id")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update-role/{user-id}")
     public ResponseEntity<ObjectResponse> updateUserRole(@PathVariable("user-id") int userID, @RequestBody UserUpdateRoleRequest userUpdateRoleRequest) {
@@ -113,7 +144,13 @@ public class UserController {
         }
     }
 
-    // lấy ra customer bằng user id
+    /**
+     * Method get customer by user id
+     *
+     * @param userID idOfUser
+     * @return customer or null
+     */
+    @Operation(summary = "Get customer by user id", description = "Get customer by user id")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/get-customer/{user-id}")
     public ResponseEntity<ObjectResponse> getCustomerByUserID(@PathVariable("user-id") int userID) {
@@ -133,17 +170,23 @@ public class UserController {
 //                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by role name failed", null));
 //    }
 
-    // lấy tất cả các order activity từ user id
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @GetMapping("/get-all-order-activities/{user-id}")
-    public ResponseEntity<ObjectResponse> getOrderActivitiesByUserID(@PathVariable("user-id") int userID) {
-        List<OrderActivity> results = userService.getOrderActivitiesByUserID(userID);
-        return !results.isEmpty() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all order activities by user ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all order activities by user ID failed", null));
-    }
+//    // lấy tất cả các order activity từ user id
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @GetMapping("/get-all-order-activities/{user-id}")
+//    public ResponseEntity<ObjectResponse> getOrderActivitiesByUserID(@PathVariable("user-id") int userID) {
+//        List<OrderActivity> results = userService.getOrderActivitiesByUserID(userID);
+//        return !results.isEmpty() ?
+//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all order activities by user ID successfully", results)) :
+//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all order activities by user ID failed", null));
+//    }
 
-    // lấy ra order bằng employee id
+    /**
+     * Method get order by employee id
+     *
+     * @param employeeID idOfEmployee
+     * @return list order or null
+     */
+    @Operation(summary = "Get order by employee id", description = "Get order by employee id")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-order/{employee-id}")
     public ResponseEntity<ObjectResponse> getOrderByEmployeeID(@PathVariable("employee-id") int employeeID) {
@@ -153,7 +196,13 @@ public class UserController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get order by employee ID failed", null));
     }
 
-    // lấy employee by order id
+    /**
+     * Method get employee by order id
+     *
+     * @param orderID idOfOrder
+     * @return employee (user) or null
+     */
+    @Operation(summary = "Get employee by order id", description = "Get employee by order id")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-employee/{order-id}")
     public ResponseEntity<ObjectResponse> getEmployeeByOrderID(@PathVariable("order-id") int orderID) {
@@ -163,17 +212,30 @@ public class UserController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get employee by order ID failed", null));
     }
 
-    // lấy user từ order activity id
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @GetMapping("/get-user/{order-activity-id}")
-    public ResponseEntity<ObjectResponse> getUserByOrderActivityID(@PathVariable("order-activity-id") int orderActivityID) {
-        UserDTO results = userService.getUserByOrderActivityID(orderActivityID);
-        return results != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get user by order activity ID successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by order activity ID failed", null));
-    }
+//    // lấy user từ order activity id
+//    /**
+//     * Method get employee by order id
+//     *
+//     * @param orderID idOfOrder
+//     * @return list employee or null
+//     */
+//    @Operation(summary = "Get employee by order id", description = "Get employee by order id")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @GetMapping("/get-user/{order-activity-id}")
+//    public ResponseEntity<ObjectResponse> getUserByOrderActivityID(@PathVariable("order-activity-id") int orderActivityID) {
+//        UserDTO results = userService.getUserByOrderActivityID(orderActivityID);
+//        return results != null ?
+//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get user by order activity ID successfully", results)) :
+//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by order activity ID failed", null));
+//    }
 
-    // khôi phục lại user đó, bao gồm unlock và undelete
+    /**
+     * Method reactive user include unlock and undelete
+     *
+     * @param userID idUser
+     * @return user or null
+     */
+    @Operation(summary = "Reactive user", description = "Reactive user include unlock and undelete")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/undelete/{user-id}")
     public ResponseEntity<ObjectResponse> unDeleteUserByID(@PathVariable("user-id") int userID) {
@@ -189,7 +251,13 @@ public class UserController {
         }
     }
 
-    // tạo ra user với role
+    /**
+     * Method create user with role
+     *
+     * @param userCreateRequest param user include role
+     * @return user or null
+     */
+    @Operation(summary = "Create user with role", description = "Create user with role duo to admin create")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createUserWithRole(@Valid @RequestBody UserCreateRequest userCreateRequest) {
@@ -205,7 +273,13 @@ public class UserController {
         }
     }
 
-    // set deleted = true and enabled = false
+    /**
+     * Method lock user include set deleted = true and enabled = false
+     *
+     * @param userID idOfUser
+     * @return user or null
+     */
+    @Operation(summary = "Lock user", description = "Lock user include set deleted = true and enabled = false duo to admin perform")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/lock/{user-id}")
     public ResponseEntity<ObjectResponse> lockUserByID(@PathVariable("user-id") int userID) {
@@ -223,7 +297,13 @@ public class UserController {
         }
     }
 
-    // xóa user, tức set deleted = true and enabled = false và xóa luôn Customer
+    /**
+     * Method delete user include set deleted = true and enabled = false and set delete of customer = true
+     *
+     * @param userID idOfUser
+     * @return user or null
+     */
+    @Operation(summary = "Delete user", description = "Delete user include set deleted = true and enabled = false and set delete of customer = true duo to admin perform")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{user-id}")
     public ResponseEntity<ObjectResponse> deleteUserByID(@PathVariable("user-id") int userID) {

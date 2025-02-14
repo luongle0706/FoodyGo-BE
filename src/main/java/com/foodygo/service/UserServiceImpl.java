@@ -22,7 +22,10 @@ import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
 import com.foodygo.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +34,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -338,7 +343,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     }
 
     @Override
-    public boolean logout(HttpServletRequest request) {
+    public boolean logout(HttpServletRequest request, HttpServletResponse response) {
         String token = jwtAuthenticationFilter.getToken(request);
         String email = jwtToken.getEmailFromJwt(token, EnumTokenType.TOKEN);
         User user = userRepository.getUserByEmail(email);
@@ -348,8 +353,53 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         user.setAccessToken(null);
         user.setRefreshToken(null);
         User checkUser = userRepository.save(user);
+        SecurityContextHolder.clearContext();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
 
         return checkUser.getAccessToken() == null;
+    }
+
+    @Override
+    public TokenResponse getTokenLoginFromOauth2() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof OAuth2AuthenticationToken)) {
+            return new TokenResponse("Failed", "Login Failed", null, null);
+        }
+
+        OAuth2User oauth2User = ((OAuth2AuthenticationToken) authentication).getPrincipal();
+        String email = oauth2User.getAttribute("email");
+        User user = userRepository.getUserByEmail(email);
+
+        if (user == null) {
+            Role role = roleService.getRoleByRoleName(EnumRoleNameType.ROLE_USER);
+            user = User.builder()
+                    .email(email)
+                    .enabled(true)
+                    .nonLocked(true)
+                    .role(role)
+                    .build();
+            userRepository.save(user);
+        }
+
+        CustomUserDetail userDetail = CustomUserDetail.mapUserToUserDetail(user);
+        String token = jwtToken.generatedToken(userDetail);
+        String refreshToken = jwtToken.generatedRefreshToken(userDetail);
+
+        user.setAccessToken(token);
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return new TokenResponse("Success", "Login successfully", token, refreshToken);
     }
 
     @Override
@@ -425,18 +475,23 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     @Override
     public UserDTO deleteUser(int userID) {
         User user = userRepository.getUserByUserID(userID);
-        Customer customer = user.getCustomer();
         if(user == null) {
             throw new ElementNotFoundException("User not found");
         }
         user.setDeleted(true);
         user.setEnabled(false);
         user.setNonLocked(false);
+        Customer customer = user.getCustomer();
         if (customer != null) {
             customer.setDeleted(true);
             customerRepository.save(customer);
         }
         return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    @Override
+    public int countNumberOfRegisterToday() {
+        return userRepository.countNumberOfRegisterToday();
     }
 
 }
