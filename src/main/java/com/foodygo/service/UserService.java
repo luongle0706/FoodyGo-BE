@@ -64,4 +64,6 @@ public interface UserService extends BaseService<User, Integer> {
 
     UserDTO deleteUser(int userID);
 
+    int countNumberOfRegisterToday();
+
 }

@@ -475,18 +475,23 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     @Override
     public UserDTO deleteUser(int userID) {
         User user = userRepository.getUserByUserID(userID);
-        Customer customer = user.getCustomer();
         if(user == null) {
             throw new ElementNotFoundException("User not found");
         }
         user.setDeleted(true);
         user.setEnabled(false);
         user.setNonLocked(false);
+        Customer customer = user.getCustomer();
         if (customer != null) {
             customer.setDeleted(true);
             customerRepository.save(customer);
         }
         return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    @Override
+    public int countNumberOfRegisterToday() {
+        return userRepository.countNumberOfRegisterToday();
     }
 
 }
