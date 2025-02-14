@@ -78,7 +78,6 @@ public class HubController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // lấy tất cả các orders từ hub id
     /**
      * Method get all orders by hub id
      *
@@ -135,7 +134,7 @@ public class HubController {
      * Method reactive hub by hub id set delete = false
      *
      * @param hubID idOfHub
-     * @return success or failed
+     * @return hub or null
      */
     @Operation(summary = "Reactive hubs", description = "Reactive hub by hub id set delete = false")
     @PreAuthorize("hasRole('MANAGER')")
@@ -157,7 +156,7 @@ public class HubController {
      * Method get hub by id
      *
      * @param hubID idOfHub
-     * @return success or failed
+     * @return hub or null
      */
     @Operation(summary = "Get hub by id", description = "Get hub by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
@@ -173,7 +172,7 @@ public class HubController {
      * Method create hub
      *
      * @param hubCreateRequest param basic for hub
-     * @return success or failed
+     * @return hub or null
      */
     @Operation(summary = "Create hub", description = "Create hub")
     @PreAuthorize("hasRole('MANAGER')")
@@ -192,7 +191,7 @@ public class HubController {
      * Method update hub by id
      *
      * @param hubUpdateRequest param basic update for hub
-     * @return success or failed
+     * @return hub or null
      */
     @Operation(summary = "Update hub by id", description = "Update hub by id")
     @PreAuthorize("hasRole('MANAGER')")
@@ -217,7 +216,7 @@ public class HubController {
      * Method delete hub set deleted = true
      *
      * @param hubID idOfHub
-     * @return success or failed
+     * @return hub or null
      */
     @Operation(summary = "Delete hub by id", description = "Delete hub by id and set deleted = true")
     @PreAuthorize("hasRole('MANAGER')")

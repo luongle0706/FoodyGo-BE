@@ -42,11 +42,6 @@ public class UserController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    @GetMapping("/test")
-    public String testne() {
-        return "testne";
-    }
-
     /**
      * Method get all users
      *
@@ -105,7 +100,7 @@ public class UserController {
      *
      * @param userID idOfUser
      * @param userUpdateRequest requestUpdateUser
-     * @return success or failed
+     * @return user or null
      */
     @Operation(summary = "Update user with basic info not include role", description = "Update user with basic info not include role by id")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
@@ -131,7 +126,7 @@ public class UserController {
      *
      * @param userID idOfUser
      * @param userUpdateRoleRequest requestUpdateUser
-     * @return success or failed
+     * @return user or null
      */
     @Operation(summary = "Update user with basic info and role", description = "Update user with basic info and role by id")
     @PreAuthorize("hasRole('ADMIN')")
@@ -205,7 +200,7 @@ public class UserController {
      * Method get employee by order id
      *
      * @param orderID idOfOrder
-     * @return list employee or null
+     * @return employee (user) or null
      */
     @Operation(summary = "Get employee by order id", description = "Get employee by order id")
     @PreAuthorize("hasRole('ADMIN')")
@@ -238,7 +233,7 @@ public class UserController {
      * Method reactive user include unlock and undelete
      *
      * @param userID idUser
-     * @return success or failed
+     * @return user or null
      */
     @Operation(summary = "Reactive user", description = "Reactive user include unlock and undelete")
     @PreAuthorize("hasRole('ADMIN')")
@@ -260,7 +255,7 @@ public class UserController {
      * Method create user with role
      *
      * @param userCreateRequest param user include role
-     * @return success or failed
+     * @return user or null
      */
     @Operation(summary = "Create user with role", description = "Create user with role duo to admin create")
     @PreAuthorize("hasRole('ADMIN')")
@@ -282,7 +277,7 @@ public class UserController {
      * Method lock user include set deleted = true and enabled = false
      *
      * @param userID idOfUser
-     * @return success or failed
+     * @return user or null
      */
     @Operation(summary = "Lock user", description = "Lock user include set deleted = true and enabled = false duo to admin perform")
     @PreAuthorize("hasRole('ADMIN')")
@@ -306,7 +301,7 @@ public class UserController {
      * Method delete user include set deleted = true and enabled = false and set delete of customer = true
      *
      * @param userID idOfUser
-     * @return success or failed
+     * @return user or null
      */
     @Operation(summary = "Delete user", description = "Delete user include set deleted = true and enabled = false and set delete of customer = true duo to admin perform")
     @PreAuthorize("hasRole('ADMIN')")

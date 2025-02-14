@@ -31,7 +31,7 @@ public class MainController {
      * Method Register account
      *
      * @param userRegisterRequest userRegisterRequest
-     * @return success or failed
+     * @return user or null
      */
     @Operation(summary = "Register account", description = "User register an account to login")
     @PostMapping("/register")
@@ -49,7 +49,7 @@ public class MainController {
      * Method Refresh token
      *
      * @param request request
-     * @return success or failed
+     * @return token or null
      */
     @Operation(summary = "Refresh token", description = "Generate a new token when token exp")
     @PostMapping("/refresh-token")
@@ -63,7 +63,7 @@ public class MainController {
      * Method login
      *
      * @param userLogin userLogin
-     * @return success or failed
+     * @return token, refreshToken or null
      */
     @Operation(summary = "Login", description = "Login")
     @PostMapping("/login")
@@ -103,7 +103,7 @@ public class MainController {
     /**
      * Method get Token from login Oauth2
      *
-     * @return token or failed
+     * @return token, refreshToken or null
      */
     @Operation(summary = "Logout", description = "Logout")
     @GetMapping("/oauth2-token")
