@@ -50,7 +50,7 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
 
         return !pageData.getContent().isEmpty() ? PagingResponse.builder()
                 .code("Success")
-                .message("Get all buildings active paging successfully")
+                .message("Get all buildings paging successfully")
                 .currentPage(currentPage)
                 .pageSizes(pageSize)
                 .totalElements(pageData.getTotalElements())
@@ -61,7 +61,7 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
                 .build() :
                 PagingResponse.builder()
                         .code("Failed")
-                        .message("Get all buildings active paging failed")
+                        .message("Get all buildings paging failed")
                         .currentPage(currentPage)
                         .pageSizes(pageSize)
                         .totalElements(pageData.getTotalElements())
