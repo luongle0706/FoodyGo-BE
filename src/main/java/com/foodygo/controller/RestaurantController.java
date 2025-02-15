@@ -67,12 +67,12 @@ public class RestaurantController {
                 );
     }
 
-    @GetMapping("/search-by-name")
+    @GetMapping("/name/{name}")
     @Operation(summary = "Search restaurants by name",
             description = "Search restaurants by name, with optional pagination and sorting.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getRestaurantsByName(
-            @RequestParam String name,
+            @PathVariable String name,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,

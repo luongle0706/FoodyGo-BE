@@ -27,7 +27,7 @@ public class AddonSectionController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    @GetMapping("/search-by-product/{productId}")
+    @GetMapping("/product/{productId}")
     @Operation(summary = "Get Addon Sections by Product ID", description = "Retrieve a paginated list of addon sections by the specified product ID. Supports sorting and pagination.")
     public ResponseEntity<ObjectResponse> getAddonSectionsByProductId(
             @PathVariable Integer productId,

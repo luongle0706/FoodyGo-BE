@@ -70,12 +70,12 @@ public class ProductController {
                 );
     }
 
-    @GetMapping("/search-by-restaurant")
+    @GetMapping("/restaurant/{restaurantId}")
     @Operation(summary = "Get products by restaurant ID",
             description = "Retrieves products by restaurant ID, with optional pagination and sorting.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getProductsByRestaurantId(
-            @RequestParam Integer restaurantId,
+            @PathVariable Integer restaurantId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -94,12 +94,12 @@ public class ProductController {
                 );
     }
 
-    @GetMapping("/search-by-category")
+    @GetMapping("/category/{categoryId}")
     @Operation(summary = "Get products by category ID",
             description = "Retrieves products by category ID, with optional pagination and sorting.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getProductsByCategoryId(
-            @RequestParam Integer categoryId,
+            @PathVariable Integer categoryId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
