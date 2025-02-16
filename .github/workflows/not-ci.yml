@@ -1,0 +1,27 @@
+#name: CI/CD Pipeline
+#on:
+#  push:
+#    branches:
+#      - main
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: SSH into VPS and deploy
+#        uses: appleboy/ssh-action@v0.1.5
+#        with:
+#          host: ${{ secrets.VPS_HOST }}
+#          username: ${{ secrets.VPS_USER }}
+#          password: ${{ secrets.VPS_PASSWORD }}
+#          script: |
+#            cd /home/theanh/GIT/SWD301-FoodyGo-BE/
+#            docker compose down
+#            sudo chmod -R 777 .
+#            git clean -dfx
+#            git fetch --all
+#            git reset --hard origin/main
+#
+#            echo '${{ secrets.FIREBASE_CREDENTIAL }}' > src/main/resources/firebase-SWD391.json
+#
+#            docker compose up --build -d
