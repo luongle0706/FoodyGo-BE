@@ -4,6 +4,8 @@ import com.foodygo.dto.CategoryDTO;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +33,12 @@ public class CategoryController {
     @Operation(summary = "Get all categories",
             description = "Retrieves all categories, with optional pagination and sorting.")
     @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Data retrieved"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getAllCategories(
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
@@ -54,6 +62,12 @@ public class CategoryController {
             description = "Searches categories by name, with optional pagination and sorting.")
     @GetMapping("/name/{name}")
     @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Categories found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getAllCategoriesContainsName(
             @PathVariable String name,
             @RequestParam(defaultValue = "0") int pageNo,
@@ -78,6 +92,14 @@ public class CategoryController {
             description = "Retrieves categories for a specific restaurant, with optional pagination and sorting.")
     @GetMapping("/restaurant/{restaurantId}")
     @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Categories found"),
+            @ApiResponse(responseCode = "400", description = "Invalid category request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Restaurant not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getAllCategoriesByRestaurantId(
             @PathVariable Integer restaurantId,
             @RequestParam(defaultValue = "0") int pageNo,
@@ -102,6 +124,14 @@ public class CategoryController {
             description = "Retrieves a category by its ID.")
     @GetMapping("/{categoryId}")
     @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Category found"),
+            @ApiResponse(responseCode = "400", description = "Invalid category request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Category not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getCategoryById(
             @PathVariable Integer categoryId
     ) {
@@ -120,6 +150,13 @@ public class CategoryController {
             description = "Creates a new category with the provided details.")
     @PostMapping
     @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Category created"),
+            @ApiResponse(responseCode = "400", description = "Invalid category body"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> createCategory(
             @RequestBody CategoryDTO.CategoryCreateRequest request
     ) {
@@ -138,6 +175,14 @@ public class CategoryController {
             description = "Updates the details of an existing category.")
     @PutMapping
     @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Category updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid category body"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Category not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> updateCategory(
             @RequestBody CategoryDTO.CategoryUpdateRequest request
     ) {
@@ -156,6 +201,13 @@ public class CategoryController {
             description = "Deletes a category by its ID.")
     @DeleteMapping("/{categoryId}")
     @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Category availability updated"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Category not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> deleteCategory(
             @PathVariable Integer categoryId
     ) {

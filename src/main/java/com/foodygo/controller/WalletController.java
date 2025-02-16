@@ -59,7 +59,7 @@ public class WalletController {
     @Operation(summary = "Get Wallet Balance", description = "Fetches the current balance of a specific wallet.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Wallet deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Wallet not found"),
+            @ApiResponse(responseCode = "400", description = "Wallet not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -72,7 +72,7 @@ public class WalletController {
     @Operation(summary = "Delete Wallet", description = "Deletes a wallet based on the wallet ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Transaction history retrieved"),
-            @ApiResponse(responseCode = "404", description = "Wallet not found"),
+            @ApiResponse(responseCode = "400", description = "Wallet not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -91,7 +91,7 @@ public class WalletController {
     @Operation(summary = "Get Transaction by ID", description = "Fetches the details of a specific transaction based on the transaction ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Transaction details retrieved"),
-            @ApiResponse(responseCode = "404", description = "Transaction not found"),
+            @ApiResponse(responseCode = "400", description = "Transaction not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -104,7 +104,7 @@ public class WalletController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Payment processed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid payment request"),
-            @ApiResponse(responseCode = "404", description = "Wallet not found"),
+            @ApiResponse(responseCode = "400", description = "Wallet not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -118,7 +118,7 @@ public class WalletController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Refund processed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid refund request"),
-            @ApiResponse(responseCode = "404", description = "Wallet not found"),
+            @ApiResponse(responseCode = "400", description = "Wallet not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -132,7 +132,7 @@ public class WalletController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Transfer completed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid transfer request"),
-            @ApiResponse(responseCode = "404", description = "One or both wallets not found"),
+            @ApiResponse(responseCode = "400", description = "One or both wallets not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -156,7 +156,7 @@ public class WalletController {
     @Operation(summary = "Approve Deposit", description = "Approves a pending deposit request based on deposit ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Deposit approved successfully"),
-            @ApiResponse(responseCode = "404", description = "Deposit not found"),
+            @ApiResponse(responseCode = "400", description = "Deposit not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
