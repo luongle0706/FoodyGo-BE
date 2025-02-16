@@ -1,26 +1,26 @@
 services:
 
   # MYSQL
-  mysql:
-    container_name: mysql
-    image: mysql:8.0.41
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456789
-      MYSQL_USER: mysql
-      MYSQL_PASSWORD: mysql
-      MYSQL_DATABASE: foodygo
-      TZ: Asia/Saigon
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./data/mysql-data:/var/lib/mysql
-    healthcheck:
-      test: mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD
-      interval: 20s
-      timeout: 10s
-      retries: 6
-    restart: unless-stopped
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-time-zone=+07:00']
+#  mysql:
+#    container_name: mysql
+#    image: mysql:8.0.41
+#    environment:
+#      MYSQL_ROOT_PASSWORD: 123456789
+#      MYSQL_USER: mysql
+#      MYSQL_PASSWORD: mysql
+#      MYSQL_DATABASE: foodygo
+#      TZ: Asia/Saigon
+#    ports:
+#      - "3306:3306"
+#    volumes:
+#      - ./data/mysql-data:/var/lib/mysql
+#    healthcheck:
+#      test: mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD
+#      interval: 20s
+#      timeout: 10s
+#      retries: 6
+#    restart: unless-stopped
+#    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-time-zone=+07:00']
 
   #BUILDER
   spring-boot-builder:
