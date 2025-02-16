@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "order-details")
+@Table(name = "order-detail")
 public class OrderDetail extends BaseEntity {
 
     @Id

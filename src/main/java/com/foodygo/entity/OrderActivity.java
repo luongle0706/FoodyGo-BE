@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "order-activities")
+@Table(name = "order-activity")
 public class OrderActivity extends BaseEntity {
 
     @Id

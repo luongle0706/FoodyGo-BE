@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "customers")
+@Table(name = "customer")
 public class Customer extends BaseEntity {
 
     @Id

@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "restaurants")
+@Table(name = "restaurant")
 public class Restaurant extends BaseEntity {
 
     @Id
