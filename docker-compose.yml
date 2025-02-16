@@ -24,7 +24,7 @@ services:
       REDIS_HOST: redis-container
       REDIS_PORT: 6379
     ports:
-      - "8080:8080"
+      - "2222:8080"
     depends_on:
       builder:
         condition: service_completed_successfully
