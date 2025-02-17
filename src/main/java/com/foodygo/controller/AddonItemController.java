@@ -4,6 +4,8 @@ import com.foodygo.dto.AddonItemDTO;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.AddonItemService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,14 @@ public class AddonItemController {
 
     @GetMapping("/section/{sectionId}")
     @Operation(summary = "Get Addon Items by Section", description = "Retrieve a paginated list of addon items by the specified section ID. Supports sorting and pagination.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Addon items found"),
+            @ApiResponse(responseCode = "400", description = "Invalid addon item request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Addon section not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getAddonItemsBySection(
             @PathVariable Integer sectionId,
             @RequestParam(defaultValue = "0") int pageNo,
@@ -51,6 +61,14 @@ public class AddonItemController {
 
     @GetMapping("/{addonItemId}")
     @Operation(summary = "Get Addon Item by ID", description = "Retrieve details of an addon item by its unique ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Addon item found"),
+            @ApiResponse(responseCode = "400", description = "Invalid addon item request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Addon item not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getAddonItemById(
             @PathVariable Integer addonItemId
     ) {
@@ -67,6 +85,13 @@ public class AddonItemController {
 
     @PostMapping
     @Operation(summary = "Create Addon Item", description = "Create a new addon item using the provided data.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Addon item created"),
+            @ApiResponse(responseCode = "400", description = "Invalid addon item body"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> createAddonItem(
             @RequestBody AddonItemDTO.CreateRequest request
     ) {
@@ -83,6 +108,14 @@ public class AddonItemController {
 
     @PutMapping
     @Operation(summary = "Update Addon Item", description = "Update an existing addon item with the provided data.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Addon item updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid addon item body"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Addon item not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> updateAddonItem(
             @RequestBody AddonItemDTO.UpdateRequest request
     ) {
@@ -99,6 +132,13 @@ public class AddonItemController {
 
     @DeleteMapping("/{addonItemId}")
     @Operation(summary = "Delete Addon Item", description = "Delete an addon item by its unique ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Addon item availability updated"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Addon item not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> deleteAddonItem(
             @PathVariable Integer addonItemId
     ) {

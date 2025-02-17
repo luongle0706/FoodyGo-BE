@@ -1,61 +1,38 @@
 services:
-
-  # MYSQL
-  mysql:
-    container_name: mysql
-    image: mysql:8.0.41
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456789
-      MYSQL_USER: mysql
-      MYSQL_PASSWORD: mysql
-      MYSQL_DATABASE: foodygo
-      TZ: Asia/Saigon
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./data/mysql-data:/var/lib/mysql
-    healthcheck:
-      test: mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD
-      interval: 20s
-      timeout: 10s
-      retries: 6
-    restart: unless-stopped
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci','--default-time-zone=+07:00']
-
   #BUILDER
-  spring-boot-builder:
-    container_name: spring-boot-builder
+  builder:
+    container_name: foodygo-builder
     build:
       context: .
       dockerfile: docker/builder/Dockerfile
-    depends_on:
-      mysql:
-        condition: service_healthy
     volumes:
       - ../maven-cache:/root/.m2
       - ./data/spring-boot-data:/temp/build-output
+    networks:
+      - foodygo-network
 
-  # SPRING BOOT RUNNER
-  spring-boot-runner:
-    container_name: spring-boot-runner
+  #RUNNER
+  runner:
+    container_name: foodygo-runner
     build:
       context: .
       dockerfile: docker/runner/Dockerfile
     environment:
       MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
       MYSQL_USER: root
-      MYSQL_PASSWORD: 123456789
-#      JWT_SECRET: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
-#      JWT_REFRESH_SECRET: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
+      MYSQL_PASSWORD: fFP4vTcMY@!NUxgt
       REDIS_HOST: redis-container
       REDIS_PORT: 6379
     ports:
-      - "8080:8080"
+      - "2222:8080"
     depends_on:
-      spring-boot-builder:
+      builder:
         condition: service_completed_successfully
     volumes:
       - ./data/spring-boot-data:/temp/build-output
+    networks:
+      - mysql-network
+      - foodygo-network
     restart: no
 
   # REDIS
@@ -67,6 +44,15 @@ services:
       - "6379:6379"
     volumes:
       - ./data/redis-data:/data
+    networks:
+      - foodygo-network
+
+networks:
+  mysql-network:
+    external: true
+  foodygo-network:
+    driver: bridge
+
 #  ollama:
 #    image: ollama/ollama
 #    container_name: ollama
