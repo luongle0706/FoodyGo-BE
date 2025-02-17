@@ -7,6 +7,7 @@ import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
+import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.BuildingService;
@@ -164,9 +165,12 @@ public class BuildingController {
         try {
             BuildingDTO building = buildingService.createBuilding(buildingCreateRequest);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create building successfully", building));
+        } catch (ElementExistException e) {
+            log.error("Error while creating building", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed." + e.getMessage(), null));
         } catch (ElementNotFoundException e) {
             log.error("Error while creating building", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed. Building not found", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error while creating building", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed", null));
@@ -190,9 +194,12 @@ public class BuildingController {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update building successfully", building));
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. Building is null", null));
+        } catch (ElementExistException e) {
+            log.error("Error while updating building", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. " + e.getMessage(), null));
         } catch (ElementNotFoundException e) {
             log.error("Error while updating building", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. Building not found", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error while updating building", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed", null));

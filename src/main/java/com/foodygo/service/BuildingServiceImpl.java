@@ -144,6 +144,12 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
         Building building = buildingRepository.findBuildingById(buildingID);
         if (building != null) {
             if (buildingUpdateRequest.getName() != null) {
+                if (!building.getName().equals(buildingUpdateRequest.getName())) {
+                    Building checkExist = buildingRepository.findBuildingByName(buildingUpdateRequest.getName());
+                    if (checkExist != null) {
+                        throw new ElementExistException("There is already a building with the name " + buildingUpdateRequest.getName());
+                    }
+                }
                 building.setName(buildingUpdateRequest.getName());
             }
             if (buildingUpdateRequest.getDescription() != null) {

@@ -262,6 +262,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 user.setPassword(bCryptPasswordEncoder.encode(userUpdateRequest.getPassword()));
             }
             if (userUpdateRequest.getPhone() != null) {
+                if (!user.getPhone().equals(userUpdateRequest.getPhone())) {
+                    User checkExistingUser = userRepository.getUserByPhone(userUpdateRequest.getPhone());
+                    if (checkExistingUser != null) {
+                        throw new ElementExistException("Phone already exists");
+                    }
+                }
                 user.setPhone(userUpdateRequest.getPhone());
             }
             if(userUpdateRequest.getFullName() != null) {
@@ -284,6 +290,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
             user.setPassword(bCryptPasswordEncoder.encode(userUpdateRoleRequest.getPassword()));
         }
         if (userUpdateRoleRequest.getPhone() != null) {
+            if (!user.getPhone().equals(userUpdateRoleRequest.getPhone())) {
+                User checkExistingUser = userRepository.getUserByPhone(userUpdateRoleRequest.getPhone());
+                if (checkExistingUser != null) {
+                    throw new ElementExistException("Phone already exists");
+                }
+            }
             user.setPhone(userUpdateRoleRequest.getPhone());
         }
         if(userUpdateRoleRequest.getFullName() != null) {
