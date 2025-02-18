@@ -98,9 +98,19 @@ FoodyGo is a platform designed to enhance food delivery efficiency and security 
 
 ---
 
-## Entity Relationship Diagram
+## System Architecture Overview Diagram
 
-![Entity Relationship Diagram](assets/erd.png)
+![System Architecture Overview](assets/system-architecture-overiew.png)
+---
+
+## Entity Relationship Diagram Conceptual
+
+![ERD Conceptual](assets/erd-conceptual.png)
+---
+
+## Entity Relationship Diagram Logical
+
+![ERD Logical](assets/erd-logical.png)
 ---
 
 ## Figma Design
