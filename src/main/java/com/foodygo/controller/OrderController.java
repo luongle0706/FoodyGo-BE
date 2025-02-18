@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class OrderController {
 
     @PostMapping()
     @Operation(summary = "Create Order", description = "Create a new order using the provided data.")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<ObjectResponse> createOrder(
             @RequestBody OrderCreateRequest request
     ) {
@@ -47,6 +49,7 @@ public class OrderController {
 
     @PutMapping("/{orderId}")
     @Operation(summary = "Update Order", description = "Update an existing order with the provided data.")
+    @PreAuthorize("hasAnyRole('STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> updateAddonItem(
             @PathVariable Integer orderId,
             @RequestBody OrderUpdateRequest orderUpdateRequest
@@ -64,6 +67,7 @@ public class OrderController {
 
     @DeleteMapping("/{orderId}")
     @Operation(summary = "Delete Order", description = "Delete an order by its unique ID.")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> deleteOrder(
             @PathVariable Integer orderId
     ) {
@@ -80,7 +84,8 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    @Operation(summary = "Get All Orders", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
+    @Operation(summary = "Get Order By Id", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
+    @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getOrderById(@PathVariable Integer orderId) {
         return ResponseEntity.ok(
                 ObjectResponse.builder()
@@ -93,6 +98,7 @@ public class OrderController {
 
     @GetMapping()
     @Operation(summary = "Get All Orders", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
+    @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getAllOrders(
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
@@ -114,6 +120,7 @@ public class OrderController {
 
     @GetMapping("/employees/{employeeId}")
     @Operation(summary = "Get Orders By Employee", description = "Retrieve a paginated list of all orders by the specified employee ID. Supports sorting and pagination.")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getAllOrdersByEmployeeId(
             @PathVariable Integer employeeId,
             @RequestParam(defaultValue = "0") int pageNo,
@@ -136,6 +143,7 @@ public class OrderController {
 
     @GetMapping("/customers/{customerId}")
     @Operation(summary = "Get Orders By Customer", description = "Retrieve a paginated list of all orders by the specified customer ID. Supports sorting and pagination.")
+    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getAllOrdersByCustomerId(
             @PathVariable Integer customerId,
             @RequestParam(defaultValue = "0") int pageNo,
@@ -158,6 +166,7 @@ public class OrderController {
 
     @GetMapping("/restaurants/{restaurantId}")
     @Operation(summary = "Get Orders By Restaurant", description = "Retrieve a paginated list of all orders by the specified restaurant ID. Supports sorting and pagination.")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     public ResponseEntity<ObjectResponse> getAllOrdersByRestaurantId(
             @PathVariable Integer restaurantId,
             @RequestParam(defaultValue = "0") int pageNo,
