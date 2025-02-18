@@ -23,5 +23,7 @@ jobs:
             git reset --hard origin/main
 
             echo '${{ secrets.FIREBASE_CREDENTIAL }}' > src/main/resources/firebase-SWD391.json
+            
+            echo '${{secrets.THEANH_FIREBASE_CREDENTIAL}}' > src/main/resources/theanh-firebase.json
 
             docker compose up --build -d
