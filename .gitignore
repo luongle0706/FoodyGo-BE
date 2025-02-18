@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 src/main/resources/firebase-SWD391.json
+src/main/resources/theanh-firebase.json
 data
 
 ### STS ###

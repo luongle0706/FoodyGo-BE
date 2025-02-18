@@ -84,7 +84,13 @@ springdoc:
 application:
   default-current-page: 1
   default-page-size: 30
+  postfix-password: xinchaomoinguoiminhlafoodygo
 
 server:
   port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 

@@ -13,4 +13,6 @@ public class TokenResponse {
     String message;
     String token;
     String refreshToken;
+    String fullName;
+    String email;
 }

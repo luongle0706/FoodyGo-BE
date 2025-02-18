@@ -6,7 +6,9 @@ import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.exception.ElementNotFoundException;
+import com.foodygo.service.FirebaseService;
 import com.foodygo.service.UserService;
+import com.google.api.Http;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +28,22 @@ import org.springframework.web.bind.annotation.*;
 public class MainController {
 
     private final UserService userService;
+    private final FirebaseService firebaseService;
+
+    @PostMapping("/firebase")
+    public ResponseEntity<ObjectResponse> loginUsingFirebase(
+            @RequestParam String googleIdToken
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        ObjectResponse.builder()
+                                .status(HttpStatus.OK.toString())
+                                .message("Successful login using firebase")
+                                .data(firebaseService.getUserFromFirebase(googleIdToken))
+                                .build()
+                );
+    }
 
     /**
      * Method Register account
@@ -73,14 +91,14 @@ public class MainController {
             return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
         } catch (Exception e) {
             log.error("Cannot login : {}", e.toString());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null, null, null));
         }
     }
 
     /**
      * Method logout
      *
-     * @param request request
+     * @param request  request
      * @param response response
      * @return success or failed
      */
@@ -90,7 +108,7 @@ public class MainController {
         try {
             boolean checkLogout = userService.logout(request, response);
             return checkLogout ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Logout successfully", null)) :
-                                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "Logout failed", null));
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "Logout failed", null));
         } catch (ElementNotFoundException e) {
             log.error("Error logout not found : {}", e.toString());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "Logout failed", null));
@@ -113,7 +131,7 @@ public class MainController {
             return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
         } catch (Exception e) {
             log.error("Cannot login : {}", e.toString());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null, null, null));
         }
     }
 

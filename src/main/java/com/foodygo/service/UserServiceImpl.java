@@ -160,8 +160,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                     listsByRole.remove(user);
                 }
             }
-        }  else if (role.equals(EnumRoleNameType.ROLE_ADMIN.name())) {
-                return userRepository.findAll();
+        } else if (role.equals(EnumRoleNameType.ROLE_ADMIN.name())) {
+            return userRepository.findAll();
         }
         return listsByRole;
     }
@@ -199,10 +199,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     @Override
     public boolean getUserByPhone(String phone) {
         User user = userRepository.getUserByPhone(phone);
-        if (user == null || !user.isNonLocked() || !user.isEnabled()) {
-            return false;
-        }
-        return true;
+        return user != null && user.isNonLocked() && user.isEnabled();
     }
 
     @Override
@@ -223,7 +220,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
             check = true;
         } else if (c >= '0' && c <= '9') {
             user = userRepository.getUserByPhone(s);
-            check = false;
         }
         return check;
     }
@@ -270,7 +266,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 }
                 user.setPhone(userUpdateRequest.getPhone());
             }
-            if(userUpdateRequest.getFullName() != null) {
+            if (userUpdateRequest.getFullName() != null) {
                 user.setFullName(userUpdateRequest.getFullName());
             }
             return userMapper.userToUserDTO(userRepository.save(user));
@@ -298,10 +294,10 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
             }
             user.setPhone(userUpdateRoleRequest.getPhone());
         }
-        if(userUpdateRoleRequest.getFullName() != null) {
+        if (userUpdateRoleRequest.getFullName() != null) {
             user.setFullName(userUpdateRoleRequest.getFullName());
         }
-        if(userUpdateRoleRequest.getRoleID() > 0) {
+        if (userUpdateRoleRequest.getRoleID() > 0) {
             Role role = roleService.getRoleByRoleId(userUpdateRoleRequest.getRoleID());
             if (role == null) {
                 throw new ElementNotFoundException("Role not found");
@@ -313,7 +309,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
     @Override
     public TokenResponse refreshToken(String refreshToken) {
-        TokenResponse tokenResponse = new TokenResponse("Failed", "Refresh token failed", null, null);
+        TokenResponse tokenResponse = new TokenResponse("Failed", "Refresh token failed", null, null, null, null);
         String email = jwtToken.getEmailFromJwt(refreshToken, EnumTokenType.REFRESH_TOKEN);
         User user = userRepository.getUserByEmail(email);
         if (user != null) {
@@ -324,7 +320,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                         String newToken = jwtToken.generatedToken(customUserDetail);
                         user.setAccessToken(newToken);
                         userRepository.save(user);
-                        tokenResponse = new TokenResponse("Success", "Refresh token successfully", newToken, refreshToken);
+                        tokenResponse = new TokenResponse("Success", "Refresh token successfully", newToken, refreshToken, user.getFullName(), user.getEmail());
                     }
                 }
             }
@@ -334,14 +330,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
     @Override
     public TokenResponse login(String email, String password) {
-        TokenResponse tokenResponse = new TokenResponse("Failed", "Login failed", null, null);
+        TokenResponse tokenResponse = new TokenResponse("Failed", "Login failed", null, null, null, null);
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(email, password);
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
         CustomUserDetail userDetails = (CustomUserDetail) authentication.getPrincipal();
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        //SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String token = jwtToken.generatedToken(userDetails);
         String refreshToken = jwtToken.generatedRefreshToken(userDetails);
         User user = userRepository.getUserByEmail(userDetails.getEmail());
@@ -349,7 +344,14 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
             user.setRefreshToken(refreshToken);
             user.setAccessToken(token);
             userRepository.save(user);
-            tokenResponse = new TokenResponse("Success", "Login successfully", token, refreshToken);
+            tokenResponse = TokenResponse.builder()
+                    .fullName(user.getFullName())
+                    .email(user.getEmail())
+                    .token(token)
+                    .refreshToken(refreshToken)
+                    .code("Success")
+                    .message("Login successfully")
+                    .build();
         }
         return tokenResponse;
     }
@@ -385,7 +387,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof OAuth2AuthenticationToken)) {
-            return new TokenResponse("Failed", "Login Failed", null, null);
+            return new TokenResponse("Failed", "Login Failed", null, null, null, null);
         }
 
         OAuth2User oauth2User = ((OAuth2AuthenticationToken) authentication).getPrincipal();
@@ -411,7 +413,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
-        return new TokenResponse("Success", "Login successfully", token, refreshToken);
+        return new TokenResponse("Success", "Login successfully", token, refreshToken, user.getFullName(), user.getEmail());
     }
 
     @Override
@@ -439,7 +441,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         if (user == null) {
             throw new ElementNotFoundException("User not found");
         }
-        if(user.isNonLocked() && user.isEnabled() && !user.isDeleted()) {
+        if (user.isNonLocked() && user.isEnabled() && !user.isDeleted()) {
             throw new UnchangedStateException("User already deleted");
         }
         user.setNonLocked(true);
@@ -487,7 +489,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     @Override
     public UserDTO deleteUser(int userID) {
         User user = userRepository.getUserByUserID(userID);
-        if(user == null) {
+        if (user == null) {
             throw new ElementNotFoundException("User not found");
         }
         user.setDeleted(true);
