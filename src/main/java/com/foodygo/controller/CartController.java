@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
     private final CartServiceImpl cartService;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/users/{userId}")
     @Operation(summary = "Get Cart By User", description = "Retrieve a cart by the specified restaurant ID.")
     public ResponseEntity<ObjectResponse> getCart(@PathVariable Integer userId) {
         return ResponseEntity.ok(ObjectResponse.builder()
@@ -28,7 +28,7 @@ public class CartController {
                 .build());
     }
 
-    @PostMapping("/add/{userId}")
+    @PostMapping("/users/{userId}")
     @Operation(summary = "Add To Cart", description = "Add a new product to cart.")
     public ResponseEntity<ObjectResponse> addToCart(@PathVariable Integer userId, @RequestBody CartItem cartItem) {
         Cart cart = cartService.addToCart(userId, cartItem);
@@ -42,7 +42,7 @@ public class CartController {
                 );
     }
 
-    @DeleteMapping("/remove/{userId}/{productId}")
+    @DeleteMapping("/users/{userId}/products/{productId}")
     @Operation(summary = "Remove From Cart", description = "Remove a product from cart.")
     public ResponseEntity<ObjectResponse> removeFromCart(@PathVariable Integer userId, @PathVariable Integer productId) {
         Cart cart = cartService.removeFromCart(userId, productId);
@@ -56,7 +56,7 @@ public class CartController {
                 );
     }
 
-    @DeleteMapping("/clear/{userId}")
+    @DeleteMapping("/users/{userId}")
     @Operation(summary = "Clear Cart", description = "Remove all product from cart.")
     public ResponseEntity<ObjectResponse> clearCart(@PathVariable Integer userId) {
         return ResponseEntity.status(HttpStatus.OK)

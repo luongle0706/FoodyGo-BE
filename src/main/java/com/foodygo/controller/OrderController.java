@@ -29,7 +29,7 @@ public class OrderController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    @PostMapping("/add")
+    @PostMapping()
     @Operation(summary = "Create Order", description = "Create a new order using the provided data.")
     public ResponseEntity<ObjectResponse> createOrder(
             @RequestBody OrderCreateRequest request
@@ -45,7 +45,7 @@ public class OrderController {
                 );
     }
 
-    @PutMapping("/update/{orderId}")
+    @PutMapping("/{orderId}")
     @Operation(summary = "Update Order", description = "Update an existing order with the provided data.")
     public ResponseEntity<ObjectResponse> updateAddonItem(
             @PathVariable Integer orderId,
@@ -62,7 +62,7 @@ public class OrderController {
                 );
     }
 
-    @DeleteMapping("/delete/{orderId}")
+    @DeleteMapping("/{orderId}")
     @Operation(summary = "Delete Order", description = "Delete an order by its unique ID.")
     public ResponseEntity<ObjectResponse> deleteOrder(
             @PathVariable Integer orderId
@@ -91,7 +91,7 @@ public class OrderController {
         );
     }
 
-    @GetMapping("/search-all-orders")
+    @GetMapping()
     @Operation(summary = "Get All Orders", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
     public ResponseEntity<ObjectResponse> getAllOrders(
             @RequestParam(defaultValue = "0") int pageNo,
@@ -112,7 +112,7 @@ public class OrderController {
                 );
     }
 
-    @GetMapping("/search-by-employee/{employeeId}")
+    @GetMapping("/employees/{employeeId}")
     @Operation(summary = "Get Orders By Employee", description = "Retrieve a paginated list of all orders by the specified employee ID. Supports sorting and pagination.")
     public ResponseEntity<ObjectResponse> getAllOrdersByEmployeeId(
             @PathVariable Integer employeeId,
@@ -134,7 +134,7 @@ public class OrderController {
                 );
     }
 
-    @GetMapping("/search-by-customer/{customerId}")
+    @GetMapping("/customers/{customerId}")
     @Operation(summary = "Get Orders By Customer", description = "Retrieve a paginated list of all orders by the specified customer ID. Supports sorting and pagination.")
     public ResponseEntity<ObjectResponse> getAllOrdersByCustomerId(
             @PathVariable Integer customerId,
@@ -156,7 +156,7 @@ public class OrderController {
                 );
     }
 
-    @GetMapping("/search-by-restaurant/{restaurantId}")
+    @GetMapping("/restaurants/{restaurantId}")
     @Operation(summary = "Get Orders By Restaurant", description = "Retrieve a paginated list of all orders by the specified restaurant ID. Supports sorting and pagination.")
     public ResponseEntity<ObjectResponse> getAllOrdersByRestaurantId(
             @PathVariable Integer restaurantId,

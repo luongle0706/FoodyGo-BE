@@ -43,6 +43,7 @@ public class WebSecurityConfig {
                 .cors(AbstractHttpConfigurer::disable).authorizeHttpRequests((auth) ->
                         auth.
                                 requestMatchers("/**").permitAll()
+                                .requestMatchers("/api/v1/carts/**").permitAll()
 //                              .requestMatchers(HttpMethod.POST, "/ues", "/*").permitAll()
                                 .anyRequest().authenticated())
                 .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
