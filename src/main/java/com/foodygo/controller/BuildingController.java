@@ -27,7 +27,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/building")
+@RequestMapping("/api/v1/buildings")
 @Tag(name = "Building", description = "Operations related to building management")
 public class BuildingController {
 
@@ -39,43 +39,67 @@ public class BuildingController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    /**
-     * Method get all buildings
+     /**
+     * Method get all buildings or all buildings by status
      *
      * @param currentPage currentOfThePage
      * @param pageSize numberOfElement
      * @return list or empty
      */
-    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination")
+    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination and filtering by status")
     @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-all")
-    public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    @GetMapping("")
+    public ResponseEntity<PagingResponse> getAllBuildings(
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+            @RequestParam(value = "status", required = false) String status) {
+
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
+        PagingResponse results = (status != null && status.equals("active"))
+                ? buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize)
+                : buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    /**
-     * Method get all buildings have status active
-     *
-     * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
-     * @return list or empty
-     */
-    @Operation(summary = "Get all buildings active", description = "Retrieves all buildings have status active, with optional pagination")
-    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-all-active")
-    public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-    }
+//    /**
+//     * Method get all buildings
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination")
+//    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
+//    @GetMapping("")
+//    public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+//
+//    /**
+//     * Method get all buildings have status active
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all buildings active", description = "Retrieves all buildings have status active, with optional pagination")
+//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
+//    @GetMapping("/active")
+//    public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
 
     /**
      * Method get hub by building id
@@ -85,7 +109,7 @@ public class BuildingController {
      */
     @Operation(summary = "Get hub by building id", description = "Get hub by building id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-hub/{building-id}")
+    @GetMapping("/{building-id}/hub")
     public ResponseEntity<ObjectResponse> getHubByBuildingID(@PathVariable("building-id") int buildingID) {
         HubDTO hub = buildingService.getHubByBuildingID(buildingID);
         return hub != null ?
@@ -103,7 +127,7 @@ public class BuildingController {
      */
     @Operation(summary = "Get all customers by building id", description = "Retrieves all customers by building id, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/get-all-customers/{building-id}")
+    @GetMapping("/{building-id}/customers")
     public ResponseEntity<PagingResponse> getCustomersByBuildingID(@PathVariable("building-id") int buildingID,
                                                                    @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                                    @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -122,7 +146,7 @@ public class BuildingController {
      */
     @Operation(summary = "Restore building by building id", description = "Restore building by building id and set deleted = false")
     @PreAuthorize("hasRole('MANAGER')")
-    @PostMapping("/undelete/{building-id}")
+    @PostMapping("/{building-id}/restore")
     public ResponseEntity<ObjectResponse> unDeleteBuildingByID(@PathVariable("building-id") int buildingID) {
         try {
             BuildingDTO building = buildingService.undeleteBuilding(buildingID);
@@ -144,7 +168,7 @@ public class BuildingController {
      */
     @Operation(summary = "Get building by id", description = "Get building by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get/{building-id}")
+    @GetMapping("/{building-id}")
     public ResponseEntity<ObjectResponse> getBuildingByID(@PathVariable("building-id") int buildingID) {
         Building building = buildingService.findById(buildingID);
         return building != null ?
@@ -160,7 +184,7 @@ public class BuildingController {
      */
     @Operation(summary = "Create building", description = "Create building")
     @PreAuthorize("hasRole('MANAGER')")
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<ObjectResponse> createBuilding(@Valid @RequestBody BuildingCreateRequest buildingCreateRequest) {
         try {
             BuildingDTO building = buildingService.createBuilding(buildingCreateRequest);
@@ -186,7 +210,7 @@ public class BuildingController {
      */
     @Operation(summary = "Update building by building id", description = "Update building by building id")
     @PreAuthorize("hasRole('MANAGER')")
-    @PutMapping("/update/{building-id}")
+    @PutMapping("/{building-id}")
     public ResponseEntity<ObjectResponse> updateBuilding(@Valid @RequestBody BuildingUpdateRequest buildingUpdateRequest, @PathVariable("building-id") int buildingID) {
         try {
             BuildingDTO building = buildingService.updateBuilding(buildingUpdateRequest, buildingID);
@@ -214,7 +238,7 @@ public class BuildingController {
      */
     @Operation(summary = "Delete building by building id", description = "Delete building by building id and set deleted = true")
     @PreAuthorize("hasRole('MANAGER')")
-    @DeleteMapping("/delete/{building-id}")
+    @DeleteMapping("/{building-id}")
     public ResponseEntity<ObjectResponse> deleteBuildingByID(@PathVariable("building-id") int buildingID) {
         try {
             BuildingDTO building = buildingService.deleteBuilding(buildingID);

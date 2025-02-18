@@ -29,13 +29,12 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Tag(name = "User", description = "Operations related to user management")
 public class UserController {
 
     private final UserService userService;
-    private final RoleService roleService;
 
     @Value("${application.default-current-page}")
     private int defaultCurrentPage;
@@ -52,49 +51,58 @@ public class UserController {
      */
     @Operation(summary = "Get all users", description = "Retrieves all users, with optional pagination")
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/get-all")
-    public ResponseEntity<PagingResponse> getAllUsers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    @GetMapping("")
+    public ResponseEntity<PagingResponse> getAllUsers(
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+            @RequestParam(value = "status", required = false) String status) {
+
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
+        PagingResponse results = (status != null && status.equals("active"))
+                ? userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize)
+                : userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    /**
-     * Method get all roles
-     *
-     * @return list or empty
-     */
-    @Operation(summary = "Get all roles", description = "Retrieves all roles")
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/get-all-roles")
-    public ResponseEntity<ObjectResponse> getAllRoles() {
-        List<Role> results = roleService.getAllRoles();
-        return !results.isEmpty() ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all roles successfully", results)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all roles failed", null));
-    }
-
-    /**
-     * Method get all users have status is active
-     *
-     * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
-     * @return list or empty
-     */
-    @Operation(summary = "Get all users active", description = "Retrieves all users have status is active")
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/get-all-active")
-    public ResponseEntity<PagingResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-    }
+//    /**
+//     * Method get all users
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all users", description = "Retrieves all users, with optional pagination")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/get-all")
+//    public ResponseEntity<PagingResponse> getAllUsers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+//
+//    /**
+//     * Method get all users have status is active
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all users active", description = "Retrieves all users have status is active")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/get-all-active")
+//    public ResponseEntity<PagingResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
 
     /**
      * Method update user with basic info not include role by id
@@ -105,7 +113,7 @@ public class UserController {
      */
     @Operation(summary = "Update user with basic info not include role", description = "Update user with basic info not include role by id")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @PutMapping("/update/{user-id}")
+    @PutMapping("/{user-id}")
     public ResponseEntity<ObjectResponse> updateUser(@PathVariable("user-id") int userID, @RequestBody UserUpdateRequest userUpdateRequest) {
         try {
             UserDTO user = userService.updateUser(userUpdateRequest, userID);
@@ -134,7 +142,7 @@ public class UserController {
      */
     @Operation(summary = "Update user with basic info and role", description = "Update user with basic info and role by id")
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/update-role/{user-id}")
+    @PutMapping("/{user-id}/role")
     public ResponseEntity<ObjectResponse> updateUserRole(@PathVariable("user-id") int userID, @RequestBody UserUpdateRoleRequest userUpdateRoleRequest) {
         try {
             UserDTO user = userService.updateUserRole(userUpdateRoleRequest, userID);
@@ -159,7 +167,7 @@ public class UserController {
      */
     @Operation(summary = "Get customer by user id", description = "Get customer by user id")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @GetMapping("/get-customer/{user-id}")
+    @GetMapping("/{user-id}")
     public ResponseEntity<ObjectResponse> getCustomerByUserID(@PathVariable("user-id") int userID) {
         CustomerDTO customer = userService.getCustomerByUserID(userID);
         return customer != null ?
@@ -188,14 +196,14 @@ public class UserController {
 //    }
 
     /**
-     * Method get order by employee id
+     * Method get orders by employee id
      *
      * @param employeeID idOfEmployee
-     * @return list order or null
+     * @return list orders or null
      */
-    @Operation(summary = "Get order by employee id", description = "Get order by employee id")
+    @Operation(summary = "Get orders by employee id", description = "Get orders by employee id")
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/get-order/{employee-id}")
+    @GetMapping("/{employee-id}/orders")
     public ResponseEntity<ObjectResponse> getOrderByEmployeeID(@PathVariable("employee-id") int employeeID) {
         List<Order> results = userService.getOrdersByEmployeeID(employeeID);
         return !results.isEmpty() ?
@@ -211,7 +219,7 @@ public class UserController {
      */
     @Operation(summary = "Get employee by order id", description = "Get employee by order id")
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/get-employee/{order-id}")
+    @GetMapping("/{order-id}/employee")
     public ResponseEntity<ObjectResponse> getEmployeeByOrderID(@PathVariable("order-id") int orderID) {
         UserDTO results = userService.getEmployeeByOrderID(orderID);
         return results != null ?
@@ -244,7 +252,7 @@ public class UserController {
      */
     @Operation(summary = "Reactive user", description = "Reactive user include unlock and undelete")
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/undelete/{user-id}")
+    @PostMapping("/{user-id}/restore")
     public ResponseEntity<ObjectResponse> unDeleteUserByID(@PathVariable("user-id") int userID) {
         try {
             UserDTO user = userService.undeletedUser(userID);
@@ -266,7 +274,7 @@ public class UserController {
      */
     @Operation(summary = "Create user with role", description = "Create user with role duo to admin create")
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<ObjectResponse> createUserWithRole(@Valid @RequestBody UserCreateRequest userCreateRequest) {
         try {
             UserDTO user = userService.createUserWithRole(userCreateRequest);
@@ -288,7 +296,7 @@ public class UserController {
      */
     @Operation(summary = "Lock user", description = "Lock user include set deleted = true and enabled = false duo to admin perform")
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/lock/{user-id}")
+    @PostMapping("/{user-id}/locked")
     public ResponseEntity<ObjectResponse> lockUserByID(@PathVariable("user-id") int userID) {
         try {
             User user = userService.findById(userID);
@@ -312,7 +320,7 @@ public class UserController {
      */
     @Operation(summary = "Delete user", description = "Delete user include set deleted = true and enabled = false and set delete of customer = true duo to admin perform")
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/delete/{user-id}")
+    @DeleteMapping("/{user-id}")
     public ResponseEntity<ObjectResponse> deleteUserByID(@PathVariable("user-id") int userID) {
         try {
             UserDTO user = userService.deleteUser(userID);

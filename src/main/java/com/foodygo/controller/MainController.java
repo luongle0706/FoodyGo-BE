@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/public")
+@RequestMapping("/api/v1/authentications")
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "Authentication", description = "Authentication")
