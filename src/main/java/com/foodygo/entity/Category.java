@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "categories")
+@Table(name = "category")
 public class Category extends BaseEntity {
 
     @Id

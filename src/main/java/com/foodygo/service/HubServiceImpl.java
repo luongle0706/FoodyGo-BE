@@ -133,6 +133,12 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
         Hub hub = hubRepository.findHubById(hubID);
         if (hub != null) {
             if (hubUpdateRequest.getName() != null) {
+                if (!hub.getName().equals(hubUpdateRequest.getName())) {
+                    Hub checkExist = hubRepository.findHubByName(hubUpdateRequest.getName());
+                    if (checkExist != null) {
+                        throw new ElementExistException("There is already a hub with the name " + hubUpdateRequest.getName());
+                    }
+                }
                 hub.setName(hubUpdateRequest.getName());
             }
             if (hubUpdateRequest.getAddress() != null) {

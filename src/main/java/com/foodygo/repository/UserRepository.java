@@ -45,4 +45,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("update User set nonLocked = false where email = ?1")
     void lockedByEmail(String email);
 
+    @Query("SELECT COUNT(u) FROM User u WHERE DATE(u.createdAt) = CURRENT_DATE")
+    int countNumberOfRegisterToday();
+
 }

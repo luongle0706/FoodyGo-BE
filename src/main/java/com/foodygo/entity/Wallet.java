@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "wallets")
+@Table(name = "wallet")
 public class Wallet extends BaseEntity {
 
     @Id

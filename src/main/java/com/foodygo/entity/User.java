@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user-account")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,6 +54,9 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy = "user")
     Customer customer;
+
+    @OneToOne(mappedBy = "owner")
+    Restaurant restaurant;
 
     @OneToMany(mappedBy = "employee")
     @JsonBackReference

@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "buildings")
+@Table(name = "building")
 public class Building extends BaseEntity {
 
     @Id

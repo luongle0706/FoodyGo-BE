@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "restaurants")
+@Table(name = "restaurant")
 public class Restaurant extends BaseEntity {
 
     @Id
@@ -29,6 +29,9 @@ public class Restaurant extends BaseEntity {
     String address;
 
     String image;
+
+    @OneToOne
+    User owner;
 
     @OneToMany(mappedBy = "restaurant")
     List<Wallet> wallets;

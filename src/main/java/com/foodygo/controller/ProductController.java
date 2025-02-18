@@ -5,6 +5,8 @@ import com.foodygo.dto.ProductDTO;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,12 @@ public class ProductController {
     @Operation(summary = "Get all products",
             description = "Retrieves all products, with optional pagination and sorting.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Data retrieved"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getAllProducts(
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
@@ -58,6 +66,14 @@ public class ProductController {
     @Operation(summary = "Get product by ID",
             description = "Retrieves a product by its ID.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product found"),
+            @ApiResponse(responseCode = "400", description = "Invalid product request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getProductById(@PathVariable Integer productId) {
         return ResponseEntity
                 .status(OK)
@@ -70,12 +86,20 @@ public class ProductController {
                 );
     }
 
-    @GetMapping("/search-by-restaurant")
+    @GetMapping("/restaurant/{restaurantId}")
     @Operation(summary = "Get products by restaurant ID",
             description = "Retrieves products by restaurant ID, with optional pagination and sorting.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product found"),
+            @ApiResponse(responseCode = "400", description = "Invalid product request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getProductsByRestaurantId(
-            @RequestParam Integer restaurantId,
+            @PathVariable Integer restaurantId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -94,12 +118,20 @@ public class ProductController {
                 );
     }
 
-    @GetMapping("/search-by-category")
+    @GetMapping("/category/{categoryId}")
     @Operation(summary = "Get products by category ID",
             description = "Retrieves products by category ID, with optional pagination and sorting.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product found"),
+            @ApiResponse(responseCode = "400", description = "Invalid product request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> getProductsByCategoryId(
-            @RequestParam Integer categoryId,
+            @PathVariable Integer categoryId,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -122,7 +154,14 @@ public class ProductController {
             description = "Creates a new product with the provided details.")
     @PostMapping
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<ObjectResponse> createCategory(
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Product created"),
+            @ApiResponse(responseCode = "400", description = "Invalid product body"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> createProduct(
             @RequestBody ProductDTO request
     ) {
         productService.createProduct(request);
@@ -136,11 +175,19 @@ public class ProductController {
                 );
     }
 
-    @Operation(summary = "Update an existing category",
-            description = "Updates the details of an existing category.")
+    @Operation(summary = "Update an existing product",
+            description = "Updates the details of an existing product.")
     @PutMapping
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<ObjectResponse> updateCategory(
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid product body"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> updateProduct(
             @RequestBody ProductDTO request
     ) {
         productService.updateProductInfo(request);
@@ -158,6 +205,13 @@ public class ProductController {
     @Operation(summary = "Switch product availability",
             description = "Switch product availability to open/close")
     @PreAuthorize("hasRole('SELLER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product availability updated"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ObjectResponse> switchAvailability(@PathVariable Integer productId) {
         boolean availability = productService.switchProductAvailability(productId);
         return ResponseEntity
@@ -170,11 +224,18 @@ public class ProductController {
                 );
     }
 
-    @Operation(summary = "Delete a category",
-            description = "Deletes a category by its ID.")
+    @Operation(summary = "Delete a product",
+            description = "Deletes a product by its ID.")
     @DeleteMapping("/{productId}")
     @PreAuthorize("hasAnyRole('SELLER', 'MANAGER')")
-    public ResponseEntity<ObjectResponse> deleteCategory(
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> deleteProduct(
             @PathVariable Integer productId
     ) {
         productService.deleteProduct(productId);

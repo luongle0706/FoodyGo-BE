@@ -7,9 +7,12 @@ import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
+import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.service.BuildingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/building")
+@Tag(name = "Building", description = "Operations related to building management")
 public class BuildingController {
 
     private final BuildingService buildingService;
@@ -35,7 +39,14 @@ public class BuildingController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    // lấy tất cả buildings
+    /**
+     * Method get all buildings
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination")
     @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all")
     public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -47,7 +58,14 @@ public class BuildingController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // lấy tất cả building chưa xóa
+    /**
+     * Method get all buildings have status active
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all buildings active", description = "Retrieves all buildings have status active, with optional pagination")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-all-active")
     public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
@@ -59,7 +77,13 @@ public class BuildingController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // lấy hub theo building id
+    /**
+     * Method get hub by building id
+     *
+     * @param buildingID idOfBuilding
+     * @return hub or null
+     */
+    @Operation(summary = "Get hub by building id", description = "Get hub by building id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get-hub/{building-id}")
     public ResponseEntity<ObjectResponse> getHubByBuildingID(@PathVariable("building-id") int buildingID) {
@@ -69,7 +93,15 @@ public class BuildingController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all hub by building ID failed", null));
     }
 
-    // lấy tất cả customer trong building
+    /**
+     * Method get all customers by building id
+     *
+     * @param buildingID idOfBuilding
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all customers by building id", description = "Retrieves all customers by building id, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all-customers/{building-id}")
     public ResponseEntity<PagingResponse> getCustomersByBuildingID(@PathVariable("building-id") int buildingID,
@@ -82,7 +114,13 @@ public class BuildingController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    // khôi phục building
+    /**
+     * Method restore building by building id and set deleted = false
+     *
+     * @param buildingID idOfBuilding
+     * @return list or empty
+     */
+    @Operation(summary = "Restore building by building id", description = "Restore building by building id and set deleted = false")
     @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/undelete/{building-id}")
     public ResponseEntity<ObjectResponse> unDeleteBuildingByID(@PathVariable("building-id") int buildingID) {
@@ -98,7 +136,13 @@ public class BuildingController {
         }
     }
 
-    // get building by id
+    /**
+     * Method get building by id
+     *
+     * @param buildingID idOfBuilding
+     * @return list or empty
+     */
+    @Operation(summary = "Get building by id", description = "Get building by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/get/{building-id}")
     public ResponseEntity<ObjectResponse> getBuildingByID(@PathVariable("building-id") int buildingID) {
@@ -108,23 +152,39 @@ public class BuildingController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get building by ID failed", null));
     }
 
-    // create building
+    /**
+     * Method create building
+     *
+     * @param buildingCreateRequest param basic info for saving db
+     * @return building or null
+     */
+    @Operation(summary = "Create building", description = "Create building")
     @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/create")
     public ResponseEntity<ObjectResponse> createBuilding(@Valid @RequestBody BuildingCreateRequest buildingCreateRequest) {
         try {
             BuildingDTO building = buildingService.createBuilding(buildingCreateRequest);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Create building successfully", building));
+        } catch (ElementExistException e) {
+            log.error("Error while creating building", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed." + e.getMessage(), null));
         } catch (ElementNotFoundException e) {
             log.error("Error while creating building", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed. Building not found", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error while creating building", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Create building failed", null));
         }
     }
 
-    // update building theo id
+    /**
+     * Method update building by building id
+     *
+     * @param buildingID idOfBuilding
+     * @param buildingUpdateRequest param basic info for saving db
+     * @return building or null
+     */
+    @Operation(summary = "Update building by building id", description = "Update building by building id")
     @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/update/{building-id}")
     public ResponseEntity<ObjectResponse> updateBuilding(@Valid @RequestBody BuildingUpdateRequest buildingUpdateRequest, @PathVariable("building-id") int buildingID) {
@@ -134,16 +194,25 @@ public class BuildingController {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update building successfully", building));
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. Building is null", null));
+        } catch (ElementExistException e) {
+            log.error("Error while updating building", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. " + e.getMessage(), null));
         } catch (ElementNotFoundException e) {
             log.error("Error while updating building", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. Building not found", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error while updating building", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update building failed", null));
         }
     }
 
-    // xóa building
+    /**
+     * Method delete building by building id and set deleted = true
+     *
+     * @param buildingID idOfBuilding
+     * @return building or null
+     */
+    @Operation(summary = "Delete building by building id", description = "Delete building by building id and set deleted = true")
     @PreAuthorize("hasRole('MANAGER')")
     @DeleteMapping("/delete/{building-id}")
     public ResponseEntity<ObjectResponse> deleteBuildingByID(@PathVariable("building-id") int buildingID) {

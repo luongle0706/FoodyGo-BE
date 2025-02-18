@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "transactions")
+@Table(name = "account-transaction")
 public class Transaction extends BaseEntity {
 
     @Id

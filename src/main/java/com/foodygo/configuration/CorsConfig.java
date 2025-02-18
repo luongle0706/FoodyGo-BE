@@ -15,14 +15,14 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Arrays.asList(
+        corsConfiguration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost",
                 "http://localhost:5173",
                 "http://foodygo.theanh0804.id.vn",
                 "https://foodygo.theanh0804.id.vn"));
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
-        corsConfiguration.setExposedHeaders(List.of("Content-Disposition"));
+        corsConfiguration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
         corsConfiguration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);

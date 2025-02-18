@@ -24,17 +24,15 @@ FoodyGo is a platform designed to enhance food delivery efficiency and security 
 - Students frequently order food from various local restaurants.
 
 ## Problem Statement
-1. Lack of a professional, secure platform for food ordering.
-2. Local restaurants struggle to reach students efficiently.
-3. Shippers face delays and inefficiencies due to direct deliveries to individual buildings.
-4. Insufficient food storage solutions during delivery delays.
+- Lack of a convenient & professional ordering platform
+- Inefficiencies in the delivery process
+- Limited customer reach for restaurants
 
 ## Solution Overview
-FoodyGo provides:
-- An online food ordering platform for students.
-- Management tools for restaurant owners to handle orders and menus.
-- Delivery hubs strategically placed in dormitory areas, reducing delivery time and wait time for shippers.
-- Secure and fixed storage at hubs to ensure food safety.
+- Online food ordering system
+- Hub-based delivery model – Reducing waiting time and optimizing efficiency
+- Enhancing the experience for restaurants
+- Efficient management system for Admin & Manager
 
 ## Target Users
 1. Students living in dormitories.
@@ -45,49 +43,74 @@ FoodyGo provides:
 ## Features
 
 ### Customer Features
-- **Account Management**: Register, log in, and update personal details.
+- **Account Management**:
+  - Register
+  - Log in
+  - Update personal details.
 - **Food Ordering**:
-  - Browse restaurants and menus.
-  - Add items to the cart and place orders.
+  - View restaurants
+  - View food items
+  - Place an order
 - **Payments**:
   - Choose payment methods.
   - Use online payment gateways (e.g., VNPay).
-- **Order Tracking**: Monitor order status and receive notifications.
-- **Reviews**:
-  - View restaurant and food reviews.
-  - Provide feedback and ratings.
+- **Order Tracking**:
+  - Track order status
+  - Receive order status notifications
 
-### Vendor Features
-- **Menu Management**: View, update, and toggle availability of menu items.
-- **Store Management**: View and update store details.
+### Seller Features
+- **Menu Management**:
+  - View food item information
+  - Update food item information
+  - Open/Close food sales
+- **Store Management**:
+  - View restaurant information
+  - Update restaurant status
 - **Order Management**:
   - Monitor order statuses.
   - Receive notifications for new orders.
-- **Statistics**: Track order counts and revenue.
+- **Track and analyze order statistics and revenue**:
 
 ### Hub Staff Features
-- Manage hub orders by:
-  - Viewing and updating order statuses.
+- **Hub Order Management**:
+  - View order status
+  - Update order status
 
 ### Manager Features
-- **Hub Management**: View and update hub details.
-- **Store Management**: Access restaurant information.
-- **Order Tracking**: Monitor order statuses.
+- **Hub Management**:
+  - View Hub information
+  - Update Hub information
+- **Store Management**:
+  - Access restaurant information.
+- **Order Tracking**:
+  - Monitor order statuses.
 - **Revenue Management**:
-  - View payment reports and statistics.
-
+  - Track payment transactions
+  - Monitor reports and revenue statistics
+  
 ### Admin Features
 - **User Account Management**:
   - View user details.
   - Update account statuses (e.g., lock, deactivate).
-- **Analytics**:
-  - Track user access and activity statistics.
+- **Statistics & Reports**:
+  - Track reports
+  - Monitor statistics on traffic and user activity
 
 ---
 
-## Entity Relationship Diagram
+## System Architecture Overview Diagram
 
-![Entity Relationship Diagram](assets/erd.png)
+![System Architecture Overview](assets/system-architecture-overiew.png)
+---
+
+## Entity Relationship Diagram Conceptual
+
+![ERD Conceptual](assets/erd-conceptual.png)
+---
+
+## Entity Relationship Diagram Logical
+
+![ERD Logical](assets/erd-logical.png)
 ---
 
 ## Figma Design

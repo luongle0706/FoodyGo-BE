@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "addon-sections")
+@Table(name = "addon-section")
 public class AddonSection extends BaseEntity {
 
     @Id

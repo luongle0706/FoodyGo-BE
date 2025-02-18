@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "addon-items")
+@Table(name = "addon-item")
 public class AddonItem extends BaseEntity {
 
     @Id

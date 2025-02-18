@@ -44,7 +44,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             "/api-docs/**",
             "/swagger-resources/**",
             "/api/v1/public/**",
-            "/api/v1/carts/**"
+            "/oauth2/**",
+            "/login/oauth2/**",
+            "/login/**",
+            "/login",
+            "/oauth2/authorization/**",
+            "/favicon.ico"
     );
 
     public String getToken(HttpServletRequest request) {
@@ -98,8 +103,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isAuthentication(String uri) {
-        AntPathMatcher pathcMatcher = new AntPathMatcher();
-        return NON_USER.stream().anyMatch(pattern -> pathcMatcher.match(pattern, uri));
+        AntPathMatcher patchMatcher = new AntPathMatcher();
+        return NON_USER.stream().anyMatch(pattern -> patchMatcher.match(pattern, uri));
     }
 
 //    private boolean testIsAuthentication(String uri){
