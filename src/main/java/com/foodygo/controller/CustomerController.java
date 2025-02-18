@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/customer")
+@RequestMapping("/api/v1/customers")
 @Tag(name = "Customer", description = "Operations related to Customer management")
 public class CustomerController {
 
@@ -49,34 +49,58 @@ public class CustomerController {
      */
     @Operation(summary = "Get all customers", description = "Retrieves all customers, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/get-all")
-    public ResponseEntity<PagingResponse> getAllCustomers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    @GetMapping("")
+    public ResponseEntity<PagingResponse> getAllCustomers(
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+            @RequestParam(value = "status", required = false) String status) {
+
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
+        PagingResponse results = (status != null && status.equals("active"))
+                ? customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize)
+                : customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    /**
-     * Method get all customers have status is active
-     *
-     * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
-     * @return list or empty
-     */
-    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
-    @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/get-all-active")
-    public ResponseEntity<PagingResponse> getAllCustomersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-    }
+//    /**
+//     * Method get all customers
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all customers", description = "Retrieves all customers, with optional pagination")
+//    @PreAuthorize("hasRole('MANAGER')")
+//    @GetMapping("/get-all")
+//    public ResponseEntity<PagingResponse> getAllCustomers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+//
+//    /**
+//     * Method get all customers have status is active
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
+//    @PreAuthorize("hasRole('MANAGER')")
+//    @GetMapping("/active")
+//    public ResponseEntity<PagingResponse> getAllCustomersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
 
 //    // lấy tất cả các order từ customer id
 //    /**
@@ -122,7 +146,7 @@ public class CustomerController {
      */
     @Operation(summary = "Get building by customer id", description = "Retrieves building by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-building/{customer-id}")
+    @GetMapping("/{customer-id}/building")
     public ResponseEntity<ObjectResponse> getBuildingByCustomerID(@PathVariable("customer-id") int customerID) {
         BuildingDTO results = customerService.getBuildingByCustomerID(customerID);
         return results != null ?
@@ -138,7 +162,7 @@ public class CustomerController {
      */
     @Operation(summary = "Get user by customer id", description = "Retrieves user by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-user-by-customer/{customer-id}")
+    @GetMapping("/{customer-id}/user")
     public ResponseEntity<ObjectResponse> getUserByCustomerID(@PathVariable("customer-id") int customerID) {
         UserDTO results = customerService.getUserByCustomerID(customerID);
         return results != null ?
@@ -154,7 +178,7 @@ public class CustomerController {
      */
     @Operation(summary = "Get wallet by customer id", description = "Retrieves wallet by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
-    @GetMapping("/get-wallet/{customer-id}")
+    @GetMapping("/{customer-id}/wallet")
     public ResponseEntity<ObjectResponse> getWalletByCustomerID(@PathVariable("customer-id") int customerID) {
         Wallet results = customerService.getWalletByCustomerID(customerID);
         return results != null ?
@@ -187,7 +211,7 @@ public class CustomerController {
      */
     @Operation(summary = "restore customer by customer id", description = "restore customer by customer id and set deleted = false")
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/undelete/{customer-id}")
+    @PostMapping("/{customer-id}/restore")
     public ResponseEntity<ObjectResponse> unDeleteCustomerByID(@PathVariable("customer-id") int customerID) {
         try {
             CustomerDTO customerDTO = customerService.undeleteCustomer(customerID);
@@ -209,7 +233,7 @@ public class CustomerController {
      */
     @Operation(summary = "get customer by customer id", description = "get customer by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF') or hasRole('SELLER')")
-    @GetMapping("/get/{customer-id}")
+    @GetMapping("/{customer-id}")
     public ResponseEntity<ObjectResponse> getCustomerByID(@PathVariable("customer-id") int customerID) {
         Customer customer = customerService.findById(customerID);
         return customer != null ?
@@ -225,7 +249,7 @@ public class CustomerController {
      */
     @Operation(summary = "Create customer", description = "Create customer")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<ObjectResponse> createCustomer(@Valid @RequestBody CustomerCreateRequest customerCreateRequest) {
         try {
             CustomerDTO customer = customerService.createCustomer(customerCreateRequest);
@@ -252,7 +276,7 @@ public class CustomerController {
     @Operation(summary = "Update customer by id", description = "Update customer by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
 //    @PostAuthorize("returnObject.customer.id == customerID")
-    @PutMapping("/update/{customer-id}")
+    @PutMapping("/{customer-id}")
     public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("customer-id") int customerID, @RequestBody CustomerUpdateRequest customerUpdateRequest) {
         try {
             CustomerDTO customer = customerService.updateCustomer(customerUpdateRequest, customerID);
@@ -277,7 +301,7 @@ public class CustomerController {
      */
     @Operation(summary = "Delete customer by id", description = "delete customer by id and set deleted = true and set delete of user = true, enabled = false and nonLocked = false")
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/delete/{customer-id}")
+    @DeleteMapping("/{customer-id}")
     public ResponseEntity<ObjectResponse> deleteCustomerByID(@PathVariable("customer-id") int customerID) {
         try {
             CustomerDTO customer = customerService.deleteCustomer(customerID);

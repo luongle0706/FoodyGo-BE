@@ -27,7 +27,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/hub")
+@RequestMapping("/api/v1/hubs")
 @Tag(name = "Hub", description = "Operations related to hub management")
 public class HubController {
 
@@ -49,14 +49,58 @@ public class HubController {
     @Operation(summary = "Get all hubs", description = "Retrieves all hubs, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/get-all")
-    public ResponseEntity<PagingResponse> getAllHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    public ResponseEntity<PagingResponse> getAllHubs(
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+            @RequestParam(value = "status", required = false) String status) {
+
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
+        PagingResponse results = (status != null && status.equals("active"))
+                ? hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize)
+                : hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
+
+//    /**
+//     * Method get all hubs
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all hubs", description = "Retrieves all hubs, with optional pagination")
+//    @PreAuthorize("hasRole('MANAGER')")
+//    @GetMapping("/get-all")
+//    public ResponseEntity<PagingResponse> getAllHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+
+//    /**
+//     * Method get all hubs have status is active
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all hubs active", description = "Retrieves all hubs have status is active")
+//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
+//    @GetMapping("/get-all-active")
+//    public ResponseEntity<PagingResponse> getAllHubsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+//                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+
 
     /**
      * Method get all buildings by hub id
@@ -68,7 +112,7 @@ public class HubController {
      */
     @Operation(summary = "Get all buildings by hub id", description = "Retrieves all buildings by hub id, with optional pagination")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-all-buildings/{hub-id}")
+    @GetMapping("/{hub-id}/buildings")
     public ResponseEntity<PagingResponse> getBuildingsByHubID(@PathVariable("hub-id") int hubID,
                                                               @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                               @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -87,7 +131,7 @@ public class HubController {
      */
     @Operation(summary = "Get all orders by hub id", description = "Retrieves all orders by hub id")
     @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get-all-orders/{hub-id}")
+    @GetMapping("/{hub-id}/orders")
     public ResponseEntity<ObjectResponse> getOrdersByHubID(@PathVariable("hub-id") int hubID) {
         List<Order> results = hubService.getOrdersByHubID(hubID);
         return results != null ?
@@ -113,33 +157,14 @@ public class HubController {
 //    }
 
     /**
-     * Method get all hubs have status is active
-     *
-     * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
-     * @return list or empty
-     */
-    @Operation(summary = "Get all hubs active", description = "Retrieves all hubs have status is active")
-    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
-    @GetMapping("/get-all-active")
-    public ResponseEntity<PagingResponse> getAllHubsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-    }
-
-    /**
-     * Method reactive hub by hub id set delete = false
+     * Method restore hub by hub id set delete = false
      *
      * @param hubID idOfHub
      * @return hub or null
      */
-    @Operation(summary = "Reactive hubs", description = "Reactive hub by hub id set delete = false")
+    @Operation(summary = "Restore hubs", description = "Restore hub by hub id set delete = false")
     @PreAuthorize("hasRole('MANAGER')")
-    @PostMapping("/undelete/{hub-id}")
+    @PostMapping("/{hub-id}/restore")
     public ResponseEntity<ObjectResponse> unDeleteHubByID(@PathVariable("hub-id") int hubID) {
         try {
             HubDTO hub = hubService.undeleteHub(hubID);
@@ -161,7 +186,7 @@ public class HubController {
      */
     @Operation(summary = "Get hub by id", description = "Get hub by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-    @GetMapping("/get/{hub-id}")
+    @GetMapping("/{hub-id}")
     public ResponseEntity<ObjectResponse> getHubByID(@PathVariable("hub-id") int hubID) {
         Hub hub = hubService.findById(hubID);
         return hub != null ?
@@ -177,7 +202,7 @@ public class HubController {
      */
     @Operation(summary = "Create hub", description = "Create hub")
     @PreAuthorize("hasRole('MANAGER')")
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<ObjectResponse> createHub(@Valid @RequestBody HubCreateRequest hubCreateRequest) {
         try {
             HubDTO hub = hubService.createHub(hubCreateRequest);
@@ -199,7 +224,7 @@ public class HubController {
      */
     @Operation(summary = "Update hub by id", description = "Update hub by id")
     @PreAuthorize("hasRole('MANAGER')")
-    @PutMapping("/update/{hub-id}")
+    @PutMapping("/{hub-id}")
     public ResponseEntity<ObjectResponse> updateHub(@PathVariable("hub-id") int hubID, @RequestBody HubUpdateRequest hubUpdateRequest) {
         try {
             HubDTO hub = hubService.updateHub(hubUpdateRequest, hubID);
@@ -227,7 +252,7 @@ public class HubController {
      */
     @Operation(summary = "Delete hub by id", description = "Delete hub by id and set deleted = true")
     @PreAuthorize("hasRole('MANAGER')")
-    @DeleteMapping("/delete/{hub-id}")
+    @DeleteMapping("/{hub-id}")
     public ResponseEntity<ObjectResponse> deleteHubByID(@PathVariable("hub-id") int hubID) {
         try {
             Hub hub = hubService.findById(hubID);
