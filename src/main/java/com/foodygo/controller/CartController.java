@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ public class CartController {
 
     @GetMapping("/users/{userId}")
     @Operation(summary = "Get Cart By User", description = "Retrieve a cart by the specified restaurant ID.")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<ObjectResponse> getCart(@PathVariable Integer userId) {
         return ResponseEntity.ok(ObjectResponse.builder()
                         .status(HttpStatus.OK.toString())
@@ -30,6 +32,7 @@ public class CartController {
 
     @PostMapping("/users/{userId}")
     @Operation(summary = "Add To Cart", description = "Add a new product to cart.")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<ObjectResponse> addToCart(@PathVariable Integer userId, @RequestBody CartItem cartItem) {
         Cart cart = cartService.addToCart(userId, cartItem);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -44,6 +47,7 @@ public class CartController {
 
     @DeleteMapping("/users/{userId}/products/{productId}")
     @Operation(summary = "Remove From Cart", description = "Remove a product from cart.")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<ObjectResponse> removeFromCart(@PathVariable Integer userId, @PathVariable Integer productId) {
         Cart cart = cartService.removeFromCart(userId, productId);
         return ResponseEntity.status(HttpStatus.OK)
@@ -58,6 +62,7 @@ public class CartController {
 
     @DeleteMapping("/users/{userId}")
     @Operation(summary = "Clear Cart", description = "Remove all product from cart.")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<ObjectResponse> clearCart(@PathVariable Integer userId) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
