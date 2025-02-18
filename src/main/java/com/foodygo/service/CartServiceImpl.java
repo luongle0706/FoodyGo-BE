@@ -1,24 +1,30 @@
 package com.foodygo.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodygo.dto.cart.Cart;
 import com.foodygo.dto.cart.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
     private static final String CART_PREFIX = "cart:";
 
     public Cart getCart(Integer userId) {
 
         String key = CART_PREFIX + userId;
-        Cart cart = (Cart) redisTemplate.opsForValue().get(key);
-        return cart != null ? cart : new Cart();
+        Object data = redisTemplate.opsForValue().get(key);
+        if (data != null) {
+            return objectMapper.convertValue(data, Cart.class);
+        }
+        return new Cart();
     }
 
     public Cart addToCart(Integer userId, CartItem cartItem) {
@@ -64,5 +70,4 @@ public class CartServiceImpl implements CartService {
         redisTemplate.delete(CART_PREFIX + userId);
         return new Cart();
     }
-
 }

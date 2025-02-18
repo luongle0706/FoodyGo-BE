@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class    OrderServiceImpl implements OrderService {
+public class OrderServiceImpl implements OrderService {
 
     private final UserService userService;
     private final CustomerService customerService;
@@ -80,7 +80,7 @@ public class    OrderServiceImpl implements OrderService {
         OrderResponse orderResponse = OrderMapper.INSTANCE.toDto(order);
         orderResponse.setOrderDetails(orderDetailResponses);
 
-        return orderResponse;a
+        return orderResponse;
     }
 
     @Override
