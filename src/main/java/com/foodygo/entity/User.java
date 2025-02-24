@@ -61,4 +61,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "employee")
     @JsonBackReference
     List<Order> employeeOrders;
+
+    @OneToMany
+    List<FcmToken> fcmTokens;
 }

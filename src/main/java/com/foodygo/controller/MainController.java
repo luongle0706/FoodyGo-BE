@@ -33,6 +33,7 @@ public class MainController {
     @PostMapping("/firebase")
     public ResponseEntity<ObjectResponse> loginUsingFirebase(
             @RequestParam String googleIdToken
+
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
