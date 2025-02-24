@@ -2,8 +2,11 @@ package com.foodygo.service;
 
 import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.response.TokenResponse;
+import com.foodygo.entity.FcmToken;
 import com.foodygo.entity.User;
+import com.foodygo.entity.composite.FcmTokenId;
 import com.foodygo.exception.AuthenticationException;
+import com.foodygo.repository.FcmTokenRepository;
 import com.foodygo.repository.UserRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -21,12 +24,13 @@ public class FirebaseServiceImpl implements FirebaseService {
     private final FirebaseAuth firebaseAuth;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final FcmTokenRepository fcmTokenRepository;
 
     @Value("${application.postfix-password}")
     private String passwordPostfix;
 
     @Override
-    public TokenResponse getUserFromFirebase(String googleIdToken) {
+    public TokenResponse getUserFromFirebase(String googleIdToken, String fcmToken) {
         try {
             FirebaseToken token = firebaseAuth.verifyIdToken(googleIdToken);
             String email = token.getEmail();
@@ -45,7 +49,14 @@ public class FirebaseServiceImpl implements FirebaseService {
                     User newUser = optionalUser.get();
                     newUser.setFullName(token.getName());
                     newUser = userRepository.save(newUser);
-
+                    FcmToken newFcmToken = FcmToken.builder()
+                            .user(newUser)
+                            .id(FcmTokenId.builder()
+                                    .token(fcmToken)
+                                    .userId(newUser.getUserID())
+                                    .build())
+                            .build();
+                    fcmTokenRepository.save(newFcmToken);
 
                     return userService.login(newUser.getEmail(), newUser.getEmail() + passwordPostfix);
                 } else {

@@ -32,8 +32,8 @@ public class MainController {
 
     @PostMapping("/firebase")
     public ResponseEntity<ObjectResponse> loginUsingFirebase(
-            @RequestParam String googleIdToken
-
+            @RequestParam String googleIdToken,
+            @RequestParam String fcmToken
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -41,7 +41,7 @@ public class MainController {
                         ObjectResponse.builder()
                                 .status(HttpStatus.OK.toString())
                                 .message("Successful login using firebase")
-                                .data(firebaseService.getUserFromFirebase(googleIdToken))
+                                .data(firebaseService.getUserFromFirebase(googleIdToken, fcmToken))
                                 .build()
                 );
     }
