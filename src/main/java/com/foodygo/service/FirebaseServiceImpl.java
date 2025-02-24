@@ -4,7 +4,6 @@ import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.FcmToken;
 import com.foodygo.entity.User;
-import com.foodygo.entity.composite.FcmTokenId;
 import com.foodygo.exception.AuthenticationException;
 import com.foodygo.repository.FcmTokenRepository;
 import com.foodygo.repository.UserRepository;
@@ -35,7 +34,15 @@ public class FirebaseServiceImpl implements FirebaseService {
             FirebaseToken token = firebaseAuth.verifyIdToken(googleIdToken);
             String email = token.getEmail();
             Optional<User> user = userRepository.findByEmailAndDeletedIsFalse(email);
-            if(user.isPresent()) {
+            if (fcmTokenRepository.existsById(fcmToken)) {
+                fcmTokenRepository.deleteById(fcmToken);
+            }
+            if (user.isPresent()) {
+                FcmToken newDeviceToken = FcmToken.builder()
+                        .token(fcmToken)
+                        .user(user.get())
+                        .build();
+                fcmTokenRepository.save(newDeviceToken);
                 return userService.login(user.get().getEmail(), user.get().getEmail() + passwordPostfix);
             } else {
                 UserRegisterRequest request = UserRegisterRequest.builder()
@@ -45,22 +52,20 @@ public class FirebaseServiceImpl implements FirebaseService {
                 userService.registerUser(request);
                 Optional<User> optionalUser = userRepository.findByEmailAndDeletedIsFalse(email);
 
-                if(optionalUser.isPresent()) {
+                if (optionalUser.isPresent()) {
                     User newUser = optionalUser.get();
                     newUser.setFullName(token.getName());
                     newUser = userRepository.save(newUser);
-                    FcmToken newFcmToken = FcmToken.builder()
+
+                    FcmToken newDeviceToken = FcmToken.builder()
+                            .token(fcmToken)
                             .user(newUser)
-                            .id(FcmTokenId.builder()
-                                    .token(fcmToken)
-                                    .userId(newUser.getUserID())
-                                    .build())
                             .build();
-                    fcmTokenRepository.save(newFcmToken);
+                    fcmTokenRepository.save(newDeviceToken);
 
                     return userService.login(newUser.getEmail(), newUser.getEmail() + passwordPostfix);
                 } else {
-                    throw new RuntimeException("");
+                    throw new AuthenticationException("Google was unable to authorize account access");
                 }
             }
         } catch (FirebaseAuthException ex) {

@@ -1,10 +1,6 @@
 package com.foodygo.entity;
 
-import com.foodygo.entity.composite.FcmTokenId;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,16 +11,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class FcmToken {
-    @EmbeddedId
-    FcmTokenId id;
+
+    @Id
+    String token;
 
     @ManyToOne
-    @MapsId("userId")
     User user;
-
-    @Builder.Default
-    boolean loggedIn = true;
-
-    @Builder.Default
-    boolean deleted = false;
 }

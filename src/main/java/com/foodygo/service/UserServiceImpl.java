@@ -21,7 +21,6 @@ import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
-import com.foodygo.repository.FcmTokenRepository;
 import com.foodygo.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,12 +54,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     private final JWTToken jwtToken;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationManager authenticationManager;
-    private final FcmTokenRepository fcmTokenRepository;
 
     public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
                            UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
-                           JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager,
-                           FcmTokenRepository fcmTokenRepository) {
+                           JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager
+                           ) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -71,7 +69,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         this.jwtToken = jwtToken;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationManager = authenticationManager;
-        this.fcmTokenRepository = fcmTokenRepository;
     }
 
     @Override
@@ -376,7 +373,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         if (session != null) {
             session.invalidate();
         }
-        fcmTokenRepository.logoutUser(user.getUserID());
         Cookie cookie = new Cookie("JSESSIONID", null);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
