@@ -1,6 +1,7 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.RestaurantDTO;
+import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.CategoryService;
 import com.foodygo.service.ProductService;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +19,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -61,29 +65,31 @@ public class RestaurantController {
     @GetMapping
     @Operation(summary = "Get all restaurants",
             description = "Retrieves all restaurants, with optional pagination and sorting.")
-    @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+//    @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @PermitAll
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data retrieved"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<ObjectResponse> getAllRestaurants(
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
+    public ResponseEntity<?> getAllRestaurants(
+            @RequestParam(required = false) Map<String, String> filters,
+            @RequestParam(required = false, defaultValue = "1") Integer pageNo,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String params,
+            @RequestParam(required = false, defaultValue = "id") String sortBy
     ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
         return ResponseEntity
                 .status(OK)
                 .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all restaurants")
-                                .data(restaurantService.getAllRestaurantDTOs(pageable))
-                                .build()
+                        restaurantService.getAllRestaurantDTOs(PagingRequest.builder()
+                                .pageNo(pageNo)
+                                .pageSize(pageSize)
+                                .params(params)
+                                .filters(filters)
+                                .sortBy(sortBy)
+                                .build())
                 );
     }
 
