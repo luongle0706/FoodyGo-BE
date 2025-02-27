@@ -25,5 +25,6 @@ public class BaseEntity {
     @UpdateTimestamp
     LocalDateTime updatedAt;
 
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     boolean deleted = false;
 }

@@ -163,7 +163,7 @@ public class DatabaseInit {
                             .phone("+84" + (100000000 + random.nextInt(900000000)))
                             .email("restaurant" + i + "@foodygo.com")
                             .address((1 + random.nextInt(100)) + "/" + (1 + random.nextInt(100)) + " Street " + (1 + random.nextInt(100)))
-                            .image("restaurant" + i + ".png")
+                            .image("https://img-global.cpcdn.com/recipes/49876fe80303b991/640x640sq70/photo.webp")
                             .build();
                     Restaurant savedRestaurant = restaurantRepository.save(restaurant);
 
