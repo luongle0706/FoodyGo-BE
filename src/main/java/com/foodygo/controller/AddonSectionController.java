@@ -2,6 +2,7 @@ package com.foodygo.controller;
 
 import com.foodygo.dto.AddonSectionDTO;
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.service.AddonItemService;
 import com.foodygo.service.AddonSectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,40 +26,10 @@ import static org.springframework.http.HttpStatus.OK;
 public class AddonSectionController {
 
     private final AddonSectionService addonSectionService;
+    private final AddonItemService addonItemService;
 
     @Value("${application.default-page-size}")
     private int defaultPageSize;
-
-    @GetMapping("/product/{productId}")
-    @Operation(summary = "Get Addon Sections by Product ID",
-            description = "Retrieve a paginated list of addon sections by the specified product ID. Supports sorting and pagination.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Addon sections found"),
-            @ApiResponse(responseCode = "400", description = "Invalid addon section request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "400", description = "Product not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<ObjectResponse> getAddonSectionsByProductId(
-            @PathVariable Integer productId,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
-    ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
-        return ResponseEntity
-                .status(OK)
-                .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all addon sections by product Id")
-                                .data(addonSectionService.getAddonSectionsByProductId(productId, pageable))
-                                .build()
-                );
-    }
 
     @GetMapping("/{addonSectionId}")
     @Operation(summary = "Get Addon Section by ID", description = "Retrieve details of an addon section by its unique ID.")
@@ -151,4 +122,35 @@ public class AddonSectionController {
                                 .build()
                 );
     }
+
+    @GetMapping("/{sectionId}/addon-items")
+    @Operation(summary = "Get Addon Items by Section", description = "Retrieve a paginated list of addon items by the specified section ID. Supports sorting and pagination.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Addon items found"),
+            @ApiResponse(responseCode = "400", description = "Invalid addon item request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Addon section not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> getAddonItemsBySection(
+            @PathVariable Integer sectionId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+    ) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
+        return ResponseEntity
+                .status(OK)
+                .body(
+                        ObjectResponse.builder()
+                                .status(OK.toString())
+                                .message("Get all categories")
+                                .data(addonItemService.getAddonItemsBySectionId(sectionId, pageable))
+                                .build()
+                );
+    }
+
 }

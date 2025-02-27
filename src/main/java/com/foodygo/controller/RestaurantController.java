@@ -2,6 +2,8 @@ package com.foodygo.controller;
 
 import com.foodygo.dto.RestaurantDTO;
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.service.CategoryService;
+import com.foodygo.service.ProductService;
 import com.foodygo.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,6 +28,8 @@ import static org.springframework.http.HttpStatus.OK;
 public class RestaurantController {
 
     private final RestaurantService restaurantService;
+    private final ProductService productService;
+    private final CategoryService categoryService;
 
     @Value("${application.default-page-size}")
     private int defaultPageSize;
@@ -205,4 +209,69 @@ public class RestaurantController {
                                 .build()
                 );
     }
+
+    @GetMapping("/{restaurantId}/products")
+    @Operation(summary = "Get products by restaurant ID",
+            description = "Retrieves products by restaurant ID, with optional pagination and sorting.")
+    @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product found"),
+            @ApiResponse(responseCode = "400", description = "Invalid product request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> getProductsByRestaurantId(
+            @PathVariable Integer restaurantId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+    ) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
+        return ResponseEntity
+                .status(OK)
+                .body(
+                        ObjectResponse.builder()
+                                .status(OK.toString())
+                                .message("Get product with restaurant ID " + restaurantId)
+                                .data(productService.getAllProductDTOsByRestaurantId(restaurantId, pageable))
+                                .build()
+                );
+    }
+
+    @Operation(summary = "Get categories by restaurant ID",
+            description = "Retrieves categories for a specific restaurant, with optional pagination and sorting.")
+    @GetMapping("/{restaurantId}/categories")
+    @PreAuthorize("hasRole('USER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Categories found"),
+            @ApiResponse(responseCode = "400", description = "Invalid category request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Restaurant not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> getAllCategoriesByRestaurantId(
+            @PathVariable Integer restaurantId,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+    ) {
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
+        return ResponseEntity
+                .status(OK)
+                .body(
+                        ObjectResponse.builder()
+                                .status(OK.toString())
+                                .message("Get all categories")
+                                .data(categoryService.getAllCategoriesDTOByRestaurantId(restaurantId, pageable))
+                                .build()
+                );
+    }
+
 }

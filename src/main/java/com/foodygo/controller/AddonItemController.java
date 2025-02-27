@@ -26,39 +26,6 @@ public class AddonItemController {
 
     private final AddonItemService addonItemService;
 
-    @Value("${application.default-page-size}")
-    private int defaultPageSize;
-
-    @GetMapping("/section/{sectionId}")
-    @Operation(summary = "Get Addon Items by Section", description = "Retrieve a paginated list of addon items by the specified section ID. Supports sorting and pagination.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Addon items found"),
-            @ApiResponse(responseCode = "400", description = "Invalid addon item request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "400", description = "Addon section not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<ObjectResponse> getAddonItemsBySection(
-            @PathVariable Integer sectionId,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
-    ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
-        return ResponseEntity
-                .status(OK)
-                .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all categories")
-                                .data(addonItemService.getAddonItemsBySectionId(sectionId, pageable))
-                                .build()
-                );
-    }
-
     @GetMapping("/{addonItemId}")
     @Operation(summary = "Get Addon Item by ID", description = "Retrieve details of an addon item by its unique ID.")
     @ApiResponses({
