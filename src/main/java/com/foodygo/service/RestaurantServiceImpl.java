@@ -2,9 +2,11 @@ package com.foodygo.service;
 
 import com.foodygo.dto.RestaurantDTO;
 import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.response.RestaurantResponseDTO;
 import com.foodygo.entity.Restaurant;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.RestaurantMapper;
+import com.foodygo.mapper.RestaurantResponseMapper;
 import com.foodygo.repository.RestaurantRepository;
 import com.foodygo.utils.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +31,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public RestaurantDTO getRestaurantDTOById(Integer restaurantId) {
-        return RestaurantMapper.INSTANCE.toDTO(getRestaurantById(restaurantId));
+    public RestaurantResponseDTO getRestaurantDTOById(Integer restaurantId) {
+        return RestaurantResponseMapper.INSTANCE.toDTO(getRestaurantById(restaurantId));
     }
 
     @Override
@@ -39,8 +41,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public Page<RestaurantDTO> getAllRestaurantDTOs(Pageable pageable) {
-        return restaurantRepository.findByDeletedFalse(pageable).map(RestaurantMapper.INSTANCE::toDTO);
+    public Page<RestaurantResponseDTO> getAllRestaurantDTOs(Pageable pageable) {
+        return restaurantRepository.findByDeletedFalse(pageable).map(RestaurantResponseMapper.INSTANCE::toDTO);
     }
 
     @Override
@@ -58,8 +60,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public Page<RestaurantDTO> searchRestaurantsByName(String name, Pageable pageable) {
-        return restaurantRepository.findByNameContainingIgnoreCase(name, pageable).map(RestaurantMapper.INSTANCE::toDTO);
+    public Page<RestaurantResponseDTO> searchRestaurantsByName(String name, Pageable pageable) {
+        return restaurantRepository.findByNameContainingIgnoreCase(name, pageable).map(RestaurantResponseMapper.INSTANCE::toDTO);
     }
 
     @Override
