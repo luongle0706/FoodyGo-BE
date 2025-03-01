@@ -58,7 +58,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
                            UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
                            JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager
-                           ) {
+    ) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -310,7 +310,10 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
     @Override
     public TokenResponse refreshToken(String refreshToken) {
-        TokenResponse tokenResponse = new TokenResponse("Failed", "Refresh token failed", null, null, null, null);
+        TokenResponse tokenResponse = TokenResponse.builder()
+                .code("Failed")
+                .message("Refresh token failed")
+                .build();
         String email = jwtToken.getEmailFromJwt(refreshToken, EnumTokenType.REFRESH_TOKEN);
         User user = userRepository.getUserByEmail(email);
         if (user != null) {
@@ -321,7 +324,15 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                         String newToken = jwtToken.generatedToken(customUserDetail);
                         user.setAccessToken(newToken);
                         userRepository.save(user);
-                        tokenResponse = new TokenResponse("Success", "Refresh token successfully", newToken, refreshToken, user.getFullName(), user.getEmail());
+                        tokenResponse = TokenResponse.builder()
+                                .code("Success")
+                                .message("Login successfully")
+                                .token(newToken)
+                                .refreshToken(refreshToken)
+                                .fullName(user.getFullName())
+                                .email(user.getEmail())
+                                .role(user.getRole().getRoleName())
+                                .build();
                     }
                 }
             }
@@ -331,7 +342,15 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
     @Override
     public TokenResponse login(String email, String password) {
-        TokenResponse tokenResponse = new TokenResponse("Failed", "Login failed", null, null, null, null);
+        TokenResponse tokenResponse = TokenResponse.builder()
+                .code("Failed")
+                .message("Login failed")
+                .token(null)
+                .refreshToken(null)
+                .fullName(null)
+                .email(null)
+                .role(null)
+                .build();
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(email, password);
@@ -346,12 +365,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
             user.setAccessToken(token);
             userRepository.save(user);
             tokenResponse = TokenResponse.builder()
-                    .fullName(user.getFullName())
-                    .email(user.getEmail())
-                    .token(token)
-                    .refreshToken(refreshToken)
                     .code("Success")
                     .message("Login successfully")
+                    .token(token)
+                    .refreshToken(refreshToken)
+                    .fullName(user.getFullName())
+                    .email(user.getEmail())
+                    .role(user.getRole().getRoleName())
                     .build();
         }
         return tokenResponse;
@@ -387,7 +407,10 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof OAuth2AuthenticationToken)) {
-            return new TokenResponse("Failed", "Login Failed", null, null, null, null);
+            return TokenResponse.builder()
+                    .code("Failed")
+                    .message("Invalid token")
+                    .build();
         }
 
         OAuth2User oauth2User = ((OAuth2AuthenticationToken) authentication).getPrincipal();
@@ -413,7 +436,15 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
-        return new TokenResponse("Success", "Login successfully", token, refreshToken, user.getFullName(), user.getEmail());
+        return TokenResponse.builder()
+                .code("Success")
+                .message("Login successfully")
+                .token(token)
+                .refreshToken(refreshToken)
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole().getRoleName())
+                .build();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.foodygo.dto.response;
 
+import com.foodygo.enums.EnumRoleNameType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,4 +16,5 @@ public class TokenResponse {
     String refreshToken;
     String fullName;
     String email;
+    EnumRoleNameType role;
 }

@@ -92,7 +92,12 @@ public class MainController {
             return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
         } catch (Exception e) {
             log.error("Cannot login : {}", e.toString());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null, null, null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    TokenResponse.builder()
+                            .code("Failed")
+                            .message(e.getMessage())
+                            .build()
+            );
         }
     }
 
@@ -132,7 +137,12 @@ public class MainController {
             return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
         } catch (Exception e) {
             log.error("Cannot login : {}", e.toString());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new TokenResponse("Failed", "Login failed", null, null, null, null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    TokenResponse.builder()
+                            .code("Failed")
+                            .message("Login failed")
+                            .build()
+            );
         }
     }
 
