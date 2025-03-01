@@ -14,10 +14,15 @@ public class WalletServiceImpl implements WalletService{
 
     private final WalletRepository walletRepository;
 
-    @Override
-    public WalletBalanceResponse getWalletByCustomerId(Integer customerId) {
-        return WalletMapper.INSTANCE.toDTO( walletRepository.findByCustomerId(customerId)
-                .orElseThrow(() -> new IdNotFoundException("Wallet not found for customer: " + customerId)));
+@Override
+public WalletBalanceResponse getWalletByCustomerId(Integer customerId) {
+    Wallet wallet = walletRepository.findByCustomerId(customerId)
+            .orElseThrow(() -> new IdNotFoundException("Wallet not found for customer: " + customerId));
+    return WalletBalanceResponse.builder()
+            .id(wallet.getId())
+            .fullName(wallet.getCustomer().getUser().getFullName())
+            .balance(wallet.getBalance())
+            .build();
     }
 
     @Override

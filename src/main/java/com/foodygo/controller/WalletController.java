@@ -1,11 +1,10 @@
 package com.foodygo.controller;
 import com.foodygo.dto.request.PaymentRequest;
 import com.foodygo.dto.request.TransferRequest;
+import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.TransactionHistoryResponse;
 import com.foodygo.dto.response.WalletBalanceResponse;
 import com.foodygo.entity.Deposit;
-import com.foodygo.entity.Transaction;
-import com.foodygo.entity.Wallet;
 import com.foodygo.service.DepositService;
 import com.foodygo.service.TransactionService;
 import com.foodygo.service.WalletService;
@@ -39,8 +38,12 @@ public class WalletController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<WalletBalanceResponse> getWalletByCustomer(@Parameter(description = "ID of the customer") @PathVariable Integer customerId) {
-        return ResponseEntity.ok(walletService.getWalletByCustomerId(customerId));
+    public ResponseEntity<ObjectResponse> getWalletByCustomer(@Parameter(description = "ID of the customer") @PathVariable Integer customerId) {
+        return ResponseEntity.ok(ObjectResponse.builder()
+                .status("200")
+                .message("Wallet found and balance retrieved")
+                .data(walletService.getWalletByCustomerId(customerId))
+                .build());
     }
 
     @Operation(summary = "Get Wallet by Restaurant ID", description = "Fetches the wallet balance and information for a restaurant based on the restaurant ID.")
@@ -51,10 +54,14 @@ public class WalletController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/restaurant/{restaurantId}")
-    public ResponseEntity<WalletBalanceResponse> getWalletByRestaurant(@Parameter(description = "ID of the restaurant") @PathVariable Integer restaurantId) {
-        return ResponseEntity.ok(walletService.getWalletByRestaurantId(restaurantId));
-    }
+@GetMapping("/restaurant/{restaurantId}")
+public ResponseEntity<ObjectResponse> getWalletByRestaurant(@Parameter(description = "ID of the restaurant") @PathVariable Integer restaurantId) {
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Wallet found and balance retrieved")
+            .data(walletService.getWalletByRestaurantId(restaurantId))
+            .build());
+}
 
     @Operation(summary = "Get Wallet Balance", description = "Fetches the current balance of a specific wallet.")
     @ApiResponses({
@@ -64,10 +71,14 @@ public class WalletController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/{walletId}/balance")
-    public ResponseEntity<Double> getWalletBalance(@Parameter(description = "ID of the wallet") @PathVariable Integer walletId) {
-        return ResponseEntity.ok(walletService.getWalletBalance(walletId));
-    }
+@GetMapping("/{walletId}/balance")
+public ResponseEntity<ObjectResponse> getWalletBalance(@Parameter(description = "ID of the wallet") @PathVariable Integer walletId) {
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Wallet balance retrieved")
+            .data(walletService.getWalletBalance(walletId))
+            .build());
+}
 
     @Operation(summary = "Delete Wallet", description = "Deletes a wallet based on the wallet ID.")
     @ApiResponses({
@@ -95,10 +106,14 @@ public class WalletController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/transactions/{transactionId}")
-    public ResponseEntity<TransactionHistoryResponse> getTransaction(@Parameter(description = "ID of the transaction") @PathVariable Integer transactionId) {
-        return ResponseEntity.ok(transactionService.getTransactionById(transactionId));
-    }
+@GetMapping("/transactions/{transactionId}")
+public ResponseEntity<ObjectResponse> getTransaction(@Parameter(description = "ID of the transaction") @PathVariable Integer transactionId) {
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Transaction details retrieved")
+            .data(transactionService.getTransactionById(transactionId))
+            .build());
+}
 
     @Operation(summary = "Make Payment from Wallet", description = "Processes a payment from a specific wallet.")
     @ApiResponses({
@@ -108,11 +123,15 @@ public class WalletController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/{walletId}/pay")
-    public ResponseEntity<TransactionHistoryResponse> pay(@Parameter(description = "ID of the wallet") @PathVariable Integer walletId,
-                                                          @Parameter(description = "Payment request details") @RequestBody PaymentRequest request) {
-        return ResponseEntity.ok(transactionService.processPayment(walletId, request.getAmount()));
-    }
+@PostMapping("/{walletId}/pay")
+public ResponseEntity<ObjectResponse> pay(@Parameter(description = "ID of the wallet") @PathVariable Integer walletId,
+                                          @Parameter(description = "Payment request details") @RequestBody PaymentRequest request) {
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Payment processed successfully")
+            .data(transactionService.processPayment(walletId, request.getAmount()))
+            .build());
+}
 
     @Operation(summary = "Process Refund to Wallet", description = "Processes a refund to a specific wallet.")
     @ApiResponses({
@@ -123,11 +142,14 @@ public class WalletController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/{walletId}/refund")
-    public ResponseEntity<TransactionHistoryResponse> refund(@Parameter(description = "ID of the wallet") @PathVariable Integer walletId,
-                                                             @Parameter(description = "Refund request details") @RequestBody PaymentRequest request) {
-        return ResponseEntity.ok(transactionService.processRefund(walletId, request.getAmount()));
-    }
-
+public ResponseEntity<ObjectResponse> refund(@Parameter(description = "ID of the wallet") @PathVariable Integer walletId,
+                                             @Parameter(description = "Refund request details") @RequestBody PaymentRequest request) {
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Refund processed successfully")
+            .data(transactionService.processRefund(walletId, request.getAmount()))
+            .build());
+}
     @Operation(summary = "Transfer Money between Wallets", description = "Transfers money from one wallet to another.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Transfer completed successfully"),
@@ -137,10 +159,13 @@ public class WalletController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/transfer")
-    public ResponseEntity<TransactionHistoryResponse> transfer(@Parameter(description = "Details of the transfer request") @RequestBody TransferRequest request) {
-        return ResponseEntity.ok(transactionService.transferMoney(request.getFromWalletId(), request.getToWalletId(), request.getAmount()));
-    }
-
+public ResponseEntity<ObjectResponse> transfer(@Parameter(description = "Details of the transfer request") @RequestBody TransferRequest request) {
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Transfer completed successfully")
+            .data(transactionService.transferMoney(request.getFromWalletId(), request.getToWalletId(), request.getAmount()))
+            .build());
+}
     @Operation(summary = "Request Deposit", description = "Creates a new deposit request.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Deposit request created successfully"),
@@ -148,10 +173,14 @@ public class WalletController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/deposit")
-    public ResponseEntity<Deposit> requestDeposit(@Parameter(description = "Details of the deposit request") @RequestBody Deposit deposit) {
-        return ResponseEntity.ok(depositService.requestDeposit(deposit));
-    }
+@PostMapping("/deposit")
+public ResponseEntity<ObjectResponse> requestDeposit(@Parameter(description = "Details of the deposit request") @RequestBody Deposit deposit) {
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Deposit request created successfully")
+            .data(depositService.requestDeposit(deposit))
+            .build());
+}
 
     @Operation(summary = "Approve Deposit", description = "Approves a pending deposit request based on deposit ID.")
     @ApiResponses({
@@ -160,9 +189,12 @@ public class WalletController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PutMapping("/{depositId}/approve")
-    public ResponseEntity<Void> approveDeposit(@Parameter(description = "ID of the deposit to approve") @PathVariable Integer depositId) {
-        depositService.approveDeposit(depositId);
-        return ResponseEntity.noContent().build();
-    }
+@PutMapping("/{depositId}/approve")
+public ResponseEntity<ObjectResponse> approveDeposit(@Parameter(description = "ID of the deposit to approve") @PathVariable Integer depositId) {
+    depositService.approveDeposit(depositId);
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("204")
+            .message("Deposit approved successfully")
+            .build());
+}
 }

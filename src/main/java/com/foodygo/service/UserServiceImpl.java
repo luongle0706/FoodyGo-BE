@@ -332,6 +332,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                                 .fullName(user.getFullName())
                                 .email(user.getEmail())
                                 .role(user.getRole().getRoleName())
+                                .userId(user.getUserID())
                                 .build();
                     }
                 }
@@ -372,6 +373,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                     .fullName(user.getFullName())
                     .email(user.getEmail())
                     .role(user.getRole().getRoleName())
+                    .userId(user.getUserID())
                     .build();
         }
         return tokenResponse;
@@ -444,6 +446,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole().getRoleName())
+                .userId(user.getUserID())
                 .build();
     }
 
