@@ -20,8 +20,10 @@ public class Category extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     String name;
 
+    @Column(columnDefinition = "NVARCHAR(2000)")
     String description;
 
     @OneToMany(mappedBy = "category")

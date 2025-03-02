@@ -2,8 +2,8 @@ package com.foodygo.controller;
 
 import com.foodygo.dto.CategoryDTO;
 import com.foodygo.dto.response.ObjectResponse;
-import com.foodygo.service.CategoryService;
-import com.foodygo.service.ProductService;
+import com.foodygo.service.spec.CategoryService;
+import com.foodygo.service.spec.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

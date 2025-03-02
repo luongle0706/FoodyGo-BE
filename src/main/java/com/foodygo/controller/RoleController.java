@@ -2,7 +2,7 @@ package com.foodygo.controller;
 
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.entity.Role;
-import com.foodygo.service.RoleService;
+import com.foodygo.service.spec.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

@@ -2,8 +2,8 @@ package com.foodygo.controller;
 
 import com.foodygo.dto.AddonSectionDTO;
 import com.foodygo.dto.response.ObjectResponse;
-import com.foodygo.service.AddonItemService;
-import com.foodygo.service.AddonSectionService;
+import com.foodygo.service.spec.AddonItemService;
+import com.foodygo.service.spec.AddonSectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

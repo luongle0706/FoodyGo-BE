@@ -23,6 +23,7 @@ public class Product extends BaseEntity {
 
     String code;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     String name;
 
     Double price;

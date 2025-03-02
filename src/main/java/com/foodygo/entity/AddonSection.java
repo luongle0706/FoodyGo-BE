@@ -20,6 +20,7 @@ public class AddonSection extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     String name;
 
     Integer maxChoice;

@@ -21,6 +21,7 @@ public class Transaction extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "NVARCHAR(2000)")
     String description;
 
     LocalDateTime time = LocalDateTime.now();
