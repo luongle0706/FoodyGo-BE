@@ -2,6 +2,7 @@ package com.foodygo.initdb;
 
 import com.foodygo.entity.*;
 import com.foodygo.enums.OrderStatus;
+import com.foodygo.enums.WalletType;
 import com.foodygo.repository.*;
 import com.foodygo.enums.EnumRoleNameType;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 @Component
 @RequiredArgsConstructor
 public class DatabaseInit {
@@ -31,6 +33,7 @@ public class DatabaseInit {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final OrderActivityRepository orderActivityRepository;
+    private final WalletRepository walletRepository;
 
     @Bean
     public CommandLineRunner database(CustomerRepository customerRepository) {
@@ -137,74 +140,89 @@ public class DatabaseInit {
                 }
             }
 
-            if (customerRepository.count() == 0) {
+            if (customerRepository.count() == 0 && walletRepository.count() == 0) {
 
-                List<User> userList = userRepository.findAll();
-
+                User user = userRepository.findById(1).orElseThrow(
+                        () -> new RuntimeException("User not found when creating customer")
+                );
                 Building building = buildingRepository.findBuildingById(1);
 
-                for (int i = 0; i < 5 && i < userList.size(); i++) {
-                    User user = userList.get(i);
+                Customer customer = Customer.builder()
+                        .building(building)
+                        .user(user)
+                        .build();
+                customer = customerRepository.save(customer);
 
-                    Customer customer = Customer.builder()
-                            .building(building)
-                            .user(user)
-                            .build();
-                    customerRepository.save(customer);
-                }
+                Wallet wallet = Wallet.builder()
+                        .balance(0.0)
+                        .walletType(WalletType.CUSTOMER)
+                        .customer(customer)
+                        .build();
+                walletRepository.save(wallet);
             }
 
             Random random = new Random();
 
-            if (restaurantRepository.count() <= 0) {
-                for (int i = 0; i < 10; i++) {
-                    Restaurant restaurant = Restaurant.builder()
-                            .name("Restaurant " + i)
-                            .phone("+84" + (100000000 + random.nextInt(900000000)))
-                            .email("restaurant" + i + "@foodygo.com")
-                            .address((1 + random.nextInt(100)) + "/" + (1 + random.nextInt(100)) + " Street " + (1 + random.nextInt(100)))
-                            .image("https://img-global.cpcdn.com/recipes/49876fe80303b991/640x640sq70/photo.webp")
+            if (restaurantRepository.count() <= 0 && walletRepository.count() <= 0) {
+                User owner = userRepository.findById(5).orElseThrow(
+                        () -> new RuntimeException("Owner not found when init restaurant")
+                );
+                Restaurant restaurant = Restaurant.builder()
+                        .name("Cơm tấm Ngô Quyền")
+                        .phone("+84" + (100000000 + random.nextInt(900000000)))
+                        .email("restaurant" + i + "@foodygo.com")
+                        .owner(owner)
+                        .address((1 + random.nextInt(100)) + "/" + (1 + random.nextInt(100)) + " Street " + (1 + random.nextInt(100)))
+                        .image("https://img-global.cpcdn.com/recipes/49876fe80303b991/640x640sq70/photo.webp")
+                        .build();
+
+                Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+
+                Wallet staffWallet = Wallet.builder()
+                        .balance(0.0)
+                        .walletType(WalletType.RESTAURANT)
+                        .restaurant(savedRestaurant)
+                        .build();
+                walletRepository.save(staffWallet);
+
+                for (int j = 0; j < 10; j++) {
+                    Category category = Category.builder()
+                            .name("R" + restaurant.getId() + "C" + j)
+                            .description("Sample category no. " + j + " from restaurant " + restaurant.getId())
+                            .restaurant(savedRestaurant)
                             .build();
-                    Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+                    categoryRepository.save(category);
 
-                    for (int j = 0; j < 10; j++) {
-                        Category category = Category.builder()
-                                .name("R" + restaurant.getId() + "C" + j)
-                                .description("Sample category no. " + j + " from restaurant " + restaurant.getId())
-                                .restaurant(savedRestaurant)
+                    Product product = Product.builder()
+                            .code("R" + restaurant.getId() + "P" + j)
+                            .name("Sample product no. " + j)
+                            .price(Math.random() * 50 + 1)
+                            .description("Sample product no. " + j + " from restaurant " + restaurant.getId())
+                            .prepareTime(Math.random() * 50 + 1)
+                            .restaurant(restaurant)
+                            .category(category)
+                            .build();
+                    productRepository.save(product);
+
+                    AddonSection addonSection = AddonSection.builder()
+                            .name("Sample addon section no." + j)
+                            .maxChoice(((int) (Math.random() * 3)) + 1)
+                            .product(product)
+                            .build();
+                    addonSectionRepository.save(addonSection);
+
+                    for (int k = 0; k < 3; k++) {
+                        AddonItem addonItem = AddonItem.builder()
+                                .name("Sample addon item no." + k)
+                                .price(Math.random() * 5 + 1)
+                                .quantity(100)
+                                .section(addonSection)
                                 .build();
-                        categoryRepository.save(category);
-
-                        Product product = Product.builder()
-                                .code("R" + restaurant.getId() + "P" + j)
-                                .name("Sample product no. " + j)
-                                .price(Math.random() * 50 + 1)
-                                .description("Sample product no. " + j + " from restaurant " + restaurant.getId())
-                                .prepareTime(Math.random() * 50 + 1)
-                                .restaurant(restaurant)
-                                .category(category)
-                                .build();
-                        productRepository.save(product);
-
-                        AddonSection addonSection = AddonSection.builder()
-                                .name("Sample addon section no." + j)
-                                .maxChoice(((int) (Math.random() * 3)) + 1)
-                                .product(product)
-                                .build();
-                        addonSectionRepository.save(addonSection);
-
-                        for (int k = 0; k < 3; k++) {
-                            AddonItem addonItem = AddonItem.builder()
-                                    .name("Sample addon item no." + k)
-                                    .price(Math.random() * 5 + 1)
-                                    .quantity(100)
-                                    .section(addonSection)
-                                    .build();
-                            addonItemRepository.save(addonItem);
-                        }
+                        addonItemRepository.save(addonItem);
                     }
                 }
             }
+
             if (orderRepository.count() == 0) {
                 List<User> employees = userRepository.findAll();
                 List<Customer> customers = customerRepository.findAll();

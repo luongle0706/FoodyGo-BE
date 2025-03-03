@@ -28,6 +28,8 @@ services:
     depends_on:
       builder:
         condition: service_completed_successfully
+    env_file:
+      - local.env
     volumes:
       - ./data/spring-boot-data:/temp/build-output
       - ./data/images:/var/www/images

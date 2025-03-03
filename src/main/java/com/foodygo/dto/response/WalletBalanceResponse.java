@@ -10,5 +10,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WalletBalanceResponse {
     Integer id;
+    String fullName;
     Double balance;
 }

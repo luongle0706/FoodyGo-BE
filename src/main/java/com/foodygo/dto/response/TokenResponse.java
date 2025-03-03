@@ -16,5 +16,6 @@ public class TokenResponse {
     String refreshToken;
     String fullName;
     String email;
+    Integer userId;
     EnumRoleNameType role;
 }

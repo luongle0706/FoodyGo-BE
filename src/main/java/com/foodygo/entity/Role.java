@@ -26,6 +26,7 @@ public class Role {
     @Enumerated(EnumType.STRING)
     EnumRoleNameType roleName;
 
+    @Column(columnDefinition = "NVARCHAR(50)")
     String displayName;
 
     @JsonBackReference

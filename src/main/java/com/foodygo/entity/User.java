@@ -24,16 +24,16 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int userID;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     String fullName;
 
-    @Column(name = "email", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
+    @Column(name = "email", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
     String email;
 
-    @Column(name = "password", columnDefinition = "VARCHAR(60)")
+    @Column(name = "password", columnDefinition = "NVARCHAR(60)")
     String password;
 
-    @Column(name = "phone", unique = true, columnDefinition = "VARCHAR(12)")
+    @Column(name = "phone", unique = true, columnDefinition = "NVARCHAR(12)")
     String phone;
 
     @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")

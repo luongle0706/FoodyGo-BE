@@ -21,7 +21,7 @@ public class Customer extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(name = "image", columnDefinition = "VARCHAR(1000)")
+    @Column(name = "image", columnDefinition = "NVARCHAR(1000)")
     String image;
 
     @ManyToOne

@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+      - production
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,10 +20,12 @@ jobs:
             sudo chmod -R 777 .
             git clean -dfx
             git fetch --all
-            git reset --hard origin/main
+            git reset --hard origin/production
 
             echo '${{ secrets.FIREBASE_CREDENTIAL }}' > src/main/resources/firebase-SWD391.json
             
             echo '${{secrets.THEANH_FIREBASE_CREDENTIAL}}' > src/main/resources/theanh-firebase.json
+            
+            echo '${{secrets.DOT_ENV}}' > local.env
 
             docker compose up --build -d

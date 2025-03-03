@@ -10,7 +10,7 @@ import com.foodygo.entity.Building;
 import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
-import com.foodygo.service.BuildingService;
+import com.foodygo.service.spec.BuildingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

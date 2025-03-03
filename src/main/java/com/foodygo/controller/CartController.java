@@ -3,7 +3,7 @@ package com.foodygo.controller;
 import com.foodygo.dto.cart.Cart;
 import com.foodygo.dto.cart.CartItem;
 import com.foodygo.dto.response.ObjectResponse;
-import com.foodygo.service.CartServiceImpl;
+import com.foodygo.service.impl.CartServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

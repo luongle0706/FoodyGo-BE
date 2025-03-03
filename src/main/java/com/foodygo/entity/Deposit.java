@@ -22,6 +22,7 @@ public class Deposit extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "NVARCHAR(2000)")
     String description;
 
     Double amount;
