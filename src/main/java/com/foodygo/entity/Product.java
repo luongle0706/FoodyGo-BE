@@ -32,6 +32,9 @@ public class Product extends BaseEntity {
 
     Double prepareTime;
 
+    @Column(name = "image", columnDefinition = "NVARCHAR(1000)")
+    String image;
+
     @Builder.Default
     boolean available = true;
 
