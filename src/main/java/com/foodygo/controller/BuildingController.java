@@ -39,67 +39,91 @@ public class BuildingController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-     /**
-     * Method get all buildings or all buildings by status
+//     /**
+//     * Method get all buildings or all buildings by status
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination and filtering by status")
+//    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
+//    @GetMapping("")
+//    public ResponseEntity<PagingResponse> getAllBuildings(
+//            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+//            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+//            @RequestParam(value = "status", required = false) String status) {
+//
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = (status != null && status.equals("active"))
+//                ? buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize)
+//                : buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+
+    /**
+     * Method get all buildings
      *
      * @param currentPage currentOfThePage
      * @param pageSize numberOfElement
      * @return list or empty
      */
-    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination and filtering by status")
+    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination")
     @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("")
-    public ResponseEntity<PagingResponse> getAllBuildings(
-            @RequestParam(value = "currentPage", required = false) Integer currentPage,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize,
-            @RequestParam(value = "status", required = false) String status) {
-
+    public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = (status != null && status.equals("active"))
-                ? buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize)
-                : buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
+        PagingResponse results = buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-//    /**
-//     * Method get all buildings
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination")
-//    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
-//    @GetMapping("")
-//    public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = buildingService.getAllBuildings(resolvedCurrentPage, resolvedPageSize);
-//        List<?> data = (List<?>) results.getData();
-//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-//    }
-//
-//    /**
-//     * Method get all buildings have status active
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all buildings active", description = "Retrieves all buildings have status active, with optional pagination")
-//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-//    @GetMapping("/active")
-//    public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize);
-//        List<?> data = (List<?>) results.getData();
-//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-//    }
+    /**
+     * Method get all buildings have status active
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all buildings active", description = "Retrieves all buildings have status active, with optional pagination")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
+    @GetMapping("/active")
+    public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = buildingService.getBuildingsActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
+
+    /**
+     * Method search buildings with name and sortBy
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize    numberOfElement
+     * @param name name of building to search
+     * @param sortBy sortBy with "nameasc, namedesc"
+     * @return list or empty
+     */
+    @Operation(summary = "Search buildings", description = "Retrieves all buildings are filtered by name and sortBy")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/search")
+    public ResponseEntity<PagingResponse> searchBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                         @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                         @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                         @RequestParam(value = "sortBy", required = false) String sortBy) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+
+        PagingResponse results = buildingService.searchBuildings(resolvedCurrentPage, resolvedPageSize, name, sortBy);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
 
     /**
      * Method get hub by building id

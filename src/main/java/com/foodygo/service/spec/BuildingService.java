@@ -24,4 +24,6 @@ public interface BuildingService extends BaseService<Building, Integer> {
 
     BuildingDTO deleteBuilding(Integer buildingID);
 
+    PagingResponse searchBuildings(Integer currentPage, Integer pageSize, String name, String sortBy);
+
 }

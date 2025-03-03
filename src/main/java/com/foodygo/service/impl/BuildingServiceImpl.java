@@ -17,10 +17,17 @@ import com.foodygo.repository.BuildingRepository;
 import com.foodygo.repository.CustomerRepository;
 import com.foodygo.service.spec.BuildingService;
 import com.foodygo.service.spec.HubService;
+import com.foodygo.utils.BuildingSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -220,6 +227,76 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
         }
         building.setDeleted(true);
         return buildingMapper.buildingToBuildingDTO(buildingRepository.save(building));
+    }
+
+    @Override
+    public PagingResponse searchBuildings(Integer currentPage, Integer pageSize, String name, String sortBy) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        Specification<Building> spec = Specification.where(null);
+
+        List<String> keys = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+
+        String searchName = "";
+        if (StringUtils.hasText(name)) {
+            searchName = name;
+        }
+        keys.add("name");
+        values.add(searchName);
+
+        if(keys.size() == values.size()) {
+            for(int i = 0; i < keys.size(); i++) {
+                String field = keys.get(i);
+                String value = values.get(i);
+                Specification<Building> newSpec = BuildingSpecification.searchByField(field, value);
+                if(newSpec != null) {
+                    spec = spec.and(newSpec);
+                }
+            }
+        }
+
+        List<Sort.Order> orders = new ArrayList<>();
+        if (StringUtils.hasText(sortBy)) {
+            String sortByLower = sortBy.trim().toLowerCase();
+
+            boolean hasNameASC = sortByLower.contains("nameasc");
+            boolean hasNameDESC = sortByLower.contains("namedesc");
+
+            if (hasNameASC ^ hasNameDESC) {
+                orders.add(hasNameASC ? Sort.Order.asc("name") : Sort.Order.desc("name"));
+            }
+
+        }
+
+        Sort sort = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
+
+        pageable = PageRequest.of(currentPage - 1, pageSize, sort);
+
+        var pageData = buildingRepository.findAll(spec, pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all hubs filter and sort paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(buildingMapper::buildingToBuildingDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all hubs filter and sort paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(buildingMapper::buildingToBuildingDTO)
+                                .toList())
+                        .build();
     }
 
 }

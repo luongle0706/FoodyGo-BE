@@ -41,6 +41,30 @@ public class UserController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
+//    /**
+//     * Method get all users
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all users", description = "Retrieves all users, with optional pagination")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("")
+//    public ResponseEntity<PagingResponse> getAllUsers(
+//            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+//            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+//            @RequestParam(value = "status", required = false) String status) {
+//
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = (status != null && status.equals("active"))
+//                ? userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize)
+//                : userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+
     /**
      * Method get all users
      *
@@ -51,57 +75,33 @@ public class UserController {
     @Operation(summary = "Get all users", description = "Retrieves all users, with optional pagination")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("")
-    public ResponseEntity<PagingResponse> getAllUsers(
-            @RequestParam(value = "currentPage", required = false) Integer currentPage,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize,
-            @RequestParam(value = "status", required = false) String status) {
-
+    public ResponseEntity<PagingResponse> getAllUsers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = (status != null && status.equals("active"))
-                ? userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize)
-                : userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
+        PagingResponse results = userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-//    /**
-//     * Method get all users
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all users", description = "Retrieves all users, with optional pagination")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @GetMapping("/get-all")
-//    public ResponseEntity<PagingResponse> getAllUsers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = userService.findAllUsers(resolvedCurrentPage, resolvedPageSize);
-//        List<?> data = (List<?>) results.getData();
-//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-//    }
-//
-//    /**
-//     * Method get all users have status is active
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all users active", description = "Retrieves all users have status is active")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @GetMapping("/get-all-active")
-//    public ResponseEntity<PagingResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize);
-//        List<?> data = (List<?>) results.getData();
-//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-//    }
+    /**
+     * Method get all users have status is active
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all users active", description = "Retrieves all users have status is active")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/active")
+    public ResponseEntity<PagingResponse> getAllUsersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
 
     /**
      * Method update user with basic info not include role by id

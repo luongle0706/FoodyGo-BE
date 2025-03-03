@@ -39,30 +39,6 @@ public class HubController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
-    /**
-     * Method get all hubs
-     *
-     * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
-     * @return list or empty
-     */
-    @Operation(summary = "Get all hubs", description = "Retrieves all hubs, with optional pagination")
-    @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/get-all")
-    public ResponseEntity<PagingResponse> getAllHubs(
-            @RequestParam(value = "currentPage", required = false) Integer currentPage,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize,
-            @RequestParam(value = "status", required = false) String status) {
-
-        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = (status != null && status.equals("active"))
-                ? hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize)
-                : hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
-        List<?> data = (List<?>) results.getData();
-        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-    }
-
 //    /**
 //     * Method get all hubs
 //     *
@@ -73,34 +49,82 @@ public class HubController {
 //    @Operation(summary = "Get all hubs", description = "Retrieves all hubs, with optional pagination")
 //    @PreAuthorize("hasRole('MANAGER')")
 //    @GetMapping("/get-all")
-//    public ResponseEntity<PagingResponse> getAllHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//    public ResponseEntity<PagingResponse> getAllHubs(
+//            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+//            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+//            @RequestParam(value = "status", required = false) String status) {
+//
 //        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
 //        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
+//        PagingResponse results = (status != null && status.equals("active"))
+//                ? hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize)
+//                : hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
 //        List<?> data = (List<?>) results.getData();
 //        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
 //    }
 
-//    /**
-//     * Method get all hubs have status is active
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all hubs active", description = "Retrieves all hubs have status is active")
-//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
-//    @GetMapping("/get-all-active")
-//    public ResponseEntity<PagingResponse> getAllHubsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize);
-//        List<?> data = (List<?>) results.getData();
-//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-//    }
+    /**
+     * Method get all hubs
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all hubs", description = "Retrieves all hubs, with optional pagination")
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("")
+    public ResponseEntity<PagingResponse> getAllHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = hubService.getHubsPaging(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
 
+    /**
+     * Method get all hubs have status is active
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all hubs active", description = "Retrieves all hubs have status is active")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
+    @GetMapping("/active")
+    public ResponseEntity<PagingResponse> getAllHubsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = hubService.getHubsActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
+
+
+    /**
+     * Method search hubs with name and sortBy
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize    numberOfElement
+     * @param name name of building to search
+     * @param sortBy sortBy with "nameasc, namedesc"
+     * @return list or empty
+     */
+    @Operation(summary = "Search hubs", description = "Retrieves all hubs are filtered by name and sortBy")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @GetMapping("/search")
+    public ResponseEntity<PagingResponse> searchHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                         @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                         @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                         @RequestParam(value = "sortBy", required = false) String sortBy) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+
+        PagingResponse results = hubService.searchHubs(resolvedCurrentPage, resolvedPageSize, name, sortBy);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
 
     /**
      * Method get all buildings by hub id

@@ -39,6 +39,30 @@ public class CustomerController {
     @Value("${application.default-page-size}")
     private int defaultPageSize;
 
+//    /**
+//     * Method get all customers
+//     *
+//     * @param currentPage currentOfThePage
+//     * @param pageSize numberOfElement
+//     * @return list or empty
+//     */
+//    @Operation(summary = "Get all customers", description = "Retrieves all customers, with optional pagination")
+//    @PreAuthorize("hasRole('MANAGER')")
+//    @GetMapping("")
+//    public ResponseEntity<PagingResponse> getAllCustomers(
+//            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+//            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+//            @RequestParam(value = "status", required = false) String status) {
+//
+//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+//        PagingResponse results = (status != null && status.equals("active"))
+//                ? customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize)
+//                : customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
+//        List<?> data = (List<?>) results.getData();
+//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+//    }
+
     /**
      * Method get all customers
      *
@@ -49,57 +73,33 @@ public class CustomerController {
     @Operation(summary = "Get all customers", description = "Retrieves all customers, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("")
-    public ResponseEntity<PagingResponse> getAllCustomers(
-            @RequestParam(value = "currentPage", required = false) Integer currentPage,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize,
-            @RequestParam(value = "status", required = false) String status) {
-
+    public ResponseEntity<PagingResponse> getAllCustomers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-        PagingResponse results = (status != null && status.equals("active"))
-                ? customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize)
-                : customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
+        PagingResponse results = customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-//    /**
-//     * Method get all customers
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all customers", description = "Retrieves all customers, with optional pagination")
-//    @PreAuthorize("hasRole('MANAGER')")
-//    @GetMapping("/get-all")
-//    public ResponseEntity<PagingResponse> getAllCustomers(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                          @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
-//        List<?> data = (List<?>) results.getData();
-//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-//    }
-//
-//    /**
-//     * Method get all customers have status is active
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
-//    @PreAuthorize("hasRole('MANAGER')")
-//    @GetMapping("/active")
-//    public ResponseEntity<PagingResponse> getAllCustomersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-//                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
-//        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
-//        PagingResponse results = customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize);
-//        List<?> data = (List<?>) results.getData();
-//        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
-//    }
+    /**
+     * Method get all customers have status is active
+     *
+     * @param currentPage currentOfThePage
+     * @param pageSize numberOfElement
+     * @return list or empty
+     */
+    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/active")
+    public ResponseEntity<PagingResponse> getAllCustomersActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
+        int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
+        PagingResponse results = customerService.getAllCustomersActive(resolvedCurrentPage, resolvedPageSize);
+        List<?> data = (List<?>) results.getData();
+        return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
 
 //    // lấy tất cả các order từ customer id
 //    /**

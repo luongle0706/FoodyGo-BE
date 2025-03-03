@@ -4,6 +4,7 @@ import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
+import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementExistException;
@@ -12,14 +13,21 @@ import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.BuildingMapper;
 import com.foodygo.mapper.HubMapper;
+import com.foodygo.mapper.HubMapperImpl;
 import com.foodygo.repository.BuildingRepository;
 import com.foodygo.repository.HubRepository;
 import com.foodygo.service.spec.HubService;
+import com.foodygo.utils.BuildingSpecification;
+import com.foodygo.utils.HubSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -32,7 +40,7 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     private final BuildingMapper buildingMapper;
 
     public HubServiceImpl(HubRepository hubRepository, HubMapper hubMapper, BuildingRepository buildingRepository,
-                          BuildingMapper buildingMapper) {
+                          BuildingMapper buildingMapper, HubMapperImpl hubMapperImpl) {
         super(hubRepository);
         this.hubRepository = hubRepository;
         this.hubMapper = hubMapper;
@@ -199,6 +207,76 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     @Override
     public Hub getHubById(Integer hubID) {
         return hubRepository.findById(hubID).orElseThrow(() -> new IdNotFoundException("Hub not found!"));
+    }
+
+    @Override
+    public PagingResponse searchHubs(Integer currentPage, Integer pageSize, String name, String sortBy) {
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
+
+        Specification<Hub> spec = Specification.where(null);
+
+        List<String> keys = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+
+        String searchName = "";
+        if (StringUtils.hasText(name)) {
+            searchName = name;
+        }
+        keys.add("name");
+        values.add(searchName);
+
+        if(keys.size() == values.size()) {
+            for(int i = 0; i < keys.size(); i++) {
+                String field = keys.get(i);
+                String value = values.get(i);
+                Specification<Hub> newSpec = HubSpecification.searchByField(field, value);
+                if(newSpec != null) {
+                    spec = spec.and(newSpec);
+                }
+            }
+        }
+
+        List<Sort.Order> orders = new ArrayList<>();
+        if (StringUtils.hasText(sortBy)) {
+            String sortByLower = sortBy.trim().toLowerCase();
+
+            boolean hasNameASC = sortByLower.contains("nameasc");
+            boolean hasNameDESC = sortByLower.contains("namedesc");
+
+            if (hasNameASC ^ hasNameDESC) {
+                orders.add(hasNameASC ? Sort.Order.asc("name") : Sort.Order.desc("name"));
+            }
+
+        }
+
+        Sort sort = orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
+
+        pageable = PageRequest.of(currentPage - 1, pageSize, sort);
+
+        var pageData = hubRepository.findAll(spec, pageable);
+
+        return !pageData.getContent().isEmpty() ? PagingResponse.builder()
+                .code("Success")
+                .message("Get all hubs filter and sort paging successfully")
+                .currentPage(currentPage)
+                .pageSizes(pageSize)
+                .totalElements(pageData.getTotalElements())
+                .totalPages(pageData.getTotalPages())
+                .data(pageData.getContent().stream()
+                        .map(hubMapper::hubToHubDTO)
+                        .toList())
+                .build() :
+                PagingResponse.builder()
+                        .code("Failed")
+                        .message("Get all hubs filter and sort paging failed")
+                        .currentPage(currentPage)
+                        .pageSizes(pageSize)
+                        .totalElements(pageData.getTotalElements())
+                        .totalPages(pageData.getTotalPages())
+                        .data(pageData.getContent().stream()
+                                .map(hubMapper::hubToHubDTO)
+                                .toList())
+                        .build();
     }
 
 }

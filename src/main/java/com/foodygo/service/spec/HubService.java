@@ -29,4 +29,6 @@ public interface HubService extends BaseService<Hub, Integer> {
 
     Hub getHubById(Integer hubID);
 
+    PagingResponse searchHubs(Integer currentPage, Integer pageSize, String name, String sortBy);
+
 }

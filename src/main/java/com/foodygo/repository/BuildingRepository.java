@@ -4,7 +4,9 @@ import com.foodygo.entity.Building;
 import com.foodygo.entity.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,7 +16,7 @@ import java.util.List;
 
 @Repository
 @Transactional
-public interface BuildingRepository extends JpaRepository<Building, Integer> {
+public interface BuildingRepository extends JpaRepository<Building, Integer>, JpaSpecificationExecutor<Building> {
     Building findBuildingById(int id);
 
     Building findBuildingByName(String name);
@@ -26,5 +28,7 @@ public interface BuildingRepository extends JpaRepository<Building, Integer> {
     Page<Building> findAllByDeletedFalse(Pageable pageable);
 
     Page<Building> findAllByHub_Id(Integer hubId, Pageable pageable);
+
+    Page<Building> findAll(Specification<Building> spec, Pageable pageable);
 
 }
