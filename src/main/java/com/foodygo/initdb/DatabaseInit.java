@@ -170,7 +170,7 @@ public class DatabaseInit {
                 Restaurant restaurant = Restaurant.builder()
                         .name("Cơm tấm Ngô Quyền")
                         .phone("+84" + (100000000 + random.nextInt(900000000)))
-                        .email("restaurant" + i + "@foodygo.com")
+                        .email("restaurant@foodygo.com")
                         .owner(owner)
                         .address((1 + random.nextInt(100)) + "/" + (1 + random.nextInt(100)) + " Street " + (1 + random.nextInt(100)))
                         .image("https://img-global.cpcdn.com/recipes/49876fe80303b991/640x640sq70/photo.webp")
