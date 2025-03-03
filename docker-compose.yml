@@ -30,6 +30,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./data/spring-boot-data:/temp/build-output
+      - ./data/images:/var/www/images
     networks:
       - mysql-network
       - foodygo-network
