@@ -22,6 +22,7 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime time;
 
     Double shippingFee;
@@ -33,6 +34,7 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime expectedDeliveryTime;
 
     String customerPhone;

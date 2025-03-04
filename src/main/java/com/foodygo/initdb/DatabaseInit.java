@@ -1,19 +1,15 @@
 package com.foodygo.initdb;
 
 import com.foodygo.entity.*;
-import com.foodygo.enums.OrderStatus;
+import com.foodygo.enums.EnumRoleNameType;
 import com.foodygo.enums.WalletType;
 import com.foodygo.repository.*;
-import com.foodygo.enums.EnumRoleNameType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 @Component

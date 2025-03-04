@@ -27,6 +27,7 @@ public class OrderActivity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     OrderStatus toStatus;
 
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime time;
 
     String image;

@@ -108,6 +108,6 @@ payment:
     command: ${COMMAND}
     orderType: ${ORDER_TYPE}
 
-image:
-  saveLocation: /var/www/images/
-  getLocation: https://foodygo.theanh0804.id.vn/public/
+#image:
+#  saveLocation: /var/www/images/
+#  getLocation: https://foodygo.theanh0804.id.vn/public/

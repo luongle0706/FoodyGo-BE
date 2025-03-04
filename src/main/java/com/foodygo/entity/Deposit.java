@@ -27,6 +27,7 @@ public class Deposit extends BaseEntity {
 
     Double amount;
 
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime time;
 
     @Enumerated(EnumType.STRING)

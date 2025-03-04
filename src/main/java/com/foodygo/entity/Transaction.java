@@ -24,6 +24,7 @@ public class Transaction extends BaseEntity {
     @Column(columnDefinition = "NVARCHAR(2000)")
     String description;
 
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime time = LocalDateTime.now();
 
     Double amount;
