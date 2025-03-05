@@ -13,11 +13,14 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "restaurant")
 public class Restaurant extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     String name;
 
     String phone;
@@ -27,6 +30,12 @@ public class Restaurant extends BaseEntity {
     String address;
 
     String image;
+
+    @OneToOne
+    User owner;
+
+    @OneToMany(mappedBy = "restaurant")
+    List<Wallet> wallets;
 
     @Builder.Default
     boolean available = true;

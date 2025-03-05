@@ -1,11 +1,12 @@
-
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
   application:
     name: foodygo
   datasource:
-    url: jdbc:mysql://localhost:3307/foodygo
-    username: root
-    password: 123456
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/foodygo}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:123456789}
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,16 +17,34 @@ spring:
   data:
     jdbc:
       dialect: mysql
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 478830836024-e2fa5s2erqeal7bupi7tim4ap64d0cha.apps.googleusercontent.com
+            client-secret: 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
+            scope: profile, email
+          facebook:
+            client-id: 1149933542880208
+            client-secret: 3702bfea20fcef39700480798a065733
+            scope: public_profile, email
+            redirect-uri: http://localhost:5173/oauth2/callback
 jwt:
-  secret: 753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465
+  secret: ${JWT_SECRET:753474857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657547465}
   expiration: 8640000
   refresh:
-    secret: 123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321
+    secret: ${JWT_REFRESH_SECRET:123454857438754387594385743975348574893759843753498776576576575765634545435365346534645645364565465347657554321}
     expiration: 864000000
   algorithms: HmacSHA256
-  # header: Authorization
-  # prefix: Bearer
-
 # Firebase
 firebase:
   bucket:
@@ -33,8 +52,8 @@ firebase:
   content:
     type: image/png
   get:
-    stream: swp391-f046d-firebase-adminsdk-drdyq-e270ed7356.json
-    url: https://firebasestorage.googleapis.com/v0/b/swd391-f046d.appspot.com/o/%s?alt=media
+    stream: firebase-SWD391.json
+    url: https://firebasestorage.googleapis.com/v0/b/swp391-f046d.appspot.com/o/%s?alt=media
     folder: swd391_image_customer
   file:
     format: .png
@@ -55,3 +74,40 @@ buffer-image:
     x: 0
     y: 0
   devide: 2
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /api-docs
+  default-produces-media-type: application/json
+
+# Preferences
+application:
+  default-current-page: 1
+  default-page-size: 30
+  postfix-password: xinchaomoinguoiminhlafoodygo
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+payment:
+  vnPay:
+    url: ${PAY_URL}
+    tmnCode: ${TMN_CODE}
+    secretKey: ${SECRET_KEY}
+    returnUrl: ${RETURN_URL}
+    version: ${VERSION}
+    command: ${COMMAND}
+    orderType: ${ORDER_TYPE}
+
+#image:
+#  saveLocation: /var/www/images/
+#  getLocation: https://foodygo.theanh0804.id.vn/public/

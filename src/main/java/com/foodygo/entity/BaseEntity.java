@@ -17,13 +17,14 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BaseEntity {
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", columnDefinition = "DATETIME(0)")
     @CreationTimestamp
     LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", columnDefinition = "DATETIME(0)")
     @UpdateTimestamp
     LocalDateTime updatedAt;
 
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     boolean deleted = false;
 }

@@ -14,19 +14,21 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "customer")
 public class Customer extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(name = "image", columnDefinition = "VARCHAR(1000)")
+    @Column(name = "image", columnDefinition = "NVARCHAR(1000)")
     String image;
 
     @ManyToOne
     Building building;
 
     @OneToOne
+    @JsonBackReference
     User user;
 
     @OneToOne(mappedBy = "customer")
@@ -35,5 +37,8 @@ public class Customer extends BaseEntity {
     @OneToMany(mappedBy = "customer")
     @JsonBackReference
     List<Order> orders;
+
+    @OneToMany(mappedBy = "customer")
+    List<Deposit> deposits;
 
 }

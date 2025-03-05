@@ -1,21 +1,29 @@
 package com.foodygo.repository;
 
 import com.foodygo.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Repository
 @Transactional
 public interface UserRepository extends JpaRepository<User, Integer> {
+
+    Optional<User> findByEmailAndDeletedIsFalse(String email);
 
     User getUserByEmail(String email);
 
     User getUserByUserID(int userID);
 
     User getUserByPhone(String phone);
+
+    Page<User> findAllByDeletedFalse(Pageable pageable);
 
     @Modifying
     @Query("update User set enabled = true where userID = ?1")
@@ -40,5 +48,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Modifying
     @Query("update User set nonLocked = false where email = ?1")
     void lockedByEmail(String email);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE DATE(u.createdAt) = CURRENT_DATE")
+    int countNumberOfRegisterToday();
 
 }

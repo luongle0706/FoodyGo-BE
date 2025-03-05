@@ -5,12 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user-account")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,16 +21,16 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     int userID;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", columnDefinition = "NVARCHAR(255)")
     String fullName;
 
-    @Column(name = "email", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
+    @Column(name = "email", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
     String email;
 
-    @Column(name = "password", columnDefinition = "VARCHAR(60)")
+    @Column(name = "password", columnDefinition = "NVARCHAR(60)")
     String password;
 
-    @Column(name = "phone", unique = true, columnDefinition = "VARCHAR(12)")
+    @Column(name = "phone", unique = true, columnDefinition = "NVARCHAR(12)")
     String phone;
 
     @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
@@ -54,7 +52,13 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user")
     Customer customer;
 
+    @OneToOne(mappedBy = "owner")
+    Restaurant restaurant;
+
     @OneToMany(mappedBy = "employee")
     @JsonBackReference
     List<Order> employeeOrders;
+
+    @OneToMany(mappedBy = "user")
+    List<FcmToken> fcmTokens;
 }

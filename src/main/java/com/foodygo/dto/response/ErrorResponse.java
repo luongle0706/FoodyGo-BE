@@ -1,20 +1,19 @@
 package com.foodygo.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Value
+@NoArgsConstructor(force = true)
 @AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ErrorResponse {
-    private Date timestamp;
-    private String status;
-    private String message;
-    private Object error;
-    private String path;
+    Date timestamp;
+    String status;
+    String message;
+    Object error;
+    String path;
 }

@@ -1,14 +1,80 @@
 services:
-  mysql:
-    container_name: mysql
-    image: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456789
-      MYSQL_USER: mysql
-      MYSQL_PASSWORD: mysql
-      MYSQL_DATABASE: foodygo
-    ports:
-      - "3307:3306"
+  #BUILDER
+  builder:
+    container_name: foodygo-builder
+    build:
+      context: .
+      dockerfile: docker/builder/Dockerfile
     volumes:
-      - ./mysql-data:/var/lib/mysql
-    restart: unless-stopped
+      - ../maven-cache:/root/.m2
+      - ./data/spring-boot-data:/temp/build-output
+    networks:
+      - foodygo-network
+
+  #RUNNER
+  runner:
+    container_name: foodygo-runner
+    build:
+      context: .
+      dockerfile: docker/runner/Dockerfile
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/foodygo
+      MYSQL_USER: root
+      MYSQL_PASSWORD: fFP4vTcMY@!NUxgt
+      REDIS_HOST: redis-container
+      REDIS_PORT: 6379
+    ports:
+      - "2222:8080"
+    depends_on:
+      builder:
+        condition: service_completed_successfully
+    env_file:
+      - local.env
+    volumes:
+      - ./data/spring-boot-data:/temp/build-output
+      - ./data/images:/var/www/images
+    networks:
+      - mysql-network
+      - foodygo-network
+    restart: no
+
+  # REDIS
+  redis:
+    image: docker.io/redis:7.2.3
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis-data:/data
+    networks:
+      - foodygo-network
+
+networks:
+  mysql-network:
+    external: true
+  foodygo-network:
+    driver: bridge
+
+#  ollama:
+#    image: ollama/ollama
+#    container_name: ollama
+#    restart: unless-stopped
+#    volumes:
+#      - ollama_data:/root/.ollama
+#    ports:
+#      - "11434:11434"
+#    tty: true
+#    stdin_open: true
+#  deepseek:
+#    image: ollama/ollama
+#    container_name: deepseek
+#    restart: unless-stopped
+#    command: ["serve"]
+#    environment:
+#      - OLLAMA_MODEL=deepseek
+#    depends_on:
+#      - ollama
+#volumes:
+#  ollama_data:
+#    driver: local

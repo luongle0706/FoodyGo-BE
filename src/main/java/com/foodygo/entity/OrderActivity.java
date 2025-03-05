@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "order-activity")
 public class OrderActivity extends BaseEntity {
 
     @Id
@@ -21,8 +22,12 @@ public class OrderActivity extends BaseEntity {
     Integer id;
 
     @Enumerated(EnumType.STRING)
-    OrderStatus status;
+    OrderStatus fromStatus;
 
+    @Enumerated(EnumType.STRING)
+    OrderStatus toStatus;
+
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime time;
 
     String image;

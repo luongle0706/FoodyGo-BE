@@ -8,19 +8,21 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
+@Entity(name = "orders")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "orders")
+@Table(name = "customer-order")
 public class Order extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime time;
 
     Double shippingFee;
@@ -32,22 +34,33 @@ public class Order extends BaseEntity {
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 
+    @Column(columnDefinition = "DATETIME(0)")
     LocalDateTime expectedDeliveryTime;
 
-    @ManyToOne
+    String customerPhone;
+
+    String shipperPhone;
+
+    String notes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id")
     User employee;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
     Customer customer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id")
     Restaurant restaurant;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hub_id")
     Hub hub;
 
-    @OneToOne
-    Transaction transaction;
+    @OneToMany(mappedBy = "order")
+    List<Transaction> transactions;
 
     @OneToMany(mappedBy = "order")
     List<OrderDetail> orderDetails;

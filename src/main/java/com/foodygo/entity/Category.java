@@ -13,13 +13,17 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "category")
 public class Category extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     String name;
 
+    @Column(columnDefinition = "NVARCHAR(2000)")
     String description;
 
     @OneToMany(mappedBy = "category")

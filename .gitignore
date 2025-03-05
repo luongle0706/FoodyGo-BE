@@ -3,7 +3,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-mysql-data
+src/main/resources/firebase-SWD391.json
+src/main/resources/theanh-firebase.json
+data
 
 ### STS ###
 .apt_generated
@@ -32,3 +34,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### env ###
+local.env

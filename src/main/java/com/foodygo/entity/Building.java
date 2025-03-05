@@ -14,16 +14,17 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Table(name = "building")
 public class Building extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(name = "name", nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
+    @Column(name = "name", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)")
     String name;
 
-    @Column(name = "description", columnDefinition = "VARCHAR(1000)")
+    @Column(name = "description", columnDefinition = "NVARCHAR(1000)")
     String description;
 
     @ManyToOne
