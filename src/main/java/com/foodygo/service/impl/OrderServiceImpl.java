@@ -15,14 +15,12 @@ import com.foodygo.mapper.OrderMapper;
 import com.foodygo.repository.OrderDetailRepository;
 import com.foodygo.repository.OrderRepository;
 import com.foodygo.service.spec.*;
-import com.foodygo.utils.QuanTest_FirebaseStorageService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,7 +36,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailService orderDetailService;
     private final TransactionService transactionService;
     private final OrderActivityService orderActivityService;
-    private final QuanTest_FirebaseStorageService firebaseStorageService;
     private final HubService hubService;
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
@@ -90,19 +87,16 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
         OrderStatus oldStatus = order.getStatus();
         OrderMapper.INSTANCE.updateOrderFromDto(orderUpdateRequest, order);
-//        if(orderUpdateRequest.getOrderDetailUpdateRequests() != null) {
-//            updateOrderDetails(order, orderUpdateRequest.getOrderDetailUpdateRequests());
-//        }
         orderRepository.save(order);
 
-        String imageUrl = null;
-        if (orderUpdateRequest.getImage() != null && !orderUpdateRequest.getImage().isEmpty()) {
-            try {
-                imageUrl = firebaseStorageService.uploadFile(orderUpdateRequest.getImage());
-            } catch (IOException e) {
-                throw new RuntimeException("Update image failed", e);
-            }
-        }
+        String imageUrl = "null";
+//        if (orderUpdateRequest.getImage() != null && !orderUpdateRequest.getImage().isEmpty()) {
+//            try {
+//                imageUrl = firebaseStorageService.uploadFile(orderUpdateRequest.getImage());
+//            } catch (IOException e) {
+//                throw new RuntimeException("Update image failed", e);
+//            }
+//        }
 
         //create order activity
         orderActivityService.logOrderStatusChange(orderId, orderUpdateRequest.getUserId(), oldStatus,
@@ -117,16 +111,6 @@ public class OrderServiceImpl implements OrderService {
         orderResponse.setOrderDetails(orderDetailResponses);
 
         return orderResponse;
-    }
-
-    private Integer getUserIdFromRequest(OrderUpdateRequest orderUpdateRequest) {
-        if (orderUpdateRequest.getUserId() != null) {
-            return orderUpdateRequest.getUserId();
-        } else if (orderUpdateRequest.getEmployeeId() != null) {
-            return orderUpdateRequest.getEmployeeId();
-        } else {
-            throw new IdNotFoundException("Not any user found");
-        }
     }
 
 //    private void updateOrderDetails(Order order, List<OrderDetailUpdateRequest> orderDetailUpdateRequests) {

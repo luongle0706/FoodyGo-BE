@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -31,8 +30,6 @@ public class DatabaseInit {
     private final HubRepository hubRepository;
     private final BuildingRepository buildingRepository;
     private final OrderRepository orderRepository;
-    private final OrderDetailRepository orderDetailRepository;
-    private final OrderActivityRepository orderActivityRepository;
     private final WalletRepository walletRepository;
 
     @Bean
@@ -52,6 +49,7 @@ public class DatabaseInit {
                 roleRepository.save(roleSeller);
             }
 
+            User user = null, admin, manager, staff = null, seller;
             if (userRepository.count() == 0) {
                 Role roleUser = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_USER);
                 Role roleAdmin = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_ADMIN);
@@ -59,7 +57,7 @@ public class DatabaseInit {
                 Role roleManager = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_MANAGER);
                 Role roleSeller = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_SELLER);
 
-                User user = User.builder()
+                user = User.builder()
                         .fullName("User")
                         .accessToken(null)
                         .refreshToken(null)
@@ -69,9 +67,9 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleUser)
                         .build();
-                userRepository.save(user);
+                user = userRepository.save(user);
 
-                User admin = User.builder()
+                admin = User.builder()
                         .fullName("Admin")
                         .accessToken(null)
                         .refreshToken(null)
@@ -81,9 +79,9 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleAdmin)
                         .build();
-                userRepository.save(admin);
+                admin = userRepository.save(admin);
 
-                User manager = User.builder()
+                manager = User.builder()
                         .fullName("Manager")
                         .accessToken(null)
                         .refreshToken(null)
@@ -93,9 +91,9 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleManager)
                         .build();
-                userRepository.save(manager);
+                manager = userRepository.save(manager);
 
-                User staff = User.builder()
+                staff = User.builder()
                         .fullName("HOANG SON HA")
                         .accessToken(null)
                         .refreshToken(null)
@@ -105,9 +103,9 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleStaff)
                         .build();
-                userRepository.save(staff);
+                staff = userRepository.save(staff);
 
-                User seller = User.builder()
+                seller = User.builder()
                         .fullName("Seller")
                         .accessToken(null)
                         .refreshToken(null)
@@ -117,7 +115,7 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleSeller)
                         .build();
-                userRepository.save(seller);
+                seller = userRepository.save(seller);
             }
 
             if (hubRepository.count() == 0) {
@@ -140,14 +138,12 @@ public class DatabaseInit {
                 }
             }
 
-            if (customerRepository.count() == 0 && walletRepository.count() == 0) {
+            Customer customer = null;
+            if (customerRepository.count() == 0) {
 
-                User user = userRepository.findById(1).orElseThrow(
-                        () -> new RuntimeException("User not found when creating customer")
-                );
                 Building building = buildingRepository.findBuildingById(1);
 
-                Customer customer = Customer.builder()
+                customer = Customer.builder()
                         .building(building)
                         .user(user)
                         .build();
@@ -163,11 +159,12 @@ public class DatabaseInit {
 
             Random random = new Random();
 
-            if (restaurantRepository.count() <= 0 && walletRepository.count() <= 0) {
+            Restaurant restaurant = null;
+            if (restaurantRepository.count() <= 0) {
                 User owner = userRepository.findById(5).orElseThrow(
                         () -> new RuntimeException("Owner not found when init restaurant")
                 );
-                Restaurant restaurant = Restaurant.builder()
+                restaurant = Restaurant.builder()
                         .name("Cơm tấm Ngô Quyền")
                         .phone("+84" + (100000000 + random.nextInt(900000000)))
                         .email("restaurant@foodygo.com")
@@ -176,12 +173,12 @@ public class DatabaseInit {
                         .image("https://img-global.cpcdn.com/recipes/49876fe80303b991/640x640sq70/photo.webp")
                         .build();
 
-                Restaurant savedRestaurant = restaurantRepository.save(restaurant);
+                restaurant = restaurantRepository.save(restaurant);
 
                 Wallet staffWallet = Wallet.builder()
                         .balance(0.0)
                         .walletType(WalletType.RESTAURANT)
-                        .restaurant(savedRestaurant)
+                        .restaurant(restaurant)
                         .build();
                 walletRepository.save(staffWallet);
 
@@ -189,7 +186,7 @@ public class DatabaseInit {
                     Category category = Category.builder()
                             .name("R" + restaurant.getId() + "C" + j)
                             .description("Sample category no. " + j + " from restaurant " + restaurant.getId())
-                            .restaurant(savedRestaurant)
+                            .restaurant(restaurant)
                             .build();
                     categoryRepository.save(category);
 
@@ -224,42 +221,15 @@ public class DatabaseInit {
             }
 
             if (orderRepository.count() == 0) {
-                List<User> employees = userRepository.findAll();
-                List<Customer> customers = customerRepository.findAll();
-                List<Restaurant> restaurants = restaurantRepository.findAll();
                 List<Hub> hubs = hubRepository.findAll();
 
-                for (int i = 0; i < 20; i++) {
-                    User randomEmployee = employees.get(random.nextInt(employees.size()));
-                    Customer randomCustomer = customers.get(random.nextInt(customers.size()));
-                    Restaurant randomRestaurant = restaurants.get(random.nextInt(restaurants.size()));
-                    Hub randomHub = hubs.get(random.nextInt(hubs.size()));
-                    List<Product> products = productRepository.findByRestaurantIdAndDeletedFalse(randomRestaurant.getId());
+                // Phí dịch vụ & vận chuyển
+                double shippingFee = random.nextDouble() * 5 + 2;
+                double serviceFee = random.nextDouble() * 3 + 1;
+                double totalPrice = 0;
 
-                    // Phí dịch vụ & vận chuyển
-                    double shippingFee = random.nextDouble() * 5 + 2;
-                    double serviceFee = random.nextDouble() * 3 + 1;
-                    double totalPrice = 0;
-
-                    // Danh sách OrderDetail
-                    List<OrderDetail> orderDetails = new ArrayList<>();
-                    for (int j = 0; j < random.nextInt(5) + 1; j++) {
-                        Product randomProduct = products.get(random.nextInt(products.size()));
-                        int quantity = random.nextInt(3) + 1;
-                        double price = randomProduct.getPrice() * quantity;
-                        totalPrice += price;
-
-                        OrderDetail orderDetail = OrderDetail.builder()
-                                .product(randomProduct)
-                                .quantity(quantity)
-                                .price(price)
-                                .addonItems("Addon " + j)
-                                .order(null) // Gán sau khi tạo order
-                                .build();
-                        orderDetails.add(orderDetail);
-                    }
-
-                    // Tạo đơn hàng
+                // Tạo đơn hàng
+                for (Hub hub : hubs) {
                     Order order = Order.builder()
                             .time(LocalDateTime.now().minusDays(random.nextInt(10)))
                             .shippingFee(shippingFee)
@@ -267,40 +237,15 @@ public class DatabaseInit {
                             .totalPrice(totalPrice + shippingFee + serviceFee)
                             .status(OrderStatus.ORDERED)
                             .expectedDeliveryTime(LocalDateTime.now().plusHours(random.nextInt(5) + 1))
-                            .customerPhone(randomCustomer.getUser().getPhone())
+                            .customerPhone(user != null ? user.getPhone() : "190238019283")
                             .shipperPhone("+84" + (100000000 + random.nextInt(900000000)))
                             .notes("Giao hàng trước 6h tối")
-                            .employee(randomEmployee)
-                            .customer(randomCustomer)
-                            .restaurant(randomRestaurant)
-                            .hub(randomHub)
+                            .employee(staff)
+                            .customer(customer)
+                            .restaurant(restaurant)
+                            .hub(hub)
                             .build();
                     orderRepository.save(order);
-
-                    // Gán order cho OrderDetail và lưu
-                    for (OrderDetail detail : orderDetails) {
-                        detail.setOrder(order);
-                        orderDetailRepository.save(detail);
-                    }
-
-                    // Tạo lịch sử trạng thái OrderActivity
-                    List<OrderActivity> orderActivities = new ArrayList<>();
-                    OrderStatus[] statuses = OrderStatus.values();
-                    for (int k = 0; k < random.nextInt(4) + 1; k++) {
-                        OrderStatus fromStatus = statuses[random.nextInt(statuses.length)];
-                        OrderStatus toStatus = statuses[random.nextInt(statuses.length)];
-
-                        OrderActivity orderActivity = OrderActivity.builder()
-                                .fromStatus(fromStatus)
-                                .toStatus(toStatus)
-                                .time(order.getTime().plusMinutes(k * 15))
-                                .image("order_activity_" + k + ".png")
-                                .user(randomEmployee)
-                                .order(order)
-                                .build();
-                        orderActivities.add(orderActivity);
-                    }
-                    orderActivityRepository.saveAll(orderActivities);
                 }
             }
         };
