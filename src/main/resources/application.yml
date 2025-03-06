@@ -108,6 +108,13 @@ payment:
     command: ${COMMAND}
     orderType: ${ORDER_TYPE}
 
+aws:
+  s3:
+    access-key: ${S3_ACCESS_KEY}
+    secret-key: ${S3_SECRET_KEY}
+    region: ${S3_REGION}
+    bucket-name: ${S3_BUCKET_NAME}
+
 #image:
 #  saveLocation: /var/www/images/
 #  getLocation: https://foodygo.theanh0804.id.vn/public/
