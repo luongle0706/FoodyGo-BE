@@ -22,7 +22,7 @@ public class CartController {
     private final CartServiceImpl cartService;
 
     @GetMapping("/users/{userId}")
-    @Operation(summary = "Get Cart By User", description = "Retrieve a cart by the specified restaurant ID.")
+    @Operation(summary = "Get Cart By User", description = "Retrieve a cart by the specified user ID.")
     @PreAuthorize("hasAnyRole('USER')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cart found"),
@@ -37,6 +37,26 @@ public class CartController {
                         .status(HttpStatus.OK.toString())
                         .message("Get cart successfully!")
                         .data(cartService.getCart(userId))
+                .build());
+    }
+    @GetMapping("/users/{userId}/restaurants{restaurantId}/products/{productId}")
+    @Operation(summary = "Get Cart item By restaurant and product", description = "Retrieve a cart item by the specified restaurant ID and product ID.")
+    @PreAuthorize("hasAnyRole('USER', 'SELLER')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cart item found"),
+            @ApiResponse(responseCode = "400", description = "Invalid cart request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Cart item not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> getCartItemByProductAndRestaurant(@PathVariable Integer userId,
+                                                                            @PathVariable Integer restaurantId,
+                                                                            @PathVariable Integer productId) {
+        return ResponseEntity.ok(ObjectResponse.builder()
+                .status(HttpStatus.OK.toString())
+                .message("Get cart item successfully!")
+                .data(cartService.getCartItemByProductAndRestaurant(userId, restaurantId, productId))
                 .build());
     }
 

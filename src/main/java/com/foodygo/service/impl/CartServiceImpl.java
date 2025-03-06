@@ -3,6 +3,7 @@ package com.foodygo.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodygo.dto.cart.Cart;
 import com.foodygo.dto.cart.CartItem;
+import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.service.spec.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,6 +18,7 @@ public class CartServiceImpl implements CartService {
     private final ObjectMapper objectMapper;
     private static final String CART_PREFIX = "cart:";
 
+    @Override
     public Cart getCart(Integer userId) {
 
         String key = CART_PREFIX + userId;
@@ -27,6 +29,7 @@ public class CartServiceImpl implements CartService {
         return new Cart();
     }
 
+    @Override
     public Cart addToCart(Integer userId, CartItem cartItem) {
         Cart cart = getCart(userId);
 
@@ -44,6 +47,7 @@ public class CartServiceImpl implements CartService {
         return updateCart(userId, cart);
     }
 
+    @Override
     public Cart removeFromCart(Integer userId, Integer productId) {
         Cart cart = getCart(userId);
         cart.getItems().removeIf(item -> item.getProductId().equals(productId));
@@ -52,6 +56,26 @@ public class CartServiceImpl implements CartService {
             return new Cart();
         }
         return updateCart(userId, cart);
+    }
+
+    @Override
+    public Cart clearCart(Integer userId) {
+        redisTemplate.delete(CART_PREFIX + userId);
+        return new Cart();
+    }
+
+    @Override
+    public CartItem getCartItemByProductAndRestaurant(Integer userId, Integer restaurantId, Integer productId) {
+        Cart cart = getCart(userId);
+        Optional<CartItem> existingItem = cart.getItems()
+                .stream()
+                .filter(item -> item.getRestaurantId().equals(restaurantId) && item.getProductId().equals(productId))
+                .findFirst();
+        if (existingItem.isPresent()) {
+            return existingItem.get();
+        } else {
+            throw new IdNotFoundException("Cart item not found!");
+        }
     }
 
     public Cart updateCart(Integer userId, Cart cart) {
@@ -64,10 +88,5 @@ public class CartServiceImpl implements CartService {
 
         redisTemplate.opsForValue().set(CART_PREFIX + userId, cart);
         return cart;
-    }
-
-    public Cart clearCart(Integer userId) {
-        redisTemplate.delete(CART_PREFIX + userId);
-        return new Cart();
     }
 }

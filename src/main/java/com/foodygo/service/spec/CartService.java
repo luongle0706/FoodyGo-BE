@@ -13,4 +13,6 @@ public interface CartService {
     Cart removeFromCart(Integer userId, Integer productId);
 
     Cart clearCart(Integer userId);
+
+    CartItem getCartItemByProductAndRestaurant(Integer userId, Integer restaurantId, Integer productId);
 }
