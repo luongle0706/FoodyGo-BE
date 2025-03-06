@@ -8,10 +8,6 @@ import java.util.List;
 public interface TransactionService {
 
     List<TransactionHistoryResponse> getTransactionsByWallet(Integer walletId);
-    TransactionHistoryResponse getTransactionById(Integer transactionId);
-    List<TransactionHistoryResponse> getTransactionsByType(Integer walletId, TransactionType type);
-    TransactionHistoryResponse processPayment(Integer walletId, double amount);
-    TransactionHistoryResponse processRefund(Integer walletId, double amount);
-    TransactionHistoryResponse transferMoney(Integer fromWalletId, Integer toWalletId, double amount);
+    List<TransactionHistoryResponse> getTransactionByType(Integer walletId);
     void deleteTransactionsByOrderId(Integer orderId);
 }

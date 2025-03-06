@@ -1,5 +1,6 @@
 package com.foodygo.dto.response;
 
+import com.foodygo.enums.TransactionType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,5 +17,5 @@ public class TransactionHistoryResponse {
     LocalDateTime time;
     Double amount;
     Double remaining;
-   String type;
+    TransactionType type;
 }

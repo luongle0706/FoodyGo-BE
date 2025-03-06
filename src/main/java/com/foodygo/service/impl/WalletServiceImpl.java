@@ -1,9 +1,12 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.response.WalletBalanceResponse;
+import com.foodygo.entity.Transaction;
 import com.foodygo.entity.Wallet;
+import com.foodygo.enums.TransactionType;
 import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.mapper.WalletMapper;
+import com.foodygo.repository.TransactionRepository;
 import com.foodygo.repository.WalletRepository;
 import com.foodygo.service.spec.WalletService;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +17,9 @@ import org.springframework.stereotype.Service;
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
+    private final TransactionRepository transactionRepository;
 
-@Override
+    @Override
 public WalletBalanceResponse getWalletByCustomerId(Integer customerId) {
     Wallet wallet = walletRepository.findByCustomerId(customerId)
             .orElseThrow(() -> new IdNotFoundException("Wallet not found for customer: " + customerId));
@@ -27,28 +31,23 @@ public WalletBalanceResponse getWalletByCustomerId(Integer customerId) {
     }
 
     @Override
-    public WalletBalanceResponse getWalletByRestaurantId(Integer restaurantId) {
-        return WalletMapper.INSTANCE.toDTO( walletRepository.findByRestaurantId(restaurantId)
-                .orElseThrow(() -> new IdNotFoundException("Wallet not found for restaurant: " + restaurantId)));
-    }
-
-    @Override
-    public double getWalletBalance(Integer walletId) {
-        Wallet wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new IdNotFoundException("Wallet not found"));
-        return wallet.getBalance();
-    }
-
-    @Override
-    public Wallet createWallet(Wallet wallet) {
-        return walletRepository.save(wallet);
-    }
-
-    @Override
-    public void deleteWallet(Integer walletId) {
-        if (!walletRepository.existsById(walletId)) {
-            throw new IdNotFoundException("Wallet not found");
+    public void processWithdraw(Integer walletId, Double amount) {
+        Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> new IdNotFoundException("Cannot found the wallet with id: " + walletId));
+        if (amount <= 0) {
+            throw new IdNotFoundException("Number of foodyxu must be more than 0");
         }
-        walletRepository.deleteById(walletId);
+        if (wallet.getBalance() <= amount) {
+            throw new IdNotFoundException("The balance is not enough to withdraw");
+        }
+        Transaction transaction = Transaction.builder()
+                .description("Rút tiền từ ví")
+                .amount(amount )
+                .remaining(wallet.getBalance() - amount)
+                .type(TransactionType.WITHDRAWAL)
+                .wallet(wallet)
+                .build();
+        wallet.setBalance(wallet.getBalance() - amount );
+        transactionRepository.save(transaction);
+        walletRepository.save(wallet);
     }
 }
