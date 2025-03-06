@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
@@ -79,7 +80,7 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleAdmin)
                         .build();
-                admin = userRepository.save(admin);
+                userRepository.save(admin);
 
                 manager = User.builder()
                         .fullName("Manager")
@@ -91,7 +92,7 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleManager)
                         .build();
-                manager = userRepository.save(manager);
+                userRepository.save(manager);
 
                 staff = User.builder()
                         .fullName("HOANG SON HA")
@@ -115,7 +116,7 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleSeller)
                         .build();
-                seller = userRepository.save(seller);
+                userRepository.save(seller);
             }
 
             if (hubRepository.count() == 0) {
@@ -193,9 +194,9 @@ public class DatabaseInit {
                     Product product = Product.builder()
                             .code("R" + restaurant.getId() + "P" + j)
                             .name("Sample product no. " + j)
-                            .price(Math.random() * 50 + 1)
+                            .price(ThreadLocalRandom.current().nextDouble(10000, 100000))
                             .description("Sample product no. " + j + " from restaurant " + restaurant.getId())
-                            .prepareTime(Math.random() * 50 + 1)
+                            .prepareTime(ThreadLocalRandom.current().nextDouble(10, 120))
                             .restaurant(restaurant)
                             .category(category)
                             .build();
@@ -212,7 +213,7 @@ public class DatabaseInit {
                         AddonItem addonItem = AddonItem.builder()
                                 .name("Sample addon item no." + k)
                                 .price(Math.random() * 5 + 1)
-                                .quantity(100)
+                                .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .section(addonSection)
                                 .build();
                         addonItemRepository.save(addonItem);
