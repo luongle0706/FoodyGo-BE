@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -76,6 +77,14 @@ public class CartServiceImpl implements CartService {
         } else {
             throw new IdNotFoundException("Cart item not found!");
         }
+    }
+
+    @Override
+    public List<CartItem> getCartItemsByRestaurant(Integer userId, Integer restaurantId) {
+       Cart cart = getCart(userId);
+        return cart.getItems()
+                .stream()
+                .filter(item -> item.getRestaurantId().equals(restaurantId)).toList();
     }
 
     public Cart updateCart(Integer userId, Cart cart) {

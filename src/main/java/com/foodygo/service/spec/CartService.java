@@ -4,6 +4,8 @@ import com.foodygo.dto.cart.Cart;
 import com.foodygo.dto.cart.CartItem;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface CartService {
     Cart getCart(Integer userId);
@@ -15,4 +17,5 @@ public interface CartService {
     Cart clearCart(Integer userId);
 
     CartItem getCartItemByProductAndRestaurant(Integer userId, Integer restaurantId, Integer productId);
+    List<CartItem> getCartItemsByRestaurant(Integer userId, Integer restaurantId);
 }
