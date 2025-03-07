@@ -52,7 +52,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         Specification<Restaurant> specification = RestaurantDTO.filterByFields(request.getFilters());
         Page<Restaurant> restaurants = restaurantRepository.findAll(specification, pageable);
         List<RestaurantDTO> mappedResposne = restaurants.getContent().stream().map(RestaurantMapper.INSTANCE::toDTO).toList();
-        return PaginationUtil.getPagedMappingJacksonValue(request, restaurants, mappedResposne);
+        return PaginationUtil.getPagedMappingJacksonValue(request, restaurants, mappedResposne, "Get all restaurants");
     }
 
     @Override

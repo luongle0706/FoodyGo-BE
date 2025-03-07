@@ -31,11 +31,11 @@ public class PaginationUtil {
         return PageRequest.of(request.getPageNo() - 1, request.getPageSize(), sort);
     }
 
-    public static MappingJacksonValue getPagedMappingJacksonValue(PagingRequest request, Page<?> page, List<?> mappedDTO) {
+    public static MappingJacksonValue getPagedMappingJacksonValue(PagingRequest request, Page<?> page, List<?> mappedDTO, String message) {
         String[] sorts = request.getSortBy().split(",");
         NewPagingResponse pagingResponse = NewPagingResponse.builder()
                 .code(HttpStatus.OK.toString())
-                .message("Get all batches")
+                .message(message)
                 .currentPage(page.getNumber() + 1)
                 .totalElements(page.getTotalElements())
                 .pageSize(request.getPageSize())
