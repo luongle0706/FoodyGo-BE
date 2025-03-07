@@ -1,5 +1,6 @@
 package com.foodygo.dto.request;
 
+import com.google.type.DateTime;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,5 +26,4 @@ public class UserRegisterRequest {
     @NotBlank(message = "Mật khẩu không được để trống")
     @Size(max = 100, min = 6, message = "Mật khẩu phải từ 6 tới 100 kí tự")
     private String password;
-
 }
