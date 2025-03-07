@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransferRequest {
-    private String receiver;
-    private Integer amount;
-    private String note;
+public class TopUpRequest {
+    Integer amount;
+    String method;
 }

@@ -1,5 +1,7 @@
 package com.foodygo.controller;
 
+import com.foodygo.dto.request.TopUpRequest;
+import com.foodygo.dto.request.TransferRequest;
 import com.foodygo.dto.request.WithdrawRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.spec.DepositService;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,6 +86,41 @@ public class WalletController {
                 .status("200")
                 .message("Withdrawal processed successfully")
                 .build());
+    }
+
+    @Operation(summary = "Transfer funds", description = "Transfers funds from one wallet to another.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Transfer processed successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid transfer request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/{walletId}/transfer")
+    public ResponseEntity<ObjectResponse> transfer(@Parameter(description = "ID of the sender's wallet") @PathVariable Integer walletId,
+                                                   @Parameter(description = "Transfer request details") @RequestBody TransferRequest request) {
+        walletService.processTransfer(walletId, request.getReceiver(), request.getAmount(), request.getNote());
+        return ResponseEntity.ok(ObjectResponse.builder()
+                .status("200")
+                .message("Transfer processed successfully")
+                .build());
+    }
+
+   @Operation(summary = "Top up Wallet", description = "Tops up a wallet with a specified amount using a specified method.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Top up processed successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid top up request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/{walletId}/topup")
+    public ResponseEntity<ObjectResponse> topUpWallet(@Parameter(description = "ID of the wallet") @PathVariable Integer walletId,
+                                                      @Parameter(description = "Top up request details") @RequestBody TopUpRequest requestDto, HttpServletRequest request) {
+
+    return ResponseEntity.ok(ObjectResponse.builder()
+            .status("200")
+            .message("Top up processed successfully")
+            .data(walletService.processTopUp(walletId, requestDto.getAmount(), requestDto.getMethod(), request))
+            .build());
     }
 
 }
