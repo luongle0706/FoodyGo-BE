@@ -39,6 +39,7 @@ public class CartController {
                         .data(cartService.getCart(userId))
                 .build());
     }
+
     @GetMapping("/users/{userId}/restaurants/{restaurantId}/products/{productId}")
     @Operation(summary = "Get Cart item By restaurant and product", description = "Retrieve a cart item by the specified restaurant ID and product ID.")
     @PreAuthorize("hasAnyRole('USER', 'SELLER')")

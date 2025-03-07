@@ -51,13 +51,27 @@ public class CartServiceImpl implements CartService {
     @Override
     public Cart removeFromCart(Integer userId, Integer productId) {
         Cart cart = getCart(userId);
-        cart.getItems().removeIf(item -> item.getProductId().equals(productId));
+        Optional<CartItem> existingItem = cart.getItems()
+                .stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            CartItem item = existingItem.get();
+            if (item.getQuantity() > 1) {
+                item.setQuantity(item.getQuantity() - 1);
+            } else {
+                cart.getItems().remove(item);
+            }
+        }
+
         if (cart.getItems().isEmpty()) {
             redisTemplate.delete(CART_PREFIX + userId);
             return new Cart();
         }
         return updateCart(userId, cart);
     }
+
 
     @Override
     public Cart clearCart(Integer userId) {
