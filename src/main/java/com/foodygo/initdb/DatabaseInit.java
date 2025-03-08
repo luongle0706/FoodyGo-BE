@@ -176,12 +176,12 @@ public class DatabaseInit {
 
                 restaurant = restaurantRepository.save(restaurant);
 
-                Wallet staffWallet = Wallet.builder()
+                Wallet sellerWallet = Wallet.builder()
                         .balance(0.0)
                         .walletType(WalletType.RESTAURANT)
                         .restaurant(restaurant)
                         .build();
-                walletRepository.save(staffWallet);
+                walletRepository.save(sellerWallet);
 
                 for (int j = 0; j < 10; j++) {
                     Category category = Category.builder()

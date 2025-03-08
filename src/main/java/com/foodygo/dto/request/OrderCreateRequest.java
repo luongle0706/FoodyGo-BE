@@ -13,7 +13,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderCreateRequest {
     Double shippingFee;
-    Double serviceFee;
     Double totalPrice;
     LocalDateTime expectedDeliveryTime;
     LocalDateTime time;
@@ -25,5 +24,6 @@ public class OrderCreateRequest {
     Integer restaurantId;
     Integer hubId;
     List<OrderDetailCreateRequest> orderDetails;
+
 
 }
