@@ -126,6 +126,12 @@ public class WalletServiceImpl implements WalletService {
         return paymentService.requestPayment(amount,"NCB", request, wallet.getCustomer().getId());
     }
 
+    @Override
+    public void paymentOrder(Order order) {
+        Wallet customerWallet = order.getCustomer().getWallet();
+//        Wallet restaurantWallet = order.getRestaurant().getWallets();
+    }
+
     private DepositMethod getDepositMethod(String method) {
         return switch (method.toUpperCase()) {
             case "VNPAY" -> DepositMethod.VNPAY;
@@ -133,5 +139,7 @@ public class WalletServiceImpl implements WalletService {
             default -> null;
         };
     }
+
+
 
 }
