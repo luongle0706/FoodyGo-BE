@@ -4,6 +4,7 @@ import com.foodygo.dto.response.WalletBalanceResponse;
 import com.foodygo.entity.*;
 import com.foodygo.enums.DepositMethod;
 import com.foodygo.enums.TransactionType;
+import com.foodygo.exception.BadRequestException;
 import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.repository.TransactionRepository;
 import com.foodygo.repository.UserRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -126,10 +128,39 @@ public class WalletServiceImpl implements WalletService {
         return paymentService.requestPayment(amount,"NCB", request, wallet.getCustomer().getId());
     }
 
+//    Xài hàm này nha The Anh
     @Override
     public void paymentOrder(Order order) {
         Wallet customerWallet = order.getCustomer().getWallet();
-//        Wallet restaurantWallet = order.getRestaurant().getWallets();
+        Wallet restaurantWallet = order.getRestaurant().getWallet();
+
+        if (customerWallet.getBalance() < order.getTotalPrice()) {
+            throw new BadRequestException("Cannot payment because the balance not enough to pay order");
+        }
+
+        Transaction customerTransaction = Transaction.builder()
+                .description("Thanh toán đơn hàng: " + order.getId())
+                .amount(order.getTotalPrice())
+                .remaining(customerWallet.getBalance() - order.getTotalPrice())
+                .type(TransactionType.PAYMENT)
+                .order(order)
+                .wallet(customerWallet)
+                .build();
+        customerWallet.setBalance(customerWallet.getBalance() - order.getTotalPrice());
+
+        Transaction restaurantTransaction = Transaction.builder()
+                .description("Nhận tiền từ đơn hàng: " + order.getId())
+                .amount(order.getTotalPrice())
+                .remaining(restaurantWallet.getBalance() + order.getTotalPrice())
+                .type(TransactionType.PAYMENT)
+                .order(order)
+                .wallet(customerWallet)
+                .build();
+
+        restaurantWallet.setBalance(restaurantWallet.getBalance() + order.getTotalPrice());
+
+        walletRepository.saveAll(List.of(customerWallet, restaurantWallet));
+        transactionRepository.saveAll(List.of(customerTransaction, restaurantTransaction));
     }
 
     private DepositMethod getDepositMethod(String method) {
