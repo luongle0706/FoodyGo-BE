@@ -5,9 +5,7 @@ import com.foodygo.dto.request.OrderDetailCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
 import com.foodygo.dto.response.OrderDetailResponse;
 import com.foodygo.dto.response.OrderResponse;
-import com.foodygo.entity.Order;
-import com.foodygo.entity.OrderDetail;
-import com.foodygo.entity.Product;
+import com.foodygo.entity.*;
 import com.foodygo.enums.OrderStatus;
 import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.mapper.OrderDetailMapper;
@@ -17,6 +15,7 @@ import com.foodygo.repository.OrderRepository;
 import com.foodygo.service.spec.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,45 +39,46 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
 
+    @Value("${business.service-fee}")
+    private double serviceFeePercentage;
+
     @Override
     @Transactional
-    public OrderResponse createOrder(OrderCreateRequest orderCreateRequest) {
-        Order order = OrderMapper.INSTANCE.toEntity(orderCreateRequest);
-        order.setEmployee(userService.findById(orderCreateRequest.getEmployeeId()));
-        order.setCustomer(customerService.findById(orderCreateRequest.getCustomerId()));
-        order.setRestaurant(restaurantService.getRestaurantById(orderCreateRequest.getRestaurantId()));
-        order.setHub(hubService.getHubById(orderCreateRequest.getHubId()));
-        order.setStatus(OrderStatus.ORDERED);
-        orderRepository.save(order);
+    public void createOrder(OrderCreateRequest request) {
+        double serviceFee = serviceFeePercentage * (request.getProductPrice() + request.getShippingFee());
+        User employee = userService.findById(request.getEmployeeId());
+        Customer customer = customerService.findById(request.getCustomerId());
+        Restaurant restaurant = restaurantService.getRestaurantById(request.getRestaurantId());
+        Hub hub = hubService.getHubById(request.getHubId());
+        Order order = Order.builder()
+                .id(null)
+                .time(request.getTime())
+                .shippingFee(request.getShippingFee())
+                .serviceFee(serviceFee)
+                .totalPrice(request.getProductPrice() + request.getShippingFee() + serviceFee)
+                .status(OrderStatus.ORDERED)
+                .expectedDeliveryTime(request.getExpectedDeliveryTime())
+                .customerPhone(request.getCustomerPhone())
+                .shipperPhone(null)
+                .employee(employee)
+                .customer(customer)
+                .restaurant(restaurant)
+                .hub(hub)
+                .notes(request.getNotes())
+                .build();
+        Order savedOrder = orderRepository.save(order);
 
-        List<Integer> productIds = orderCreateRequest.getOrderDetails().stream()
-                .map(OrderDetailCreateRequest::getProductId)
-                .toList();
-
-        Map<Integer, Product> productMap = productService.getProductsByIds(productIds)
-                .stream()
-                .collect(Collectors.toMap(Product::getId, p -> p));
-
-        List<OrderDetail> orderDetails = orderCreateRequest.getOrderDetails().stream()
-                .map(dto -> OrderDetail.builder()
-                        .quantity(dto.getQuantity())
-                        .price(dto.getPrice())
-                        .addonItems(dto.getAddonItems())
-                        .order(order)
-                        .product(productMap.get(dto.getProductId()))
-                        .build()).toList();
-
-        orderDetailRepository.saveAll(orderDetails);
-        order.setOrderDetails(orderDetails);
-
-        List<OrderDetailResponse> orderDetailResponses = orderDetails.stream()
-                .map(OrderDetailMapper.INSTANCE::toDto)
-                .collect(Collectors.toList());
-
-        OrderResponse orderResponse = OrderMapper.INSTANCE.toDto(order);
-        orderResponse.setOrderDetails(orderDetailResponses);
-
-        return orderResponse;
+        for(OrderDetailCreateRequest odcr : request.getOrderDetails()) {
+            Product p = productService.getProductById(odcr.getProductId());
+            OrderDetail od = OrderDetail.builder()
+                    .quantity(odcr.getQuantity())
+                    .price(odcr.getPrice())
+                    .addonItems(odcr.getAddonItems())
+                    .order(savedOrder)
+                    .product(p)
+                    .build();
+            orderDetailRepository.save(od);
+        }
     }
 
     @Override
@@ -118,13 +118,14 @@ public class OrderServiceImpl implements OrderService {
 //                .collect(Collectors.toMap(OrderDetail::getId, orderDetail -> orderDetail));
 //        List<OrderDetail> updatedOrderDetails = new ArrayList<>();
 //
-////        List<Integer> productIds = orderDetailUpdateRequests.stream()
-////                .map(OrderDetailUpdateRequest::getProductId)
-////                .toList();
-////
-////        Map<Integer, Product> productMap = productService.getProductsByIds(productIds)
-////                .stream()
-////                .collect(Collectors.toMap(Product::getId, p -> p));
+
+    /// /        List<Integer> productIds = orderDetailUpdateRequests.stream()
+    /// /                .map(OrderDetailUpdateRequest::getProductId)
+    /// /                .toList();
+    /// /
+    /// /        Map<Integer, Product> productMap = productService.getProductsByIds(productIds)
+    /// /                .stream()
+    /// /                .collect(Collectors.toMap(Product::getId, p -> p));
 //
 //        for(OrderDetailUpdateRequest orderDetailUpdateRequest : orderDetailUpdateRequests) {
 //            if(orderDetailUpdateRequest.getId() == null) {
@@ -144,7 +145,6 @@ public class OrderServiceImpl implements OrderService {
 //        orderDetailRepository.saveAll(updatedOrderDetails);
 //        order.setOrderDetails(updatedOrderDetails);
 //    }
-
     @Override
     public Order getOrderById(Integer id) {
         return orderRepository.findById(id)

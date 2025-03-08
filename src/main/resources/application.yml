@@ -115,6 +115,8 @@ aws:
     region: ${S3_REGION}
     bucket-name: ${S3_BUCKET_NAME}
 
+business:
+  service-fee: 0.01
 #image:
 #  saveLocation: /var/www/images/
 #  getLocation: https://foodygo.theanh0804.id.vn/public/

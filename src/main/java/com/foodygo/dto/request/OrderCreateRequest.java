@@ -1,5 +1,7 @@
 package com.foodygo.dto.request;
 
+import com.foodygo.entity.Order;
+import com.foodygo.enums.OrderStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,17 +15,15 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderCreateRequest {
     Double shippingFee;
-    Double totalPrice;
+    Double productPrice;
     LocalDateTime expectedDeliveryTime;
     LocalDateTime time;
     String customerPhone;
-    String shipperPhone;
     String notes;
     Integer employeeId;
     Integer customerId;
     Integer restaurantId;
     Integer hubId;
     List<OrderDetailCreateRequest> orderDetails;
-
 
 }
