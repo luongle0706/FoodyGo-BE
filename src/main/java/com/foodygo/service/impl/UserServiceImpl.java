@@ -5,10 +5,7 @@ import com.foodygo.configuration.JWTAuthenticationFilter;
 import com.foodygo.configuration.JWTToken;
 import com.foodygo.dto.CustomerDTO;
 import com.foodygo.dto.UserDTO;
-import com.foodygo.dto.request.UserCreateRequest;
-import com.foodygo.dto.request.UserRegisterRequest;
-import com.foodygo.dto.request.UserUpdateRequest;
-import com.foodygo.dto.request.UserUpdateRoleRequest;
+import com.foodygo.dto.request.*;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.dto.response.TokenResponse;
 import com.foodygo.entity.*;
@@ -24,6 +21,7 @@ import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.repository.WalletRepository;
+import com.foodygo.service.spec.CustomerService;
 import com.foodygo.service.spec.RoleService;
 import com.foodygo.service.spec.UserService;
 import jakarta.servlet.http.Cookie;
@@ -59,11 +57,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationManager authenticationManager;
     private final WalletRepository walletRepository;
+    private final CustomerService customerService;
 
     public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
                            UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
                            JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager,
-                           WalletRepository walletRepository) {
+                           WalletRepository walletRepository, CustomerService customerService) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -75,6 +74,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationManager = authenticationManager;
         this.walletRepository = walletRepository;
+        this.customerService = customerService;
     }
 
     @Override
@@ -239,6 +239,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         User user = User.builder()
                 .email(userRegisterRequest.getEmail())
                 .password(bCryptPasswordEncoder.encode(userRegisterRequest.getPassword()))
+                .fullName(userRegisterRequest.getFullName())
+                .phone(userRegisterRequest.getPhone())
                 .accessToken(null)
                 .refreshToken(null)
                 .enabled(true)
@@ -247,18 +249,22 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .build();
         user = userRepository.save(user);
 
-        Customer customer = customerRepository.save(
-                Customer.builder()
-                        .image(null)
-                        .building(null)
-                        .user(user)
-                        .build()
-        );
+//        Customer customer = customerRepository.save(
+//                Customer.builder()
+//                        .image(null)
+//                        .building(null)
+//                        .user(user)
+//                        .build()
+//        );
+
+        CustomerCreateRequest customerCreateRequest = new CustomerCreateRequest(userRegisterRequest.getImage(), userRegisterRequest.getBuildingID(), user.getUserID());
+
+        CustomerDTO customer = customerService.createCustomer(customerCreateRequest);
 
         walletRepository.save(Wallet.builder()
                 .balance(0.0)
                 .walletType(WalletType.CUSTOMER)
-                .customer(customer)
+                .customer(customerMapper.customerDTOToCustomer(customer))
                 .build());
 
         return userMapper.userToUserDTO(userRepository.save(user));

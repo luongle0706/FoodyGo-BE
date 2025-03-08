@@ -15,6 +15,7 @@ import com.foodygo.mapper.BuildingMapper;
 import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
+import com.foodygo.repository.UserRepository;
 import com.foodygo.service.spec.BuildingService;
 import com.foodygo.service.spec.CustomerService;
 import com.foodygo.service.spec.UserService;
@@ -49,7 +50,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
 
     private final CustomerRepository customerRepository;
     private final BuildingService buildingService;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final CustomerMapper customerMapper;
     private final UserMapper userMapper;
     private final BuildingMapper buildingMapper;
@@ -106,11 +107,11 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     @Value("${buffer-image.devide}")
     private int bufferImageDevide;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService, CustomerMapper customerMapper, UserMapper userMapper, BuildingMapper buildingMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserRepository userRepository, CustomerMapper customerMapper, UserMapper userMapper, BuildingMapper buildingMapper) {
         super(customerRepository);
         this.customerRepository = customerRepository;
         this.buildingService = buildingService;
-        this.userService = userService;
+        this.userRepository = userRepository;
         this.customerMapper = customerMapper;
         this.userMapper = userMapper;
         this.buildingMapper = buildingMapper;
@@ -216,7 +217,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     private User getUser(int userID) {
-        User user = userService.findById(userID);
+        User user = userRepository.getUserByUserID(userID);
         if (user == null) {
             throw new ElementNotFoundException("User is not found");
         }
@@ -332,7 +333,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
             user.setNonLocked(false);
         }
         customer.setDeleted(true);
-        userService.save(user);
+        userRepository.save(user);
         return customerMapper.customerToCustomerDTO(customerRepository.save(customer));
     }
 

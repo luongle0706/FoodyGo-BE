@@ -18,4 +18,5 @@ public class CustomerCreateRequest {
 
     @Positive(message = "UserID must be positive")
     private int userID;
+
 }
