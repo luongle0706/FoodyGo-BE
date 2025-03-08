@@ -43,6 +43,7 @@ import java.nio.file.Files;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -176,6 +177,11 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
                                 .map(customerMapper::customerToCustomerDTO)
                                 .toList())
                         .build();
+    }
+
+    @Override
+    public List<CustomerDTO> getCustomers() {
+        return customerRepository.findByDeletedIsFalse().stream().map(customerMapper::customerToCustomerDTO).collect(Collectors.toList());
     }
 
     @Override

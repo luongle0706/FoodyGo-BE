@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -171,6 +172,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
             return userRepository.findAll();
         }
         return listsByRole;
+    }
+
+    @Override
+    public List<UserDTO> getUsers() {
+        return userRepository.findByDeletedIsFalse().stream().map(userMapper::userToUserDTO).collect(Collectors.toList());
     }
 
     @Override

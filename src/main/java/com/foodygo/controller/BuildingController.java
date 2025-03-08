@@ -126,6 +126,20 @@ public class BuildingController {
     }
 
     /**
+     * Method get all buildings non paging
+     *
+     * @return list or empty
+     */
+    @Operation(summary = "Get all buildings non paging", description = "Retrieves all buildings, without optional pagination")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
+    @GetMapping("/non-paging")
+    public ResponseEntity<ObjectResponse> getAllBuildingsNonPaging() {
+        List<BuildingDTO> results = buildingService.getBuildings();
+        return !results.isEmpty() ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "get all buildings non paging successfully", results)) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "get all buildings non paging failed", results));
+    }
+
+    /**
      * Method get hub by building id
      *
      * @param buildingID idOfBuilding

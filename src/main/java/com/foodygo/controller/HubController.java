@@ -83,6 +83,20 @@ public class HubController {
     }
 
     /**
+     * Method get all hubs non paging
+     *
+     * @return list or empty
+     */
+    @Operation(summary = "Get all hubs non paging", description = "Retrieves all hubs, without optional pagination")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
+    @GetMapping("/non-paging")
+    public ResponseEntity<ObjectResponse> getAllHubsNonPaging() {
+        List<HubDTO> results = hubService.getHubs();
+        return !results.isEmpty() ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "get all hub non paging successfully", results)) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "get all hub non paging failed", results));
+    }
+
+    /**
      * Method get all hubs have status is active
      *
      * @param currentPage currentOfThePage

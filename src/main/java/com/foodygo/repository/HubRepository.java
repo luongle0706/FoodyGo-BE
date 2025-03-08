@@ -32,4 +32,6 @@ public interface HubRepository extends JpaRepository<Hub, Integer>, JpaSpecifica
 
     Page<Hub> findAll(Specification<Hub> spec, Pageable pageable);
 
+    List<Hub> findByDeletedIsFalse();
+
 }

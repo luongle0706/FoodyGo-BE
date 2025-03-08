@@ -2,6 +2,7 @@ package com.foodygo.controller;
 
 import com.foodygo.dto.BuildingDTO;
 import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
@@ -80,6 +81,20 @@ public class CustomerController {
         PagingResponse results = customerService.getAllCustomers(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
+
+    /**
+     * Method get all customers non paging
+     *
+     * @return list or empty
+     */
+    @Operation(summary = "Get all customers non paging", description = "Retrieves all customers, without optional pagination")
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/non-paging")
+    public ResponseEntity<ObjectResponse> getAllCustomersNonPaging() {
+        List<CustomerDTO> results = customerService.getCustomers();
+        return !results.isEmpty() ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "get all customers non paging successfully", results)) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "get all customers non paging failed", results));
     }
 
     /**
