@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final HubService hubService;
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final WalletService walletService;
 
     @Value("${business.service-fee}")
     private double serviceFeePercentage;
@@ -56,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
                 .shippingFee(request.getShippingFee())
                 .serviceFee(serviceFee)
                 .totalPrice(request.getProductPrice() + request.getShippingFee() + serviceFee)
-                .status(OrderStatus.ORDERED)
+                .status(OrderStatus.CANCELLED)
                 .expectedDeliveryTime(request.getExpectedDeliveryTime())
                 .customerPhone(request.getCustomerPhone())
                 .shipperPhone(null)
@@ -66,19 +66,23 @@ public class OrderServiceImpl implements OrderService {
                 .hub(hub)
                 .notes(request.getNotes())
                 .build();
-        Order savedOrder = orderRepository.save(order);
+        orderRepository.save(order);
 
-        for(OrderDetailCreateRequest odcr : request.getOrderDetails()) {
+        for (OrderDetailCreateRequest odcr : request.getOrderDetails()) {
             Product p = productService.getProductById(odcr.getProductId());
             OrderDetail od = OrderDetail.builder()
                     .quantity(odcr.getQuantity())
                     .price(odcr.getPrice())
                     .addonItems(odcr.getAddonItems())
-                    .order(savedOrder)
+                    .order(order)
                     .product(p)
                     .build();
             orderDetailRepository.save(od);
         }
+
+        walletService.paymentOrder(order);
+        order.setStatus(OrderStatus.ORDERED);
+        orderRepository.save(order);
     }
 
     @Override

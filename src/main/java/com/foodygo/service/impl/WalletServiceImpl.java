@@ -1,7 +1,10 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.response.WalletBalanceResponse;
-import com.foodygo.entity.*;
+import com.foodygo.entity.Order;
+import com.foodygo.entity.Transaction;
+import com.foodygo.entity.User;
+import com.foodygo.entity.Wallet;
 import com.foodygo.enums.DepositMethod;
 import com.foodygo.enums.TransactionType;
 import com.foodygo.exception.BadRequestException;
@@ -10,13 +13,11 @@ import com.foodygo.repository.TransactionRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.repository.WalletRepository;
 import com.foodygo.service.spec.WalletService;
-import com.foodygo.thirdparty.PaymentDTO;
 import com.foodygo.thirdparty.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -128,8 +129,7 @@ public class WalletServiceImpl implements WalletService {
         return paymentService.requestPayment(amount,"NCB", request, wallet.getCustomer().getId());
     }
 
-//    Xài hàm này nha The Anh
-    @Override
+    @Override // The Anh da~ xai ham nay nha Loc PT
     public void paymentOrder(Order order) {
         Wallet customerWallet = order.getCustomer().getWallet();
         Wallet restaurantWallet = order.getRestaurant().getWallet();
