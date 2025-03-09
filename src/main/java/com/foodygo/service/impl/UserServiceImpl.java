@@ -393,6 +393,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         String token = jwtToken.generatedToken(userDetails);
         String refreshToken = jwtToken.generatedRefreshToken(userDetails);
         User user = userRepository.getUserByEmail(userDetails.getEmail());
+        Customer customer = customerRepository.findByUserUserID(user.getUserID()).orElse(null);
         if (user != null) {
             user.setRefreshToken(refreshToken);
             user.setAccessToken(token);
@@ -406,6 +407,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                     .email(user.getEmail())
                     .role(user.getRole().getRoleName())
                     .userId(user.getUserID())
+                    .customerId(customer != null ? customer.getId() : null)
                     .build();
         }
         return tokenResponse;

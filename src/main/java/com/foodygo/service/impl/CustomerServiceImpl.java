@@ -239,12 +239,13 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
         User user = getUser(customerCreateRequest.getUserID());
         try {
             String url = null;
-            if(customerCreateRequest.getImage() == null) {
-                String dataUrl = generateImageWithInitial(user.getEmail());
-                url = uploadFileBase64(dataUrl);
-            } else {
-                url = upload(customerCreateRequest.getImage());
-            }
+            // Khong lay duoc quyen "Invalid JWT Signature"
+//            if(customerCreateRequest.getImage() == null) {
+//                String dataUrl = generateImageWithInitial(user.getEmail());
+//                url = uploadFileBase64(dataUrl);
+//            } else {
+//                url = upload(customerCreateRequest.getImage());
+//            }
             Customer customer = Customer.builder()
                     .image(url)
                     .building(building)

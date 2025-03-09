@@ -46,7 +46,6 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public int createOrder(OrderCreateRequest request) {
         double serviceFee = serviceFeePercentage * (request.getProductPrice() + request.getShippingFee());
-        User employee = userService.findById(request.getEmployeeId());
         Customer customer = customerService.findById(request.getCustomerId());
         Restaurant restaurant = restaurantService.getRestaurantById(request.getRestaurantId());
         Hub hub = hubService.getHubById(request.getHubId());
@@ -60,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
                 .expectedDeliveryTime(request.getExpectedDeliveryTime())
                 .customerPhone(request.getCustomerPhone())
                 .shipperPhone(null)
-                .employee(employee)
+                .employee(null)
                 .customer(customer)
                 .restaurant(restaurant)
                 .hub(hub)

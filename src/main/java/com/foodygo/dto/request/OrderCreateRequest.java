@@ -20,7 +20,6 @@ public class OrderCreateRequest {
     LocalDateTime time;
     String customerPhone;
     String notes;
-    Integer employeeId;
     Integer customerId;
     Integer restaurantId;
     Integer hubId;

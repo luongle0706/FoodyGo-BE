@@ -191,10 +191,12 @@ public class DatabaseInit {
                             .build();
                     categoryRepository.save(category);
 
+                    int randomPrice = ThreadLocalRandom.current().nextInt(10, 100);
+
                     Product product = Product.builder()
                             .code("R" + restaurant.getId() + "P" + j)
                             .name("Sample product no. " + j)
-                            .price(ThreadLocalRandom.current().nextDouble(10000, 100000))
+                            .price(randomPrice * 1000.0)
                             .description("Sample product no. " + j + " from restaurant " + restaurant.getId())
                             .prepareTime(ThreadLocalRandom.current().nextDouble(10, 120))
                             .restaurant(restaurant)
@@ -210,9 +212,10 @@ public class DatabaseInit {
                     addonSectionRepository.save(addonSection);
 
                     for (int k = 0; k < 3; k++) {
+                        int randomAddonItemPrice = ThreadLocalRandom.current().nextInt(0, 10);
                         AddonItem addonItem = AddonItem.builder()
                                 .name("Sample addon item no." + k)
-                                .price(Math.random() * 5 + 1)
+                                .price(randomAddonItemPrice * 1000.0)
                                 .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .section(addonSection)
                                 .build();
