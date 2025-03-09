@@ -37,6 +37,6 @@ public class UserRegisterRequest {
     private MultipartFile image;
 
     @Positive(message = "BuildingID must be positive")
-    private int buildingID;
+    private Integer buildingID;
 
 }

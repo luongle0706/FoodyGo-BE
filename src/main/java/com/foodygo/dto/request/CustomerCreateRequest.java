@@ -14,7 +14,7 @@ public class CustomerCreateRequest {
     private MultipartFile image;
 
     @Positive(message = "BuildingID must be positive")
-    private int buildingID;
+    private Integer buildingID;
 
     @Positive(message = "UserID must be positive")
     private int userID;

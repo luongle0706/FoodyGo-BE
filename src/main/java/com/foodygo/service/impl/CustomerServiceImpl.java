@@ -18,7 +18,6 @@ import com.foodygo.repository.CustomerRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.service.spec.BuildingService;
 import com.foodygo.service.spec.CustomerService;
-import com.foodygo.service.spec.UserService;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobId;
@@ -232,7 +231,11 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
 
     @Override
     public CustomerDTO createCustomer(CustomerCreateRequest customerCreateRequest) {
-        Building building = getBuilding(customerCreateRequest.getBuildingID());
+        // Allow null building create request because of Google Registration
+        Building building = null;
+        if(customerCreateRequest.getBuildingID() != null) {
+            building = getBuilding(customerCreateRequest.getBuildingID());
+        }
         User user = getUser(customerCreateRequest.getUserID());
         try {
             String url = null;
