@@ -46,14 +46,13 @@ public class OrderController {
     public ResponseEntity<ObjectResponse> createOrder(
             @RequestBody OrderCreateRequest request
     ) {
-        orderService.createOrder(request);
         return ResponseEntity
                 .status(CREATED)
                 .body(
                         ObjectResponse.builder()
                                 .status(CREATED.toString())
                                 .message("Create order successfully!")
-                                .data(null)
+                                .data(orderService.createOrder(request))
                                 .build()
                 );
     }

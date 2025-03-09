@@ -44,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void createOrder(OrderCreateRequest request) {
+    public int createOrder(OrderCreateRequest request) {
         double serviceFee = serviceFeePercentage * (request.getProductPrice() + request.getShippingFee());
         User employee = userService.findById(request.getEmployeeId());
         Customer customer = customerService.findById(request.getCustomerId());
@@ -83,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
         walletService.paymentOrder(order);
         order.setStatus(OrderStatus.ORDERED);
         orderRepository.save(order);
+        return order.getId();
     }
 
     @Override

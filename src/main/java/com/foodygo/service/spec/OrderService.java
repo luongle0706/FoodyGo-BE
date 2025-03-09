@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    void createOrder(OrderCreateRequest orderCreateRequest);
+    int createOrder(OrderCreateRequest orderCreateRequest);
     OrderResponse updateOrder(Integer orderId, OrderUpdateRequest request);
     OrderResponse getOrderResponseById(Integer id);
     Order getOrderById(Integer id);
