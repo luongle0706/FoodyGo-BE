@@ -30,6 +30,15 @@ public class Hub extends BaseEntity {
     @Column(name = "description", columnDefinition = "VARCHAR(1000)")
     String description;
 
+    @Column(columnDefinition = "DOUBLE DEFAULT 0.0")
+    double longitude;
+
+    @Column(columnDefinition = "DOUBLE DEFAULT 0.0")
+    double latitude;
+
+    @OneToMany(mappedBy = "hub")
+    List<User> employees;
+
     @OneToMany(mappedBy = "hub")
     @JsonBackReference
     List<Order> orders;

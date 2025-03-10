@@ -10,10 +10,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -34,6 +34,17 @@ public class DatabaseInit {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final WalletRepository walletRepository;
+    private final OperatingHourRepository operatingHourRepository;
+
+    public static final Map<Integer, String> WEEKDAYS = Map.of(
+            1, "Thứ 2",
+            2, "Thứ 3",
+            3, "Thứ 4",
+            4, "Thứ 5",
+            5, "Thứ 6",
+            6, "Thứ 7",
+            7, "Chủ Nhật"
+    );
 
     @Bean
     public CommandLineRunner database(CustomerRepository customerRepository) {
@@ -120,15 +131,24 @@ public class DatabaseInit {
                         .build();
                 userRepository.save(seller);
             }
-
             if (hubRepository.count() == 0) {
+            double[] latitudes = new double[] {10.883272, 10.883719, 10.883246, 10.881893, 10.881890, 10.882405, 10.882813, 10.883466, 10.884012, 10.884505, 10.885257};
+            double[] longitudes = new double[] {106.783463, 106.780424, 106.779642, 106.781007, 106.781691, 106.781505, 106.782802, 106.779903, 106.782519, 106.781359, 106.782090};
                 for (int i = 1; i <= 10; i++) {
                     Hub hub = Hub.builder()
                             .address("Hub Address " + i)
                             .name("Hub " + i)
+                            .longitude(latitudes[i])
+                            .latitude(longitudes[i])
                             .description("Hub Description " + i)
                             .build();
                     Hub savedHub = hubRepository.save(hub);
+
+                    if (i == 1) {
+                        assert staff != null;
+                        staff.setHub(hub);
+                        staff = userRepository.save(staff);
+                    }
 
                     for (int j = 1; j <= 5; j++) {
                         Building building = Building.builder()
@@ -177,6 +197,18 @@ public class DatabaseInit {
                         .build();
 
                 restaurant = restaurantRepository.save(restaurant);
+
+                for (int i = 1; i < 8; i++) {
+                    OperatingHour operatingHour = OperatingHour.builder()
+                            .day(WEEKDAYS.get(i))
+                            .isOpen(false)
+                            .is24Hours(false)
+                            .openingTime(LocalTime.of(7,0))
+                            .closingTime(LocalTime.of(23,0))
+                            .restaurant(restaurant)
+                            .build();
+                    operatingHourRepository.save(operatingHour);
+                }
 
                 Wallet sellerWallet = Wallet.builder()
                         .balance(0.0)
