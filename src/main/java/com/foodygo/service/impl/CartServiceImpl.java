@@ -21,7 +21,6 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart getCart(Integer userId) {
-
         String key = CART_PREFIX + userId;
         Object data = redisTemplate.opsForValue().get(key);
         if (data != null) {
@@ -44,7 +43,6 @@ public class CartServiceImpl implements CartService {
         } else {
             cart.getItems().add(cartItem);
         }
-
         return updateCart(userId, cart);
     }
 

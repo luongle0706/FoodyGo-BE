@@ -3,6 +3,7 @@ package com.foodygo.service.spec;
 import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
+import com.foodygo.dto.response.HubSelectionResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
@@ -10,6 +11,8 @@ import com.foodygo.entity.Order;
 import java.util.List;
 
 public interface HubService extends BaseService<Hub, Integer> {
+
+    List<HubSelectionResponse> getHubsForSelection();
 
     PagingResponse getHubsPaging(Integer currentPage, Integer pageSize);
 

@@ -69,4 +69,6 @@ public interface UserService extends BaseService<User, Integer> {
 
     int countNumberOfRegisterToday();
 
+    boolean existEmailUser(String email);
+
 }

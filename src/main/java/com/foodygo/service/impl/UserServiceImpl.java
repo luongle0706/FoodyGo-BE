@@ -576,4 +576,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         return userRepository.countNumberOfRegisterToday();
     }
 
+    @Override
+    public boolean existEmailUser(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }
