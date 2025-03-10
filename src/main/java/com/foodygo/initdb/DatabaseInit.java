@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -31,6 +32,7 @@ public class DatabaseInit {
     private final HubRepository hubRepository;
     private final BuildingRepository buildingRepository;
     private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final WalletRepository walletRepository;
 
     @Bean
@@ -250,6 +252,29 @@ public class DatabaseInit {
                             .hub(hub)
                             .build();
                     orderRepository.save(order);
+                }
+            }
+
+            if (orderDetailRepository.count() == 0) {
+                List<Order> orders = orderRepository.findAll();
+                Product product1 = productRepository.findById(1).orElseThrow();
+                Product product2 = productRepository.findById(2).orElseThrow();
+
+                for (Order order : orders) {
+                    OrderDetail orderDetail1 = OrderDetail.builder()
+                            .order(order)
+                            .product(product1)
+                            .price(product1.getPrice())
+                            .quantity(1)
+                            .build();
+                    OrderDetail orderDetail2 = OrderDetail.builder()
+                            .order(order)
+                            .product(product2)
+                            .price(product2.getPrice())
+                            .quantity(1)
+                            .build();
+                    orderDetailRepository.save(orderDetail1);
+                    orderDetailRepository.save(orderDetail2);
                 }
             }
         };
