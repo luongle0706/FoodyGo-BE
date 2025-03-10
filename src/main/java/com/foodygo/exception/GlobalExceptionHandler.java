@@ -21,37 +21,37 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> unauthorizedException(AuthenticationException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(new Date(), "Failed", "You don't have permission", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(new Date(), "Thất bại", "Bạn không có quyền truy cập", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(ElementNotFoundException.class)
     public ResponseEntity<ErrorResponse> elementNotFoundException(ElementNotFoundException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Can not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Thất bại", "Không tìm thấy", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(ElementExistException.class)
     public ResponseEntity<ErrorResponse> elementExistException(ElementExistException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element existed", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Thất bại", "Phần tử đã tồn tại", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> elementExistException(AccessDeniedException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(new Date(), "Failed", "You don't have permission to assess this api", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(new Date(), "Thất bại", "Bạn không có quyền truy cập API này", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(UnchangedStateException.class)
     public ResponseEntity<ErrorResponse> unchangedStateException(UnchangedStateException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Element unchanged", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Thất bại", "Phần tử không thay đổi", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> noResourceFoundException(NoResourceFoundException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new Date(), "Failed", "Resource not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(new Date(), "Thất bại", "Không tìm thấy tài nguyên", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ErrorResponse> unauthorizedExceptionJWT(ExpiredJwtException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(new Date(), "Failed", "You don't have permission", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(new Date(), "Thất bại", "Bạn không có quyền truy cập", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -62,17 +62,17 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Some arguments are invalid", errors, request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Thất bại", "Một số tham số không hợp lệ", errors, request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(IdNotFoundException.class)
     public ResponseEntity<ErrorResponse> idNotFoundException(IdNotFoundException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "ID not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Thất bại", "Không tìm thấy ID", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> badRequestException(BadRequestException e, WebRequest request) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Bad Request", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Thất bại", "Yêu cầu không hợp lệ", e.getMessage(), request.getDescription(false).replace("uri=", "")));
     }
 
 }
