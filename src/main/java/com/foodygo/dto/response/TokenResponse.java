@@ -18,5 +18,6 @@ public class TokenResponse {
     String email;
     Integer userId;
     Integer customerId;
+    Integer restaurantId;
     EnumRoleNameType role;
 }

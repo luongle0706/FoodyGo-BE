@@ -1,5 +1,7 @@
 package com.foodygo.service.impl;
 
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.paging.OrderPagingResponse;
 import com.foodygo.dto.request.OrderCreateRequest;
 import com.foodygo.dto.request.OrderDetailCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
@@ -13,13 +15,17 @@ import com.foodygo.mapper.OrderMapper;
 import com.foodygo.repository.OrderDetailRepository;
 import com.foodygo.repository.OrderRepository;
 import com.foodygo.service.spec.*;
+import com.foodygo.utils.PaginationUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +33,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final UserService userService;
     private final CustomerService customerService;
     private final RestaurantService restaurantService;
     private final ProductService productService;
@@ -91,6 +96,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
         OrderStatus oldStatus = order.getStatus();
         OrderMapper.INSTANCE.updateOrderFromDto(orderUpdateRequest, order);
+        order.setConfirmedAt(LocalDateTime.now());
         orderRepository.save(order);
 
         String imageUrl = "null";
@@ -196,7 +202,10 @@ public class OrderServiceImpl implements OrderService {
             List<OrderDetailResponse> orderDetailResponses = order.getOrderDetails().stream()
                     .map(OrderDetailMapper.INSTANCE::toDto)
                     .collect(Collectors.toList());
-
+            int totalItems = orderDetailResponses.stream()
+                    .mapToInt(OrderDetailResponse::getQuantity)
+                    .sum();
+            orderResponse.setTotalItems(totalItems);
             orderResponse.setOrderDetails(orderDetailResponses);
             return orderResponse;
         });
@@ -213,4 +222,21 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> orders = orderRepository.findByRestaurantId(restaurantId, pageable);
         return getOrderResponses(orders);
     }
+
+    @Override
+    public Page<OrderResponse> getOrdersByStatus(OrderStatus status, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByStatus(status, pageable);
+        return getOrderResponses(orders);
+    }
+
+    @Override
+    public MappingJacksonValue getOrders(PagingRequest request) {
+        Pageable pageable = PaginationUtil.getPageable(request);
+        Specification<Order> orderSpecification = OrderPagingResponse.filterByFields(request.getFilters());
+        Page<Order> page = orderRepository.findAll(orderSpecification, pageable);
+        List<OrderPagingResponse> mappedDTOs = page.getContent().stream().map(OrderPagingResponse::fromEntity).toList();
+        return PaginationUtil.getPagedMappingJacksonValue(request, page, mappedDTOs, "Get orders");
+    }
+
+
 }

@@ -5,6 +5,7 @@ import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
+import com.foodygo.dto.response.PublicBuildingDTO;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementExistException;
@@ -50,6 +51,14 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
         this.buildingMapper = buildingMapper;
         this.hubMapper = hubMapper;
         this.customerMapper = customerMapper;
+    }
+
+    @Override
+    public List<PublicBuildingDTO> getAllBuildings() {
+        List<Building> buildings = buildingRepository.findByDeletedIsFalse();
+        return buildings.stream().map(
+                PublicBuildingDTO::fromEntity
+        ).toList();
     }
 
     @Override
@@ -138,7 +147,7 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
                 .build();
         if (buildingCreateRequest.getHubID() == null) {
             building.setHub(null);
-        } else if(buildingCreateRequest.getHubID() > 0) {
+        } else if (buildingCreateRequest.getHubID() > 0) {
             Hub hub = hubService.findById(buildingCreateRequest.getHubID());
             if (hub != null) {
                 building.setHub(hub);
@@ -167,14 +176,14 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
             }
             if (buildingUpdateRequest.getHubID() == null) {
                 building.setHub(null);
-            } else if(buildingUpdateRequest.getHubID() > 0) {
-                    Hub hub = hubService.findById(buildingUpdateRequest.getHubID());
-                    if (hub != null) {
-                        building.setHub(hub);
-                    } else {
-                        throw new ElementNotFoundException("Hub not found");
-                    }
+            } else if (buildingUpdateRequest.getHubID() > 0) {
+                Hub hub = hubService.findById(buildingUpdateRequest.getHubID());
+                if (hub != null) {
+                    building.setHub(hub);
+                } else {
+                    throw new ElementNotFoundException("Hub not found");
                 }
+            }
             return buildingMapper.buildingToBuildingDTO(buildingRepository.save(building));
         }
         return null;
@@ -246,12 +255,12 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
         keys.add("name");
         values.add(searchName);
 
-        if(keys.size() == values.size()) {
-            for(int i = 0; i < keys.size(); i++) {
+        if (keys.size() == values.size()) {
+            for (int i = 0; i < keys.size(); i++) {
                 String field = keys.get(i);
                 String value = values.get(i);
                 Specification<Building> newSpec = BuildingSpecification.searchByField(field, value);
-                if(newSpec != null) {
+                if (newSpec != null) {
                     spec = spec.and(newSpec);
                 }
             }

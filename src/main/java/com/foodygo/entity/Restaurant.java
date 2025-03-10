@@ -31,6 +31,12 @@ public class Restaurant extends BaseEntity {
 
     String image;
 
+    @Column(columnDefinition = "DOUBLE DEFAULT 0.0")
+    double longitude;
+
+    @Column(columnDefinition = "DOUBLE DEFAULT 0.0")
+    double latitude;
+
     @OneToOne
     User owner;
 
