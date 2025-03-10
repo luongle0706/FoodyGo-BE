@@ -1,5 +1,7 @@
 package com.foodygo.service.impl;
 
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.paging.OrderPagingResponse;
 import com.foodygo.dto.request.OrderCreateRequest;
 import com.foodygo.dto.request.OrderDetailCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
@@ -13,11 +15,14 @@ import com.foodygo.mapper.OrderMapper;
 import com.foodygo.repository.OrderDetailRepository;
 import com.foodygo.repository.OrderRepository;
 import com.foodygo.service.spec.*;
+import com.foodygo.utils.PaginationUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,7 +33,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final UserService userService;
     private final CustomerService customerService;
     private final RestaurantService restaurantService;
     private final ProductService productService;
@@ -223,6 +227,15 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderResponse> getOrdersByStatus(OrderStatus status, Pageable pageable) {
         Page<Order> orders = orderRepository.findByStatus(status, pageable);
         return getOrderResponses(orders);
+    }
+
+    @Override
+    public MappingJacksonValue getOrders(PagingRequest request) {
+        Pageable pageable = PaginationUtil.getPageable(request);
+        Specification<Order> orderSpecification = OrderPagingResponse.filterByFields(request.getFilters());
+        Page<Order> page = orderRepository.findAll(orderSpecification, pageable);
+        List<OrderPagingResponse> mappedDTOs = page.getContent().stream().map(OrderPagingResponse::fromEntity).toList();
+        return PaginationUtil.getPagedMappingJacksonValue(request, page, mappedDTOs, "Get orders");
     }
 
 
