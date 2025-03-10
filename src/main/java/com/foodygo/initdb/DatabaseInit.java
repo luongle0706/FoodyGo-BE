@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
@@ -121,36 +119,90 @@ public class DatabaseInit {
                         .build();
                 userRepository.save(seller);
             }
+
             if (hubRepository.count() == 0) {
-            double[] latitudes = new double[] {10.883272, 10.883719, 10.883246, 10.881893, 10.881890, 10.882405, 10.882813, 10.883466, 10.884012, 10.884505, 10.885257};
-            double[] longitudes = new double[] {106.783463, 106.780424, 106.779642, 106.781007, 106.781691, 106.781505, 106.782802, 106.779903, 106.782519, 106.781359, 106.782090};
-                for (int i = 1; i <= 10; i++) {
+                Random random = new Random();
+                double[] hubLatitudes = new double[] {10.883272, 10.883719, 10.883246, 10.881893, 10.881890, 10.882405, 10.882813, 10.883466, 10.884012, 10.884505, 10.885257};
+                double[] hubLongitudes = new double[] {106.783463, 106.780424, 106.779642, 106.781007, 106.781691, 106.781505, 106.782802, 106.779903, 106.782519, 106.781359, 106.782090};
+                // Danh sách ánh xạ Hub → Buildings
+                Map<String, String[]> hubBuildingMap = new HashMap<>();
+                hubBuildingMap.put("Hub 1", new String[]{"A1", "A2", "A3"});
+                hubBuildingMap.put("Hub 2", new String[]{"A4", "A5"});
+                hubBuildingMap.put("Hub 3", new String[]{"B1", "B2", "B3"});
+                hubBuildingMap.put("Hub 4", new String[]{"B4", "B5"});
+                hubBuildingMap.put("Hub 5", new String[]{"C1", "C2"});
+                hubBuildingMap.put("Hub 6", new String[]{"C3", "C4"});
+                hubBuildingMap.put("Hub 7", new String[]{"C5", "C6"});
+                hubBuildingMap.put("Hub 8", new String[]{"D2", "D3", "D4"});
+                hubBuildingMap.put("Hub 9", new String[]{"D5", "D6"});
+                hubBuildingMap.put("Hub 10", new String[]{"E1"});
+                hubBuildingMap.put("Hub 11", new String[]{"G1"});
+                hubBuildingMap.put("Hub 12", new String[]{"F1", "F2"});
+
+                // Tạo danh sách tọa độ building
+                Map<String, double[]> buildingCoordinates = new HashMap<>();
+                String[] buildingNames = {
+                        "A1", "A2", "A3", "A4", "A5",
+                        "B1", "B2", "B3", "B4", "B5",
+                        "C1", "C2", "C3", "C4", "C5", "C6",
+                        "D2", "D3", "D4", "D5", "D6",
+                        "E1", "G1", "F1", "F2"
+                };
+                double[] buildingLatitudes = {
+                        10.881837, 10.882055, 10.882527, 10.881701, 10.882287,
+                        10.882730, 10.883051, 10.883491, 10.883172, 10.883874,
+                        10.883195, 10.883517, 10.883755, 10.884056, 10.883054, 10.883545,
+                        10.884469, 10.884741, 10.884957, 10.884909, 10.885382,
+                        10.884249, 10.885634, 10.885450, 10.885655
+                };
+                double[] buildingLongitudes = {
+                        106.781889, 106.781678, 106.781222, 106.781364, 106.780879,
+                        106.782949, 106.782802, 106.782528, 106.783579, 106.783124,
+                        106.780772, 106.780462, 106.780233, 106.780000, 106.780032, 106.779607,
+                        106.781610, 106.781359, 106.781139, 106.782133, 106.781815,
+                        106.779313, 106.780883, 106.779819, 106.779581
+                };
+
+                // Lưu thông tin tọa độ vào Map
+                for (int i = 0; i < buildingNames.length; i++) {
+                    buildingCoordinates.put(buildingNames[i], new double[]{buildingLatitudes[i], buildingLongitudes[i]});
+                }
+
+                int hubIndex = 1;
+                for (Map.Entry<String, String[]> entry : hubBuildingMap.entrySet()) {
+                    String hubName = entry.getKey();
+                    String[] assignedBuildings = entry.getValue();
+
+                    // Random tọa độ cho Hub trong phạm vi hợp lý
+                    double hubLat = 10.88 + (random.nextDouble() * 0.01); // Từ 10.88 đến 10.89
+                    double hubLon = 106.78 + (random.nextDouble() * 0.01); // Từ 106.78 đến 106.79
+
                     Hub hub = Hub.builder()
-                            .address("Hub Address " + i)
-                            .name("Hub " + i)
-                            .longitude(latitudes[i])
-                            .latitude(longitudes[i])
-                            .description("Hub Description " + i)
+                            .address("Hub Address " + hubIndex)
+                            .name(hubName)
+                            .longitude(hubLon)
+                            .latitude(hubLat)
+                            .description("Hub Description " + hubIndex)
                             .build();
                     Hub savedHub = hubRepository.save(hub);
 
-                    if (i == 1) {
-                        assert staff != null;
-                        staff.setHub(hub);
-                        staff = userRepository.save(staff);
+                    // Gán các building vào Hub
+                    for (String buildingName : assignedBuildings) {
+                        double[] coordinates = buildingCoordinates.get(buildingName);
+                        if (coordinates != null) {
+                            Building building = Building.builder()
+                                    .latitude(coordinates[0])
+                                    .longitude(coordinates[1])
+                                    .name(buildingName)
+                                    .description("Building Description for " + buildingName)
+                                    .hub(savedHub)
+                                    .build();
+                            buildingRepository.save(building);
+                        }
                     }
-
-                    for (int j = 1; j <= 5; j++) {
-                        Building building = Building.builder()
-                                .name("Building " + j + " in hub " + i)
-                                .description("Building Description " + j)
-                                .hub(savedHub)
-                                .build();
-                        buildingRepository.save(building);
-                    }
+                    hubIndex++;
                 }
             }
-
             Customer customer = null;
             if (customerRepository.count() == 0) {
 
