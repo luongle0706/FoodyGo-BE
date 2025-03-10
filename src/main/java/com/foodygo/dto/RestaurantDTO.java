@@ -3,10 +3,8 @@ package com.foodygo.dto;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.foodygo.entity.Restaurant;
 import jakarta.persistence.criteria.Predicate;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Data
 @JsonFilter("dynamicFilter")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RestaurantDTO {
     Integer id;
     String name;

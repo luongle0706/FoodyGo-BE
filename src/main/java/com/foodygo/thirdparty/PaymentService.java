@@ -30,16 +30,16 @@ public class PaymentService {
     private final TransactionRepository transactionRepository;
 
     public PaymentDTO.VNPayResponse requestPayment(
-            Double amount,
+            Integer amount,
             String bankCode,
             HttpServletRequest request,
-            Integer userId
+            Integer customerId
     ) {
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
 
         System.out.println("Amount: " + amount);
 
-        long amountInVND = Math.round(amount * 100);
+        long amountInVND = amount * 100;
         vnpParamsMap.put("vnp_Amount", String.valueOf(amountInVND));
 
         if (bankCode != null && !bankCode.isEmpty()) {
@@ -49,7 +49,7 @@ public class PaymentService {
         vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
 
         // Thêm userId vào orderInfo
-        vnpParamsMap.put("vnp_OrderInfo", String.valueOf(userId));
+        vnpParamsMap.put("vnp_OrderInfo", String.valueOf(customerId));
 
         return getVnPayResponse(vnpParamsMap);
     }
@@ -84,56 +84,103 @@ public class PaymentService {
     }
 
     public ObjectResponse handleVNPayCallback(HttpServletRequest request) {
+        // Extract parameters from the callback request
         String responseCode = request.getParameter("vnp_ResponseCode");
         String txnRef = request.getParameter("vnp_TxnRef");
         String amountStr = request.getParameter("vnp_Amount");
+        String orderInfo = request.getParameter("vnp_OrderInfo");
+        String bankCode = request.getParameter("vnp_BankCode");
+        String transactionNo = request.getParameter("vnp_TransactionNo");
+        String payDate = request.getParameter("vnp_PayDate");
 
-        // Lấy thông tin từ orderInfo
-        String[] split = request.getParameter("vnp_OrderInfo").split("\\|");
-        Integer customerId = Integer.parseInt(request.getParameter("vnp_OrderInfo"));
+        // Parse customer ID from the order info
+        Integer customerId;
+        try {
+            // If orderInfo contains additional data separated by |
+            if (orderInfo.contains("|")) {
+                String[] orderInfoParts = orderInfo.split("\\|");
+                customerId = Integer.parseInt(orderInfoParts[0]);
+            } else {
+                // If orderInfo is simply the customer ID
+                customerId = Integer.parseInt(orderInfo);
+            }
+        } catch (NumberFormatException e) {
+            throw new IdNotFoundException("Invalid customer ID in order info: " + orderInfo);
+        }
 
-        if (responseCode.equals("00")) { // Thanh toán thành công
-            double amount = Double.parseDouble(amountStr) / 100; // VNPay trả về số tiền nhân 100
+        // Check if payment was successful
+        if (responseCode.equals("00")) {
+            // Convert amount from VNPay format (amount * 100) to actual amount
+            double amountInVND = Double.parseDouble(amountStr) / 100;
 
+            // Convert VND amount to FoodyXu (1000 VND = 1 FoodyXu)
+            double foodyXuAmount = amountInVND / 1000;
+
+            // Find customer's wallet
             Wallet wallet = walletRepository.findByCustomerId(customerId)
-                    .orElseThrow(() -> new IdNotFoundException("Wallet not found for customer"));
+                    .orElseThrow(() -> new IdNotFoundException("Wallet not found for customer ID: " + customerId));
 
-            double newBalance = wallet.getBalance() + amount;
-            wallet.setBalance(newBalance);
-            walletRepository.save(wallet);
+            // Create transaction description with detailed information
+            String depositDescription = String.format(
+                    "Nạp tiền qua VNPAY - Mã GD: %s - Ngân hàng: %s",
+                    transactionNo,
+                    bankCode
+            );
 
-            // Lưu thông tin nạp tiền vào bảng Deposit
+            // Calculate new balance
+            double newBalance = wallet.getBalance() + foodyXuAmount;
+
+            // Create Deposit record
             Deposit deposit = Deposit.builder()
-                    .description("VNPay Deposit")
-                    .amount(amount)
+                    .description(depositDescription)
+                    .amount(foodyXuAmount)
                     .time(LocalDateTime.now())
                     .method(DepositMethod.VNPAY)
                     .remaining(newBalance)
                     .customer(wallet.getCustomer())
                     .wallet(wallet)
                     .build();
+
+            // Save deposit record first to get its ID
             depositRepository.save(deposit);
 
-            // Lưu transaction vào bảng Transaction
+            // Create Transaction record linked to the deposit
             Transaction transaction = Transaction.builder()
-                    .description("Deposit via VNPay")
+                    .description("Nạp " + foodyXuAmount + " FoodyXu qua VNPAY")
                     .time(LocalDateTime.now())
-                    .amount(amount)
+                    .amount(foodyXuAmount)
                     .remaining(newBalance)
                     .type(TransactionType.TOP_UP)
                     .wallet(wallet)
-                    .deposit(deposit)
+                    .deposit(deposit)  // Link to the deposit record
                     .build();
+
+            // Save transaction record
             transactionRepository.save(transaction);
 
+            // Update wallet balance
+            wallet.setBalance(newBalance);
+            walletRepository.save(wallet);
+
+            // Return success response
             return ObjectResponse.builder()
                     .status(HttpStatus.OK.toString())
                     .message("Payment Success")
-                    .data("Wallet balance updated successfully")
+                    .data(Map.of(
+                            "transactionId", transaction.getId(),
+                            "depositId", deposit.getId(),
+                            "amount", foodyXuAmount,
+                            "newBalance", newBalance
+                    ))
                     .build();
-        }
+        } else {
+            // If payment failed, log the error code and return failure response
+            String errorMessage = "Payment failed with response code: " + responseCode;
 
-        throw new IdNotFoundException("Payment Failed");
+            // You could add error logging here
+
+            throw new IdNotFoundException(errorMessage);
+        }
     }
 
 }

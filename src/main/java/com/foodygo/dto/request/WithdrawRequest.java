@@ -3,6 +3,6 @@ package com.foodygo.dto.request;
 import lombok.Data;
 
 @Data
-public class PaymentRequest {
+public class WithdrawRequest {
     private Double amount;
 }

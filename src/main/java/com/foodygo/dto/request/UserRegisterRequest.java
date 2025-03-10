@@ -1,13 +1,11 @@
 package com.foodygo.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @NoArgsConstructor
@@ -25,5 +23,20 @@ public class UserRegisterRequest {
     @NotBlank(message = "Mật khẩu không được để trống")
     @Size(max = 100, min = 6, message = "Mật khẩu phải từ 6 tới 100 kí tự")
     private String password;
+
+    @NotNull(message = "Vui lòng nhập tên")
+    @NotBlank(message = "Tên không được để trống")
+    @Size(max = 255, min = 2, message = "Tên phải từ 2 tới 255 kí tự")
+    private String fullName;
+
+    @NotNull(message = "Vui lòng nhập số điện thoại")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Size(max = 12, min = 9, message = "Số điện thoại phải từ 9 tới 12 kí tự")
+    private String phone;
+
+    private MultipartFile image;
+
+    @Positive(message = "BuildingID must be positive")
+    private Integer buildingID;
 
 }

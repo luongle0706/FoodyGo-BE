@@ -25,10 +25,12 @@ public class Product extends BaseEntity {
     @Column(columnDefinition = "NVARCHAR(255)")
     String name;
 
+    @Column(columnDefinition = "DOUBLE(10,2)")
     Double price;
 
     String description;
 
+    @Column(columnDefinition = "DOUBLE(10,2)")
     Double prepareTime;
 
     @Column(name = "image", columnDefinition = "NVARCHAR(1000)")

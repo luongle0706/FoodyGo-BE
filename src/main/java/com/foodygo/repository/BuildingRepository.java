@@ -2,6 +2,7 @@ package com.foodygo.repository;
 
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Customer;
+import com.foodygo.entity.Hub;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,5 +31,7 @@ public interface BuildingRepository extends JpaRepository<Building, Integer>, Jp
     Page<Building> findAllByHub_Id(Integer hubId, Pageable pageable);
 
     Page<Building> findAll(Specification<Building> spec, Pageable pageable);
+
+    List<Building> findByDeletedIsFalse();
 
 }

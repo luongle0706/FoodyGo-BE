@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -297,6 +298,11 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
                                 .map(buildingMapper::buildingToBuildingDTO)
                                 .toList())
                         .build();
+    }
+
+    @Override
+    public List<BuildingDTO> getBuildings() {
+        return buildingRepository.findByDeletedIsFalse().stream().map(buildingMapper::buildingToBuildingDTO).collect(Collectors.toList());
     }
 
 }

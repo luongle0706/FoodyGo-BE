@@ -7,6 +7,8 @@ import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
 
+import java.util.List;
+
 public interface BuildingService extends BaseService<Building, Integer> {
     PagingResponse getAllBuildings(Integer currentPage, Integer pageSize);
 
@@ -25,5 +27,7 @@ public interface BuildingService extends BaseService<Building, Integer> {
     BuildingDTO deleteBuilding(Integer buildingID);
 
     PagingResponse searchBuildings(Integer currentPage, Integer pageSize, String name, String sortBy);
+
+    List<BuildingDTO> getBuildings();
 
 }

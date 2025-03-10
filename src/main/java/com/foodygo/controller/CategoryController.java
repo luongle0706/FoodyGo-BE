@@ -1,6 +1,7 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.CategoryDTO;
+import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.spec.CategoryService;
 import com.foodygo.service.spec.ProductService;
@@ -14,8 +15,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -34,59 +38,34 @@ public class CategoryController {
     @GetMapping
     @Operation(summary = "Get all categories",
             description = "Retrieves all categories, with optional pagination and sorting.")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','STAFF','ADMIN','SELLER')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Data retrieved"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<ObjectResponse> getAllCategories(
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
+    public ResponseEntity<MappingJacksonValue> getAllCategories(
+            @RequestParam(required = false, defaultValue = "1") int pageNo,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String params,
+            @RequestParam(required = false, defaultValue = "id") String sortBy,
+            @RequestParam(required = false) Map<String, String> filters
     ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
+        filters.remove("pageNo");
+        filters.remove("pageSize");
+        filters.remove("sortBy");
+        filters.remove("params");
         return ResponseEntity
                 .status(OK)
                 .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all categories")
-                                .data(categoryService.getAllCategoriesDTO(pageable))
-                                .build()
-                );
-    }
-
-    @Operation(summary = "Search categories by name",
-            description = "Searches categories by name, with optional pagination and sorting.")
-    @GetMapping("/name/{name}")
-    @PreAuthorize("hasRole('USER')")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Categories found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<ObjectResponse> getAllCategoriesContainsName(
-            @PathVariable String name,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
-    ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
-        return ResponseEntity
-                .status(OK)
-                .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all categories")
-                                .data(categoryService.getCategoriesDTOContainsName(name, pageable))
-                                .build()
+                        categoryService.getAllCategories(PagingRequest.builder()
+                                .pageNo(pageNo)
+                                .pageSize(pageSize)
+                                .params(params)
+                                .sortBy(sortBy)
+                                .filters(filters)
+                                .build())
                 );
     }
 

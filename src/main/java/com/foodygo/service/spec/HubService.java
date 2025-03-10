@@ -15,6 +15,8 @@ public interface HubService extends BaseService<Hub, Integer> {
 
     PagingResponse getHubsActive(Integer currentPage, Integer pageSize);
 
+    List<HubDTO> getHubs();
+
     HubDTO undeleteHub(Integer hubID);
 
     HubDTO createHub(HubCreateRequest hubCreateRequest);

@@ -17,5 +17,6 @@ public class TokenResponse {
     String fullName;
     String email;
     Integer userId;
+    Integer customerId;
     EnumRoleNameType role;
 }

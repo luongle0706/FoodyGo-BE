@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -31,11 +32,13 @@ public class FirebaseServiceImpl implements FirebaseService {
     private String passwordPostfix;
 
     @Override
+    @Transactional
     public TokenResponse getUserFromFirebase(String googleIdToken, String fcmToken) {
         try {
             FirebaseToken token = firebaseAuth.verifyIdToken(googleIdToken);
             String email = token.getEmail();
             Optional<User> user = userRepository.findByEmailAndDeletedIsFalse(email);
+            // Delete previous fcmToken
             if (fcmTokenRepository.existsById(fcmToken)) {
                 fcmTokenRepository.deleteById(fcmToken);
             }
@@ -47,25 +50,24 @@ public class FirebaseServiceImpl implements FirebaseService {
                 fcmTokenRepository.save(newDeviceToken);
                 return userService.login(user.get().getEmail(), user.get().getEmail() + passwordPostfix);
             } else {
+                // Create new user
+                System.out.println("Full name: " + token.getName());
                 UserRegisterRequest request = UserRegisterRequest.builder()
                         .email(email)
                         .password(email + passwordPostfix)
+                        .fullName(token.getName())
                         .build();
                 userService.registerUser(request);
-                Optional<User> optionalUser = userRepository.findByEmailAndDeletedIsFalse(email);
+                Optional<User> newUser = userRepository.findByEmailAndDeletedIsFalse(email);
 
-                if (optionalUser.isPresent()) {
-                    User newUser = optionalUser.get();
-                    newUser.setFullName(token.getName());
-                    newUser = userRepository.save(newUser);
-
+                if (newUser.isPresent()) {
                     FcmToken newDeviceToken = FcmToken.builder()
                             .token(fcmToken)
-                            .user(newUser)
+                            .user(newUser.get())
                             .build();
                     fcmTokenRepository.save(newDeviceToken);
 
-                    return userService.login(newUser.getEmail(), newUser.getEmail() + passwordPostfix);
+                    return userService.login(newUser.get().getEmail(), newUser.get().getEmail() + passwordPostfix);
                 } else {
                     throw new AuthenticationException("Google was unable to authorize account access");
                 }

@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartItem {
+    Integer restaurantId;
     Integer productId;
     String productName;
     Double price;
