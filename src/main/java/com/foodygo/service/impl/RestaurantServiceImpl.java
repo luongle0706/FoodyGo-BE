@@ -3,13 +3,17 @@ package com.foodygo.service.impl;
 import com.foodygo.dto.RestaurantDTO;
 import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.response.RestaurantResponseDTO;
+import com.foodygo.entity.OperatingHour;
 import com.foodygo.entity.Restaurant;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.RestaurantMapper;
 import com.foodygo.mapper.RestaurantResponseMapper;
+import com.foodygo.repository.OperatingHourRepository;
 import com.foodygo.repository.RestaurantRepository;
+import com.foodygo.service.spec.OperatingHourService;
 import com.foodygo.service.spec.RestaurantService;
 import com.foodygo.utils.PaginationUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +21,27 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class RestaurantServiceImpl implements RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
+    private final OperatingHourService operatingHourService;
+
+    public static final Map<Integer, String> WEEKDAYS = Map.of(
+            1, "Thứ 2",
+            2, "Thứ 3",
+            3, "Thứ 4",
+            4, "Thứ 5",
+            5, "Thứ 6",
+            6, "Thứ 7",
+            7, "Chủ Nhật"
+    );
 
     @Override
     public Restaurant getRestaurantById(Integer restaurantId) {
@@ -77,6 +95,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
+    @Transactional
     public void createRestaurant(RestaurantDTO restaurantDTO) {
         Restaurant restaurant = Restaurant.builder()
                 .name(restaurantDTO.getName())
@@ -86,13 +105,27 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .image(restaurantDTO.getImage())
                 .build();
         restaurantRepository.save(restaurant);
+
+        for (int i = 0; i < 7; i++) {
+            OperatingHour operatingHour = OperatingHour.builder()
+                    .day(WEEKDAYS.get(i))
+                    .isOpen(false)
+                    .is24Hours(false)
+                    .openingTime(LocalTime.of(7,0))
+                    .closingTime(LocalTime.of(23,0))
+                    .restaurant(restaurant)
+                    .build();
+            operatingHourService.createOperatingHour(operatingHour);
+        }
     }
 
     @Override
+    @Transactional
     public void deleteRestaurant(Integer restaurantId) {
         Restaurant restaurant = getRestaurantById(restaurantId);
         restaurant.setDeleted(true);
         restaurantRepository.save(restaurant);
+        operatingHourService.deleteOperatingHoursByRestaurantId(restaurantId);
     }
 
     @Override
