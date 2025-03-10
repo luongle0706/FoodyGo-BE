@@ -1,8 +1,9 @@
 package com.foodygo.service.impl;
 
-import com.foodygo.dto.request.OperatingHourDTO;
+import com.foodygo.dto.OperatingHourDTO;
 import com.foodygo.entity.OperatingHour;
 import com.foodygo.exception.IdNotFoundException;
+import com.foodygo.mapper.OperatingHourMapper;
 import com.foodygo.repository.OperatingHourRepository;
 import com.foodygo.service.spec.OperatingHourService;
 import jakarta.transaction.Transactional;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,5 +61,11 @@ public class OperatingHourServiceImpl implements OperatingHourService {
     @Override
     public List<OperatingHour> getOperatingHoursByRestaurantId(Integer restaurantId) {
         return repository.findByRestaurantId(restaurantId);
+    }
+
+    @Override
+    public List<OperatingHourDTO> getOperatingHourDTOsByRestaurantId(Integer restaurantId) {
+        List<OperatingHour> list = repository.findByRestaurantId(restaurantId);
+        return list.stream().map(OperatingHourMapper.INSTANCE::toDto).collect(Collectors.toList());
     }
 }

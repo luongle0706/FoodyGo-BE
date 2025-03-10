@@ -11,9 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,6 +23,31 @@ import static org.springframework.http.HttpStatus.OK;
 @Tag(name = "OperatingHour")
 public class OperatingHourController {
     private final OperatingHourService operatingHourService;
+
+    @GetMapping("/{restaurantId}")
+    @Operation(summary = "Get Operating Hours of a Restaurant", description = "Get operating hours of a restaurant.")
+    @PreAuthorize("hasAnyRole('STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Operating hour found"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Operating Hour not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> getRestaurantOperatingHours(
+            @PathVariable Integer restaurantId
+    ) {
+        return ResponseEntity
+                .status(OK)
+                .body(
+                        ObjectResponse.builder()
+                                .status(OK.toString())
+                                .message("Operating hour found!")
+                                .data(operatingHourService.getOperatingHourDTOsByRestaurantId(restaurantId))
+                                .build()
+                );
+    }
 
     @PutMapping()
     @Operation(summary = "Update Operating Hours of a Restaurant", description = "Update existing operating hours of a restaurant with the provided data.")

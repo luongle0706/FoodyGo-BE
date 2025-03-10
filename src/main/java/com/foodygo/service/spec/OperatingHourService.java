@@ -1,7 +1,6 @@
 package com.foodygo.service.spec;
 
-import com.foodygo.dto.request.OperatingHourDTO;
-import com.foodygo.dto.request.OperatingHourUpdateRequest;
+import com.foodygo.dto.OperatingHourDTO;
 import com.foodygo.entity.OperatingHour;
 
 import java.util.List;
@@ -14,4 +13,5 @@ public interface OperatingHourService {
     void deleteOperatingHoursByRestaurantId(Integer restaurantId);
     OperatingHour getOperatingHourById(Integer id);
     List<OperatingHour> getOperatingHoursByRestaurantId(Integer restaurantId);
+    List<OperatingHourDTO> getOperatingHourDTOsByRestaurantId(Integer restaurantId);
 }
