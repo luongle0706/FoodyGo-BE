@@ -3,6 +3,8 @@ package com.foodygo.controller;
 import com.foodygo.dto.request.OrderCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.dto.response.OrderResponse;
+import com.foodygo.enums.OrderStatus;
 import com.foodygo.service.spec.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -139,17 +144,24 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
+            @RequestParam(defaultValue = "true") boolean ascending,
+            @RequestParam(required = false) OrderStatus status
     ) {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
+        Page<OrderResponse> orders;
+        if (status != null) {
+            orders = orderService.getOrdersByStatus(status, pageable);
+        } else {
+            orders = orderService.getAllOrders(pageable);
+        }
         return ResponseEntity
                 .status(OK)
                 .body(
                         ObjectResponse.builder()
                                 .status(OK.toString())
                                 .message("Get all orders successfully!")
-                                .data(orderService.getAllOrders(pageable))
+                                .data(orders)
                                 .build()
                 );
     }

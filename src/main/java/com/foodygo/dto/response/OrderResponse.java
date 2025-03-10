@@ -16,9 +16,11 @@ public class OrderResponse {
     Double shippingFee;
     Double serviceFee;
     Double totalPrice;
+    Integer totalItems;
     String status;
     LocalDateTime expectedDeliveryTime;
     LocalDateTime time;
+    LocalDateTime confirmedAt;
     String customerPhone;
     String shipperPhone;
     String notes;
