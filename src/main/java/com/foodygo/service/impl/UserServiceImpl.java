@@ -19,6 +19,7 @@ import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
+import com.foodygo.repository.RestaurantRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.repository.WalletRepository;
 import com.foodygo.service.spec.CustomerService;
@@ -59,11 +60,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     private final AuthenticationManager authenticationManager;
     private final WalletRepository walletRepository;
     private final CustomerService customerService;
+    private final RestaurantRepository restaurantRepository;
 
     public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
                            UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
                            JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager,
-                           WalletRepository walletRepository, CustomerService customerService) {
+                           WalletRepository walletRepository, CustomerService customerService, RestaurantRepository restaurantRepository) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -76,6 +78,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         this.authenticationManager = authenticationManager;
         this.walletRepository = walletRepository;
         this.customerService = customerService;
+        this.restaurantRepository = restaurantRepository;
     }
 
     @Override
@@ -356,6 +359,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                         String newToken = jwtToken.generatedToken(customUserDetail);
                         user.setAccessToken(newToken);
                         userRepository.save(user);
+                        Customer customer = customerRepository.findByUserUserID(user.getUserID()).orElse(null);
+                        Restaurant restaurant = restaurantRepository.findByOwnerUserID(user.getUserID()).orElse(null);
                         tokenResponse = TokenResponse.builder()
                                 .code("Success")
                                 .message("Login successfully")
@@ -365,6 +370,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                                 .email(user.getEmail())
                                 .role(user.getRole().getRoleName())
                                 .userId(user.getUserID())
+                                .customerId(customer != null ? customer.getId() : null)
+                                .restaurantId(restaurant != null ? restaurant.getId() : null)
                                 .build();
                     }
                 }
@@ -394,6 +401,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         String refreshToken = jwtToken.generatedRefreshToken(userDetails);
         User user = userRepository.getUserByEmail(userDetails.getEmail());
         Customer customer = customerRepository.findByUserUserID(user.getUserID()).orElse(null);
+        Restaurant restaurant = restaurantRepository.findByOwnerUserID(user.getUserID()).orElse(null);
+        if (restaurant == null) {
+            System.err.println("Cannot find restaurant");
+        } else {
+            System.out.println("Restaurant ID = " + restaurant.getId());
+        }
         if (user != null) {
             user.setRefreshToken(refreshToken);
             user.setAccessToken(token);
@@ -408,6 +421,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                     .role(user.getRole().getRoleName())
                     .userId(user.getUserID())
                     .customerId(customer != null ? customer.getId() : null)
+                    .restaurantId(restaurant != null ? restaurant.getId() : null)
                     .build();
         }
         return tokenResponse;
