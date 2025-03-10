@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -562,4 +563,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         return userRepository.countNumberOfRegisterToday();
     }
 
+    @Override
+    public boolean existEmailUser(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }

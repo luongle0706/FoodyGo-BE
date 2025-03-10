@@ -52,4 +52,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT COUNT(u) FROM User u WHERE DATE(u.createdAt) = CURRENT_DATE")
     int countNumberOfRegisterToday();
 
+    boolean existsByEmail(String email);
 }

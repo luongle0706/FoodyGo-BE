@@ -29,11 +29,8 @@ public class EmailController {
 
     @PostMapping("/send-otp")
     public ResponseEntity<ObjectResponse> verifyOtp(@RequestBody OTPRequest request) {
-        UserDTO userDTO = userService.getUserByEmail(request.getEmail());
         OTPResponse otpResponse = new OTPResponse();
-        if(userDTO != null) {
-            otpResponse.setExistedEmail(true);
-        }
+            otpResponse.setExistedEmail(userService.existEmailUser(request.getEmail()));
         String storedOtp = emailService.sendOTP(request.getEmail());
         if(storedOtp != null) {
             otpResponse.setOtp(storedOtp);
