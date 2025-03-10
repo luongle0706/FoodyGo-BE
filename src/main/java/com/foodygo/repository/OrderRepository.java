@@ -1,6 +1,7 @@
 package com.foodygo.repository;
 
 import com.foodygo.entity.Order;
+import com.foodygo.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Page<Order> findOrdersByEmployeeId(@Param("employeeId") Integer employeeId, Pageable pageable);
 
     Page<Order> findByRestaurantId(Integer restaurantId, Pageable pageable);
+
+    Page<Order> findByStatus(OrderStatus status, Pageable pageable);
 }

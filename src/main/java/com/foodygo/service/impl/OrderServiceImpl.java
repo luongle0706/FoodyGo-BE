@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = getOrderById(orderId);
         OrderStatus oldStatus = order.getStatus();
         OrderMapper.INSTANCE.updateOrderFromDto(orderUpdateRequest, order);
+        order.setConfirmedAt(LocalDateTime.now());
         orderRepository.save(order);
 
         String imageUrl = "null";
@@ -196,7 +198,10 @@ public class OrderServiceImpl implements OrderService {
             List<OrderDetailResponse> orderDetailResponses = order.getOrderDetails().stream()
                     .map(OrderDetailMapper.INSTANCE::toDto)
                     .collect(Collectors.toList());
-
+            int totalItems = orderDetailResponses.stream()
+                    .mapToInt(OrderDetailResponse::getQuantity)
+                    .sum();
+            orderResponse.setTotalItems(totalItems);
             orderResponse.setOrderDetails(orderDetailResponses);
             return orderResponse;
         });
@@ -213,4 +218,12 @@ public class OrderServiceImpl implements OrderService {
         Page<Order> orders = orderRepository.findByRestaurantId(restaurantId, pageable);
         return getOrderResponses(orders);
     }
+
+    @Override
+    public Page<OrderResponse> getOrdersByStatus(OrderStatus status, Pageable pageable) {
+        Page<Order> orders = orderRepository.findByStatus(status, pageable);
+        return getOrderResponses(orders);
+    }
+
+
 }

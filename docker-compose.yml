@@ -46,9 +46,13 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./data/redis-data:/data
+      - redis:/data
     networks:
       - foodygo-network
+
+volumes:
+  redis:
+    name: foodygo-redis
 
 networks:
   mysql-network:
