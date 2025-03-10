@@ -122,14 +122,20 @@ public class DatabaseInit {
 
             if (hubRepository.count() == 0) {
                 for (int i = 1; i <= 10; i++) {
+
+                    double randomHubLatitude = ThreadLocalRandom.current().nextDouble(10.883277, 10.885268);
+                    double randomHubLongitude = ThreadLocalRandom.current().nextDouble(106.777129, 106.783920);
+
                     Hub hub = Hub.builder()
                             .address("Hub Address " + i)
                             .name("Hub " + i)
+                            .longitude(randomHubLongitude)
+                            .latitude(randomHubLatitude)
                             .description("Hub Description " + i)
                             .build();
                     Hub savedHub = hubRepository.save(hub);
 
-                    if(i == 1) {
+                    if (i == 1) {
                         assert staff != null;
                         staff.setHub(hub);
                         staff = userRepository.save(staff);
