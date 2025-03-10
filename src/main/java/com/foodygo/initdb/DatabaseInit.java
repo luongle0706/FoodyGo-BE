@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -129,6 +128,12 @@ public class DatabaseInit {
                             .description("Hub Description " + i)
                             .build();
                     Hub savedHub = hubRepository.save(hub);
+
+                    if(i == 1) {
+                        assert staff != null;
+                        staff.setHub(hub);
+                        staff = userRepository.save(staff);
+                    }
 
                     for (int j = 1; j <= 5; j++) {
                         Building building = Building.builder()

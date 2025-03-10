@@ -31,6 +31,9 @@ public class Hub extends BaseEntity {
     String description;
 
     @OneToMany(mappedBy = "hub")
+    List<User> employees;
+
+    @OneToMany(mappedBy = "hub")
     @JsonBackReference
     List<Order> orders;
 
