@@ -1,4 +1,4 @@
-package com.foodygo.dto.request;
+package com.foodygo.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OperatingHourDTO {
     Integer id;
+    String day;
     boolean open;
     boolean hours;
     LocalTime openingTime;

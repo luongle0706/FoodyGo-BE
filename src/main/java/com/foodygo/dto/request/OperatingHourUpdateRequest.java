@@ -1,5 +1,6 @@
 package com.foodygo.dto.request;
 
+import com.foodygo.dto.OperatingHourDTO;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
