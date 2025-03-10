@@ -10,10 +10,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
@@ -33,6 +35,17 @@ public class DatabaseInit {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final WalletRepository walletRepository;
+    private final OperatingHourRepository operatingHourRepository;
+
+    public static final Map<Integer, String> WEEKDAYS = Map.of(
+            1, "Thứ 2",
+            2, "Thứ 3",
+            3, "Thứ 4",
+            4, "Thứ 5",
+            5, "Thứ 6",
+            6, "Thứ 7",
+            7, "Chủ Nhật"
+    );
 
     @Bean
     public CommandLineRunner database(CustomerRepository customerRepository) {
@@ -239,6 +252,18 @@ public class DatabaseInit {
                         .build();
 
                 restaurant = restaurantRepository.save(restaurant);
+
+                for (int i = 1; i < 8; i++) {
+                    OperatingHour operatingHour = OperatingHour.builder()
+                            .day(WEEKDAYS.get(i))
+                            .isOpen(false)
+                            .is24Hours(false)
+                            .openingTime(LocalTime.of(7,0))
+                            .closingTime(LocalTime.of(23,0))
+                            .restaurant(restaurant)
+                            .build();
+                    operatingHourRepository.save(operatingHour);
+                }
 
                 Wallet sellerWallet = Wallet.builder()
                         .balance(0.0)
