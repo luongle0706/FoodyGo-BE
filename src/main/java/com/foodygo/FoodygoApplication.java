@@ -21,6 +21,12 @@ public class FoodygoApplication {
         String command = dotenv.get("COMMAND") != null ? dotenv.get("COMMAND") : System.getProperty("COMMAND", "");
         String orderType = dotenv.get("ORDER_TYPE") != null ? dotenv.get("ORDER_TYPE") : System.getProperty("ORDER_TYPE", "");
 
+        String s3AccessKey = dotenv.get("S3_ACCESS_KEY") != null ? dotenv.get("S3_ACCESS_KEY") : System.getProperty("S3_ACCESS_KEY", "");
+        String s3SecretKey = dotenv.get("S3_SECRET_KEY") != null ? dotenv.get("S3_SECRET_KEY") : System.getProperty("S3_SECRET_KEY", "");
+        String s3Region = dotenv.get("S3_REGION") != null ? dotenv.get("S3_REGION") : System.getProperty("S3_REGION", "");
+        String s3BucketName = dotenv.get("S3_BUCKET_NAME") != null ? dotenv.get("S3_BUCKET_NAME") : System.getProperty("S3_BUCKET_NAME", "");
+
+
         System.setProperty("PAY_URL", payUrl);
         System.setProperty("TMN_CODE", tmnCode);
         System.setProperty("SECRET_KEY", secretKey);
@@ -28,6 +34,11 @@ public class FoodygoApplication {
         System.setProperty("VERSION", version);
         System.setProperty("COMMAND", command);
         System.setProperty("ORDER_TYPE", orderType);
+
+        System.setProperty("S3_ACCESS_KEY", s3AccessKey);
+        System.setProperty("S3_SECRET_KEY", s3SecretKey);
+        System.setProperty("S3_REGION", s3Region);
+        System.setProperty("S3_BUCKET_NAME", s3BucketName);
 
         SpringApplication.run(FoodygoApplication.class, args);
     }

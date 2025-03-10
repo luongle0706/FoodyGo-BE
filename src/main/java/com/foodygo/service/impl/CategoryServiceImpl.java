@@ -1,6 +1,8 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.CategoryDTO;
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.paging.CategoryPagingResponse;
 import com.foodygo.entity.Category;
 import com.foodygo.entity.Restaurant;
 import com.foodygo.exception.ElementNotFoundException;
@@ -8,21 +10,33 @@ import com.foodygo.mapper.CategoryMapper;
 import com.foodygo.repository.CategoryRepository;
 import com.foodygo.repository.RestaurantRepository;
 import com.foodygo.service.spec.CategoryService;
+import com.foodygo.utils.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-
     private final RestaurantRepository restaurantRepository;
+
+    @Override
+    public MappingJacksonValue getAllCategories(PagingRequest request) {
+        Pageable pageable = PaginationUtil.getPageable(request);
+        Specification<Category> specification = CategoryPagingResponse.filterByFields(request.getFilters());
+        Page<Category> page = categoryRepository.findAll(specification, pageable);
+        List<CategoryPagingResponse> mappedDTO = page.getContent().stream().map(CategoryPagingResponse::fromEntity).toList();
+        return PaginationUtil.getPagedMappingJacksonValue(request, page, mappedDTO, "Get all categories");
+    }
 
     @Override
     public Category getCategoryById(Integer categoryId) {
@@ -41,44 +55,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category getCategoryByName(String name) {
-        return categoryRepository
-                .findByNameIgnoreCaseAndDeletedFalse(name)
-                .orElse(null);
-    }
-
-    @Override
-    public CategoryDTO getCategoryDTOByName(String name) {
-        Category category = getCategoryByName(name);
-        if (category == null) {
-            throw new ElementNotFoundException("Category not found witht name " + name);
-        }
-        return CategoryMapper.INSTANCE.toDTO(category);
-    }
-
-    @Override
-    public List<Category> getCategoriesContainsName(String name) {
-        return categoryRepository.findByNameContainingIgnoreCase(name);
-    }
-
-    @Override
-    public Page<CategoryDTO> getCategoriesDTOContainsName(String name, Pageable pageable) {
-        return categoryRepository.findByNameContainingIgnoreCase(name, pageable).map(CategoryMapper.INSTANCE::toDTO);
-    }
-
-    @Override
-    public List<Category> getAllCategories() {
-        return categoryRepository.findByDeletedFalse();
-    }
-
-    @Override
     public Page<CategoryDTO> getAllCategoriesDTO(Pageable pageable) {
         return categoryRepository.findByDeletedFalse(pageable).map(CategoryMapper.INSTANCE::toDTO);
-    }
-
-    @Override
-    public List<Category> getAllCategoriesByRestaurantId(Integer restaurantId) {
-        return categoryRepository.findByRestaurantIdAndDeletedFalse(restaurantId);
     }
 
     @Override

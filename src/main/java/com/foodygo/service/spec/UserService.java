@@ -1,6 +1,7 @@
 package com.foodygo.service.spec;
 
 import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserRegisterRequest;
@@ -19,6 +20,8 @@ public interface UserService extends BaseService<User, Integer> {
     PagingResponse findAllUsers(Integer currentPage, Integer pageSize);
 
     List<User> getUsersByRole(Integer roleID);
+
+    List<UserDTO> getUsers();
 
     PagingResponse getAllUsersActive(Integer currentPage, Integer pageSize);
 

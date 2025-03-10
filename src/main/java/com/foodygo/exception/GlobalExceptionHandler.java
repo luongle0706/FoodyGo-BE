@@ -65,4 +65,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Some arguments are invalid", errors, request.getDescription(false).replace("uri=", "")));
     }
 
+    @ExceptionHandler(IdNotFoundException.class)
+    public ResponseEntity<ErrorResponse> idNotFoundException(IdNotFoundException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "ID not found", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> badRequestException(BadRequestException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(new Date(), "Failed", "Bad Request", e.getMessage(), request.getDescription(false).replace("uri=", "")));
+    }
+
 }

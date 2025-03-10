@@ -29,7 +29,7 @@ public class Wallet extends BaseEntity {
     @OneToOne
     Customer customer;
 
-    @ManyToOne
+    @OneToOne
     Restaurant restaurant;
 
     @OneToMany(mappedBy = "wallet")

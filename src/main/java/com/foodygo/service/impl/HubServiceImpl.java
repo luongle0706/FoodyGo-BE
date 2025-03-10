@@ -3,6 +3,7 @@ package com.foodygo.service.impl;
 import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
+import com.foodygo.dto.response.HubSelectionResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
@@ -29,6 +30,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,6 +48,12 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
         this.hubMapper = hubMapper;
         this.buildingRepository = buildingRepository;
         this.buildingMapper = buildingMapper;
+    }
+
+    @Override
+    public List<HubSelectionResponse> getHubsForSelection() {
+        List<Hub> hubs = hubRepository.findByDeletedIsFalse();
+        return hubs.stream().map(HubSelectionResponse::fromEntity).toList();
     }
 
     @Override
@@ -106,6 +114,11 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
                                 .map(hubMapper::hubToHubDTO)
                                 .toList())
                         .build();
+    }
+
+    @Override
+    public List<HubDTO> getHubs() {
+        return hubRepository.findByDeletedIsFalse().stream().map(hubMapper::hubToHubDTO).collect(Collectors.toList());
     }
 
     @Override

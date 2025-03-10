@@ -34,8 +34,8 @@ public class Restaurant extends BaseEntity {
     @OneToOne
     User owner;
 
-    @OneToMany(mappedBy = "restaurant")
-    List<Wallet> wallets;
+    @OneToOne(mappedBy = "restaurant")
+    Wallet wallet;
 
     @Builder.Default
     boolean available = true;

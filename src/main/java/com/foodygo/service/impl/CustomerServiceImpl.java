@@ -15,9 +15,9 @@ import com.foodygo.mapper.BuildingMapper;
 import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.CustomerRepository;
+import com.foodygo.repository.UserRepository;
 import com.foodygo.service.spec.BuildingService;
 import com.foodygo.service.spec.CustomerService;
-import com.foodygo.service.spec.UserService;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobId;
@@ -42,6 +42,7 @@ import java.nio.file.Files;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -49,7 +50,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
 
     private final CustomerRepository customerRepository;
     private final BuildingService buildingService;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final CustomerMapper customerMapper;
     private final UserMapper userMapper;
     private final BuildingMapper buildingMapper;
@@ -106,11 +107,11 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     @Value("${buffer-image.devide}")
     private int bufferImageDevide;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserService userService, CustomerMapper customerMapper, UserMapper userMapper, BuildingMapper buildingMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserRepository userRepository, CustomerMapper customerMapper, UserMapper userMapper, BuildingMapper buildingMapper) {
         super(customerRepository);
         this.customerRepository = customerRepository;
         this.buildingService = buildingService;
-        this.userService = userService;
+        this.userRepository = userRepository;
         this.customerMapper = customerMapper;
         this.userMapper = userMapper;
         this.buildingMapper = buildingMapper;
@@ -178,6 +179,11 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
+    public List<CustomerDTO> getCustomers() {
+        return customerRepository.findByDeletedIsFalse().stream().map(customerMapper::customerToCustomerDTO).collect(Collectors.toList());
+    }
+
+    @Override
     public CustomerDTO undeleteCustomer(Integer customerID) {
         Customer customer = customerRepository.findCustomerById((customerID));
         if (customer == null) {
@@ -216,7 +222,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     private User getUser(int userID) {
-        User user = userService.findById(userID);
+        User user = userRepository.getUserByUserID(userID);
         if (user == null) {
             throw new ElementNotFoundException("User is not found");
         }
@@ -225,16 +231,21 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
 
     @Override
     public CustomerDTO createCustomer(CustomerCreateRequest customerCreateRequest) {
-        Building building = getBuilding(customerCreateRequest.getBuildingID());
+        // Allow null building create request because of Google Registration
+        Building building = null;
+        if(customerCreateRequest.getBuildingID() != null) {
+            building = getBuilding(customerCreateRequest.getBuildingID());
+        }
         User user = getUser(customerCreateRequest.getUserID());
         try {
             String url = null;
-            if(customerCreateRequest.getImage() == null) {
-                String dataUrl = generateImageWithInitial(user.getEmail());
-                url = uploadFileBase64(dataUrl);
-            } else {
-                url = upload(customerCreateRequest.getImage());
-            }
+            // Khong lay duoc quyen "Invalid JWT Signature"
+//            if(customerCreateRequest.getImage() == null) {
+//                String dataUrl = generateImageWithInitial(user.getEmail());
+//                url = uploadFileBase64(dataUrl);
+//            } else {
+//                url = upload(customerCreateRequest.getImage());
+//            }
             Customer customer = Customer.builder()
                     .image(url)
                     .building(building)
@@ -332,7 +343,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
             user.setNonLocked(false);
         }
         customer.setDeleted(true);
-        userService.save(user);
+        userRepository.save(user);
         return customerMapper.customerToCustomerDTO(customerRepository.save(customer));
     }
 

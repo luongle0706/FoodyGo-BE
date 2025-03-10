@@ -1,6 +1,7 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.CustomerDTO;
+import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.UserCreateRequest;
 import com.foodygo.dto.request.UserUpdateRequest;
@@ -101,6 +102,20 @@ public class UserController {
         PagingResponse results = userService.getAllUsersActive(resolvedCurrentPage, resolvedPageSize);
         List<?> data = (List<?>) results.getData();
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
+    }
+
+    /**
+     * Method get all users non paging
+     *
+     * @return list or empty
+     */
+    @Operation(summary = "Get all users non paging", description = "Retrieves all users, without optional pagination")
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/non-paging")
+    public ResponseEntity<ObjectResponse> getAllUsersNonPaging() {
+        List<UserDTO> results = userService.getUsers();
+        return !results.isEmpty() ? ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "get all users non paging successfully", results)) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "get all users non paging failed", results));
     }
 
     /**

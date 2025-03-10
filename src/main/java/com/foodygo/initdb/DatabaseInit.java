@@ -11,9 +11,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class DatabaseInit {
     private final HubRepository hubRepository;
     private final BuildingRepository buildingRepository;
     private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final WalletRepository walletRepository;
 
     @Bean
@@ -79,7 +83,7 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleAdmin)
                         .build();
-                admin = userRepository.save(admin);
+                userRepository.save(admin);
 
                 manager = User.builder()
                         .fullName("Manager")
@@ -91,7 +95,7 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleManager)
                         .build();
-                manager = userRepository.save(manager);
+                userRepository.save(manager);
 
                 staff = User.builder()
                         .fullName("HOANG SON HA")
@@ -115,17 +119,26 @@ public class DatabaseInit {
                         .nonLocked(true)
                         .role(roleSeller)
                         .build();
-                seller = userRepository.save(seller);
+                userRepository.save(seller);
             }
-
             if (hubRepository.count() == 0) {
+            double[] latitudes = new double[] {10.883272, 10.883719, 10.883246, 10.881893, 10.881890, 10.882405, 10.882813, 10.883466, 10.884012, 10.884505, 10.885257};
+            double[] longitudes = new double[] {106.783463, 106.780424, 106.779642, 106.781007, 106.781691, 106.781505, 106.782802, 106.779903, 106.782519, 106.781359, 106.782090};
                 for (int i = 1; i <= 10; i++) {
                     Hub hub = Hub.builder()
                             .address("Hub Address " + i)
                             .name("Hub " + i)
+                            .longitude(latitudes[i])
+                            .latitude(longitudes[i])
                             .description("Hub Description " + i)
                             .build();
                     Hub savedHub = hubRepository.save(hub);
+
+                    if (i == 1) {
+                        assert staff != null;
+                        staff.setHub(hub);
+                        staff = userRepository.save(staff);
+                    }
 
                     for (int j = 1; j <= 5; j++) {
                         Building building = Building.builder()
@@ -175,12 +188,12 @@ public class DatabaseInit {
 
                 restaurant = restaurantRepository.save(restaurant);
 
-                Wallet staffWallet = Wallet.builder()
+                Wallet sellerWallet = Wallet.builder()
                         .balance(0.0)
                         .walletType(WalletType.RESTAURANT)
                         .restaurant(restaurant)
                         .build();
-                walletRepository.save(staffWallet);
+                walletRepository.save(sellerWallet);
 
                 for (int j = 0; j < 10; j++) {
                     Category category = Category.builder()
@@ -190,12 +203,14 @@ public class DatabaseInit {
                             .build();
                     categoryRepository.save(category);
 
+                    int randomPrice = ThreadLocalRandom.current().nextInt(10, 100);
+
                     Product product = Product.builder()
                             .code("R" + restaurant.getId() + "P" + j)
                             .name("Sample product no. " + j)
-                            .price(Math.random() * 50 + 1)
+                            .price(randomPrice * 1000.0)
                             .description("Sample product no. " + j + " from restaurant " + restaurant.getId())
-                            .prepareTime(Math.random() * 50 + 1)
+                            .prepareTime(ThreadLocalRandom.current().nextDouble(10, 120))
                             .restaurant(restaurant)
                             .category(category)
                             .build();
@@ -209,10 +224,11 @@ public class DatabaseInit {
                     addonSectionRepository.save(addonSection);
 
                     for (int k = 0; k < 3; k++) {
+                        int randomAddonItemPrice = ThreadLocalRandom.current().nextInt(0, 10);
                         AddonItem addonItem = AddonItem.builder()
                                 .name("Sample addon item no." + k)
-                                .price(Math.random() * 5 + 1)
-                                .quantity(100)
+                                .price(randomAddonItemPrice * 1000.0)
+                                .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .section(addonSection)
                                 .build();
                         addonItemRepository.save(addonItem);
@@ -246,6 +262,29 @@ public class DatabaseInit {
                             .hub(hub)
                             .build();
                     orderRepository.save(order);
+                }
+            }
+
+            if (orderDetailRepository.count() == 0) {
+                List<Order> orders = orderRepository.findAll();
+                Product product1 = productRepository.findById(1).orElseThrow();
+                Product product2 = productRepository.findById(2).orElseThrow();
+
+                for (Order order : orders) {
+                    OrderDetail orderDetail1 = OrderDetail.builder()
+                            .order(order)
+                            .product(product1)
+                            .price(product1.getPrice())
+                            .quantity(1)
+                            .build();
+                    OrderDetail orderDetail2 = OrderDetail.builder()
+                            .order(order)
+                            .product(product2)
+                            .price(product2.getPrice())
+                            .quantity(1)
+                            .build();
+                    orderDetailRepository.save(orderDetail1);
+                    orderDetailRepository.save(orderDetail2);
                 }
             }
         };
