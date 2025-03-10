@@ -35,6 +35,7 @@ public class PaymentController {
     @PermitAll
     public void payCallbackHandler(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectResponse paymentResponse = paymentService.handleVNPayCallback(request);
-        response.sendRedirect("http://localhost:5173/hoan-tat-thanh-toan");
+        response.sendRedirect("https://admin.foodygo.theanh0804.id.vn/payment-successfully");
     }
 }
+

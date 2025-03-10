@@ -31,6 +31,8 @@ public class Order extends BaseEntity {
 
     Double totalPrice;
 
+    LocalDateTime confirmedAt;
+
     @Enumerated(EnumType.STRING)
     OrderStatus status;
 

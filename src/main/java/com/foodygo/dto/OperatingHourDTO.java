@@ -1,5 +1,6 @@
 package com.foodygo.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +16,8 @@ public class OperatingHourDTO {
     String day;
     boolean open;
     boolean hours;
+    @JsonFormat(pattern = "HH:mm")
     LocalTime openingTime;
+    @JsonFormat(pattern = "HH:mm")
     LocalTime closingTime;
 }
