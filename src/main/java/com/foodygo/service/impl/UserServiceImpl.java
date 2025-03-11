@@ -82,6 +82,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     }
 
     @Override
+    public List<User> getUsersByHub(int hubId) {
+        return userRepository.findUsersByHubId(hubId);
+    }
+
+    @Override
     public PagingResponse findAllUsers(Integer currentPage, Integer pageSize) {
         Pageable pageable = PageRequest.of(currentPage - 1, pageSize);
 
