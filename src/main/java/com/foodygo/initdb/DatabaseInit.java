@@ -10,6 +10,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.time.LocalTime;
@@ -135,8 +136,8 @@ public class DatabaseInit {
 
             if (hubRepository.count() == 0) {
                 Random random = new Random();
-                double[] hubLatitudes = new double[] {10.883272, 10.883719, 10.883246, 10.881893, 10.881890, 10.882405, 10.882813, 10.883466, 10.884012, 10.884505, 10.885257};
-                double[] hubLongitudes = new double[] {106.783463, 106.780424, 106.779642, 106.781007, 106.781691, 106.781505, 106.782802, 106.779903, 106.782519, 106.781359, 106.782090};
+//                double[] hubLatitudes = new double[]{10.883272, 10.883719, 10.883246, 10.881893, 10.881890, 10.882405, 10.882813, 10.883466, 10.884012, 10.884505, 10.885257};
+//                double[] hubLongitudes = new double[]{106.783463, 106.780424, 106.779642, 106.781007, 106.781691, 106.781505, 106.782802, 106.779903, 106.782519, 106.781359, 106.782090};
                 // Danh sách ánh xạ Hub → Buildings
                 Map<String, String[]> hubBuildingMap = new HashMap<>();
                 hubBuildingMap.put("Hub 1", new String[]{"A1", "A2", "A3"});
@@ -198,6 +199,11 @@ public class DatabaseInit {
                             .description("Hub Description " + hubIndex)
                             .build();
                     Hub savedHub = hubRepository.save(hub);
+                    if (hubIndex == 1) {
+                        assert staff != null;
+                        staff.setHub(savedHub);
+                        userRepository.save(staff);
+                    }
 
                     // Gán các building vào Hub
                     for (String buildingName : assignedBuildings) {
@@ -258,8 +264,8 @@ public class DatabaseInit {
                             .day(WEEKDAYS.get(i))
                             .isOpen(false)
                             .is24Hours(false)
-                            .openingTime(LocalTime.of(7,0))
-                            .closingTime(LocalTime.of(23,0))
+                            .openingTime(LocalTime.of(7, 0))
+                            .closingTime(LocalTime.of(23, 0))
                             .restaurant(restaurant)
                             .build();
                     operatingHourRepository.save(operatingHour);
