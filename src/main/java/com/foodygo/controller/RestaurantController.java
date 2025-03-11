@@ -126,7 +126,7 @@ public class RestaurantController {
     @PostMapping
     @Operation(summary = "Create a restaurant",
             description = "Create a restaurant, with optional data.")
-    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Restaurant created"),
             @ApiResponse(responseCode = "400", description = "Invalid request body"),
@@ -149,7 +149,7 @@ public class RestaurantController {
     @PutMapping
     @Operation(summary = "Update a restaurant",
             description = "Update a restaurant, with optional data.")
-    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Restaurant updated"),
             @ApiResponse(responseCode = "400", description = "Invalid request body"),
@@ -173,7 +173,7 @@ public class RestaurantController {
     @PutMapping("/{restaurantId}")
     @Operation(summary = "Switch restaurant availability",
             description = "Switch restaurant availability to open/close")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Restaurant availability updated"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -196,7 +196,7 @@ public class RestaurantController {
     @DeleteMapping("/{restaurantId}")
     @Operation(summary = "Delete a restaurant",
             description = "Soft delete a restaurant")
-    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Restaurant deleted"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
