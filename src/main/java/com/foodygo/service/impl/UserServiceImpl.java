@@ -18,10 +18,7 @@ import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.CustomerMapper;
 import com.foodygo.mapper.UserMapper;
-import com.foodygo.repository.CustomerRepository;
-import com.foodygo.repository.RestaurantRepository;
-import com.foodygo.repository.UserRepository;
-import com.foodygo.repository.WalletRepository;
+import com.foodygo.repository.*;
 import com.foodygo.service.spec.CustomerService;
 import com.foodygo.service.spec.RoleService;
 import com.foodygo.service.spec.UserService;
@@ -79,6 +76,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         this.walletRepository = walletRepository;
         this.customerService = customerService;
         this.restaurantRepository = restaurantRepository;
+    }
+
+    @Override
+    public List<User> getUsersByHub(int hubId) {
+        return userRepository.findUsersByHubId(hubId);
     }
 
     @Override
@@ -258,14 +260,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .build();
         user = userRepository.save(user);
 
-//        Customer customer = customerRepository.save(
-//                Customer.builder()
-//                        .image(null)
-//                        .building(null)
-//                        .user(user)
-//                        .build()
-//        );
-
         CustomerCreateRequest customerCreateRequest = new CustomerCreateRequest(userRegisterRequest.getImage(), userRegisterRequest.getBuildingID(), user.getUserID());
 
         CustomerDTO customer = customerService.createCustomer(customerCreateRequest);
@@ -379,15 +373,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
     @Override
     public TokenResponse login(String email, String password) {
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .code("Failed")
-                .message("Login failed")
-                .token(null)
-                .refreshToken(null)
-                .fullName(null)
-                .email(null)
-                .role(null)
-                .build();
+        TokenResponse tokenResponse;
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(email, password);
@@ -399,28 +385,22 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         User user = userRepository.getUserByEmail(userDetails.getEmail());
         Customer customer = customerRepository.findByUserUserID(user.getUserID()).orElse(null);
         Restaurant restaurant = restaurantRepository.findByOwnerUserID(user.getUserID()).orElse(null);
-        if (restaurant == null) {
-            System.err.println("Cannot find restaurant");
-        } else {
-            System.out.println("Restaurant ID = " + restaurant.getId());
-        }
-        if (user != null) {
-            user.setRefreshToken(refreshToken);
-            user.setAccessToken(token);
-            userRepository.save(user);
-            tokenResponse = TokenResponse.builder()
-                    .code("Success")
-                    .message("Login successfully")
-                    .token(token)
-                    .refreshToken(refreshToken)
-                    .fullName(user.getFullName())
-                    .email(user.getEmail())
-                    .role(user.getRole().getRoleName())
-                    .userId(user.getUserID())
-                    .customerId(customer != null ? customer.getId() : null)
-                    .restaurantId(restaurant != null ? restaurant.getId() : null)
-                    .build();
-        }
+        user.setRefreshToken(refreshToken);
+        user.setAccessToken(token);
+        userRepository.save(user);
+        tokenResponse = TokenResponse.builder()
+                .code("Success")
+                .message("Login successfully")
+                .token(token)
+                .refreshToken(refreshToken)
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole().getRoleName())
+                .userId(user.getUserID())
+                .customerId(customer != null ? customer.getId() : null)
+                .restaurantId(restaurant != null ? restaurant.getId() : null)
+                .hubId(user.getHub() != null ? user.getHub().getId() : null)
+                .build();
         return tokenResponse;
     }
 

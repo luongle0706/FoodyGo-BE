@@ -19,5 +19,6 @@ public class TokenResponse {
     Integer userId;
     Integer customerId;
     Integer restaurantId;
+    Integer hubId;
     EnumRoleNameType role;
 }
