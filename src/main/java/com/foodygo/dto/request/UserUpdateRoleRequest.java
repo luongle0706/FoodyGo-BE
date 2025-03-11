@@ -16,9 +16,6 @@ public class UserUpdateRoleRequest {
     @Size(max = 255, min = 1, message = "FullName phải từ 1 tới 255 kí tự")
     private String fullName;
 
-    @Size(max = 100, min = 6, message = "Mật khẩu phải từ 6 tới 100 kí tự")
-    private String password;
-
     @Min(value = 1, message = "RoleID must be positive")
     private int roleID;
 }
