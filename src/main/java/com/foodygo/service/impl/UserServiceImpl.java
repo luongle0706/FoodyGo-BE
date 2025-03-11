@@ -318,9 +318,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         if (user == null) {
             throw new ElementNotFoundException("User not found");
         }
-        if (userUpdateRoleRequest.getPassword() != null) {
-            user.setPassword(bCryptPasswordEncoder.encode(userUpdateRoleRequest.getPassword()));
-        }
         if (userUpdateRoleRequest.getPhone() != null) {
             if (!user.getPhone().equals(userUpdateRoleRequest.getPhone())) {
                 User checkExistingUser = userRepository.getUserByPhone(userUpdateRoleRequest.getPhone());
