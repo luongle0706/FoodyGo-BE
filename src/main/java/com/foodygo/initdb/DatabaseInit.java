@@ -334,7 +334,7 @@ public class DatabaseInit {
                             .shippingFee(shippingFee)
                             .serviceFee(serviceFee)
                             .totalPrice(totalPrice + shippingFee + serviceFee)
-                            .status(OrderStatus.ORDERED)
+                            .status(OrderStatus.RESTAURANT_ACCEPTED)
                             .expectedDeliveryTime(LocalDateTime.now().plusHours(random.nextInt(5) + 1))
                             .customerPhone(user != null ? user.getPhone() : "190238019283")
                             .shipperPhone("+84" + (100000000 + random.nextInt(900000000)))

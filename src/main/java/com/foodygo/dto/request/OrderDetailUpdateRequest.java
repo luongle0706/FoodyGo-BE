@@ -9,9 +9,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDetailUpdateRequest {
-    Integer id;
-    Integer quantity;
+    int id;
+    int quantity;
     Double price;
     String addonItems;
-    Integer productId;
+    int productId;
 }
