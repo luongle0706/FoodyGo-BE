@@ -4,6 +4,7 @@ import com.foodygo.dto.request.TopUpRequest;
 import com.foodygo.dto.request.TransferRequest;
 import com.foodygo.dto.request.WithdrawRequest;
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.dto.response.WalletsSummaryResponse;
 import com.foodygo.service.spec.DepositService;
 import com.foodygo.service.spec.TransactionService;
 import com.foodygo.service.spec.WalletService;
@@ -12,9 +13,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +28,6 @@ public class WalletController {
 
     private final WalletService walletService;
     private final TransactionService transactionService;
-    private final DepositService depositService;
 
     @Operation(summary = "Get Wallet by Customer ID", description = "Fetches the wallet balance and information for a customer based on the customer ID.")
     @ApiResponses({
@@ -106,7 +108,7 @@ public class WalletController {
     }
 
    @Operation(summary = "Top up Wallet", description = "Tops up a wallet with a specified amount using a specified method.")
-    @ApiResponses({
+   @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Top up processed successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid top up request"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -121,6 +123,22 @@ public class WalletController {
             .message("Top up processed successfully")
             .data(walletService.processTopUp(walletId, requestDto.getAmount(), requestDto.getMethod(), request))
             .build());
+    }
+
+    @Operation(summary = "Get Wallets Summary", description = "Fetches the summary of all wallets.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Wallets summary retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/summary")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ResponseEntity<ObjectResponse> getWalletsSummary() {
+        WalletsSummaryResponse summary = walletService.getWalletsSummary();
+        return ResponseEntity.ok(ObjectResponse.builder()
+                .status("200")
+                .message("Wallets summary retrieved successfully")
+                .data(summary)
+                .build());
     }
 
 }
