@@ -98,11 +98,11 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse updateOrder(Integer orderId, OrderUpdateRequest orderUpdateRequest) {
         Order order = getOrderById(orderId);
         User user = userService.findById(orderUpdateRequest.getUserId());
-        if (!Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_STAFF)) {
+        if (Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_STAFF)) {
             order.setEmployee(user);
         }
         OrderStatus oldStatus = order.getStatus();
-        if(!Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_SELLER)) {
+        if(Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_SELLER)) {
             order.setConfirmedAt(LocalDateTime.now());
         }
         OrderMapper.INSTANCE.updateOrderFromDto(orderUpdateRequest, order);
