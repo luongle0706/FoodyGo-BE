@@ -71,7 +71,7 @@ public class BuildingController {
      * @return list or empty
      */
     @Operation(summary = "Get all buildings", description = "Retrieves all buildings, with optional pagination")
-    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF') or hasRole('ADMIN') or hasRole('USER') or hasRole('SELLER')")
     @GetMapping("")
     public ResponseEntity<PagingResponse> getAllBuildings(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize) {
@@ -90,7 +90,7 @@ public class BuildingController {
      * @return list or empty
      */
     @Operation(summary = "Get all buildings active", description = "Retrieves all buildings have status active, with optional pagination")
-    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
+//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/active")
     public ResponseEntity<PagingResponse> getAllBuildingsActive(@RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                                 @RequestParam(value = "pageSize", required = false) Integer pageSize) {

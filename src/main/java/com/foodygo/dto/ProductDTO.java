@@ -13,8 +13,17 @@ public record ProductDTO(
         String description,
         Double prepareTime,
         boolean available,
-        List<AddonSection> addonSections
+        List<AddonSection> addonSections,
+        Category category
 ) {
+    @Builder
+    public record Category(
+            Integer id,
+            String name
+    ) {
+    }
+
+    @Builder
     public record AddonSection(
             Integer id,
             String name,
