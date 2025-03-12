@@ -1,11 +1,12 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.HubDTO;
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.paging.HubPagingResponse;
+import com.foodygo.dto.paging.OrderPagingResponse;
 import com.foodygo.dto.request.HubCreateRequest;
 import com.foodygo.dto.request.HubUpdateRequest;
-import com.foodygo.dto.response.HubSelectionResponse;
 import com.foodygo.dto.response.PagingResponse;
-import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.entity.Order;
 import com.foodygo.exception.ElementExistException;
@@ -18,13 +19,15 @@ import com.foodygo.mapper.HubMapperImpl;
 import com.foodygo.repository.BuildingRepository;
 import com.foodygo.repository.HubRepository;
 import com.foodygo.service.spec.HubService;
-import com.foodygo.utils.BuildingSpecification;
 import com.foodygo.utils.HubSpecification;
+import com.foodygo.utils.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -51,9 +54,12 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     }
 
     @Override
-    public List<HubSelectionResponse> getHubsForSelection() {
-        List<Hub> hubs = hubRepository.findByDeletedIsFalse();
-        return hubs.stream().map(HubSelectionResponse::fromEntity).toList();
+    public MappingJacksonValue getHubsForSelection(PagingRequest request) {
+        Pageable pageable = PaginationUtil.getPageable(request);
+        Specification<Hub> spec = HubPagingResponse.filterByFields(request.getFilters());
+        Page<Hub> page = hubRepository.findAll(spec, pageable);
+        List<HubPagingResponse> mappedDTOs = page.getContent().stream().map(HubPagingResponse::fromEntity).toList();
+        return PaginationUtil.getPagedMappingJacksonValue(request, page, mappedDTOs, "Get hubs");
     }
 
     @Override
@@ -163,7 +169,7 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
             if (hubUpdateRequest.getAddress() != null) {
                 hub.setAddress(hubUpdateRequest.getAddress());
             }
-            if(hubUpdateRequest.getDescription() != null) {
+            if (hubUpdateRequest.getDescription() != null) {
                 hub.setDescription(hubUpdateRequest.getDescription());
             }
             return hubMapper.hubToHubDTO(hubRepository.save(hub));
@@ -205,7 +211,7 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
     @Override
     public List<Order> getOrdersByHubID(Integer hubID) {
         Hub hub = hubRepository.findHubById(hubID);
-        if(hub != null) {
+        if (hub != null) {
             return hub.getOrders();
         }
         return null;
@@ -238,12 +244,12 @@ public class HubServiceImpl extends BaseServiceImpl<Hub, Integer> implements Hub
         keys.add("name");
         values.add(searchName);
 
-        if(keys.size() == values.size()) {
-            for(int i = 0; i < keys.size(); i++) {
+        if (keys.size() == values.size()) {
+            for (int i = 0; i < keys.size(); i++) {
                 String field = keys.get(i);
                 String value = values.get(i);
                 Specification<Hub> newSpec = HubSpecification.searchByField(field, value);
-                if(newSpec != null) {
+                if (newSpec != null) {
                     spec = spec.and(newSpec);
                 }
             }
