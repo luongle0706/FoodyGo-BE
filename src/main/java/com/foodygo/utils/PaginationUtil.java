@@ -28,7 +28,9 @@ public class PaginationUtil {
             sortingOrders.add(new Sort.Order(direction, fieldName));
         }
         Sort sort = Sort.by(sortingOrders);
-        return PageRequest.of(request.getPageNo() - 1, request.getPageSize(), sort);
+        return request.getPageSize() > 0
+                ? PageRequest.of(request.getPageNo() - 1, request.getPageSize(), sort)
+                : Pageable.unpaged(sort);
     }
 
     public static MappingJacksonValue getPagedMappingJacksonValue(PagingRequest request, Page<?> page, List<?> mappedDTO, String message) {

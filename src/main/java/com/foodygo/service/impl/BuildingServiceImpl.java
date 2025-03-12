@@ -2,10 +2,12 @@ package com.foodygo.service.impl;
 
 import com.foodygo.dto.BuildingDTO;
 import com.foodygo.dto.HubDTO;
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.paging.BuildingPagingResponse;
+import com.foodygo.dto.paging.HubPagingResponse;
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
-import com.foodygo.dto.response.PublicBuildingDTO;
 import com.foodygo.entity.Building;
 import com.foodygo.entity.Hub;
 import com.foodygo.exception.ElementExistException;
@@ -19,11 +21,14 @@ import com.foodygo.repository.CustomerRepository;
 import com.foodygo.service.spec.BuildingService;
 import com.foodygo.service.spec.HubService;
 import com.foodygo.utils.BuildingSpecification;
+import com.foodygo.utils.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -54,11 +59,12 @@ public class BuildingServiceImpl extends BaseServiceImpl<Building, Integer> impl
     }
 
     @Override
-    public List<PublicBuildingDTO> getAllBuildings() {
-        List<Building> buildings = buildingRepository.findByDeletedIsFalse();
-        return buildings.stream().map(
-                PublicBuildingDTO::fromEntity
-        ).toList();
+    public MappingJacksonValue getAllBuildings(PagingRequest request) {
+        Pageable pageable = PaginationUtil.getPageable(request);
+        Specification<Building> spec = BuildingPagingResponse.filterByFields(request.getFilters());
+        Page<Building> page = buildingRepository.findAll(spec, pageable);
+        List<BuildingPagingResponse> mappedDTOs = page.getContent().stream().map(BuildingPagingResponse::fromEntity).toList();
+        return PaginationUtil.getPagedMappingJacksonValue(request, page, mappedDTOs, "Get buildings");
     }
 
     @Override

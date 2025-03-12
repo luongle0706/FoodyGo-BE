@@ -8,8 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
-import java.util.List;
-
 public interface ProductService {
     Product getProductById(Integer productId);
 
