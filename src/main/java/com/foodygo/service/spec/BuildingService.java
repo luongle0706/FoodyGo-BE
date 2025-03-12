@@ -2,17 +2,18 @@ package com.foodygo.service.spec;
 
 import com.foodygo.dto.BuildingDTO;
 import com.foodygo.dto.HubDTO;
+import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.request.BuildingCreateRequest;
 import com.foodygo.dto.request.BuildingUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
-import com.foodygo.dto.response.PublicBuildingDTO;
 import com.foodygo.entity.Building;
+import org.springframework.http.converter.json.MappingJacksonValue;
 
 import java.util.List;
 
 public interface BuildingService extends BaseService<Building, Integer> {
 
-    List<PublicBuildingDTO> getAllBuildings();
+    MappingJacksonValue getAllBuildings(PagingRequest request);
 
     PagingResponse getAllBuildings(Integer currentPage, Integer pageSize);
 

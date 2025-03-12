@@ -37,6 +37,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -58,11 +59,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     private final WalletRepository walletRepository;
     private final CustomerService customerService;
     private final RestaurantRepository restaurantRepository;
+    private final FcmTokenRepository fcmTokenRepository;
 
     public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
                            UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
                            JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager,
-                           WalletRepository walletRepository, CustomerService customerService, RestaurantRepository restaurantRepository) {
+                           WalletRepository walletRepository, CustomerService customerService, RestaurantRepository restaurantRepository, FcmTokenRepository fcmTokenRepository) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -76,6 +78,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         this.walletRepository = walletRepository;
         this.customerService = customerService;
         this.restaurantRepository = restaurantRepository;
+        this.fcmTokenRepository = fcmTokenRepository;
     }
 
     @Override
@@ -363,6 +366,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                                 .userId(user.getUserID())
                                 .customerId(customer != null ? customer.getId() : null)
                                 .restaurantId(restaurant != null ? restaurant.getId() : null)
+                                .hubId(user.getHub() != null ? user.getHub().getId() : null)
                                 .build();
                     }
                 }
@@ -402,6 +406,33 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .hubId(user.getHub() != null ? user.getHub().getId() : null)
                 .build();
         return tokenResponse;
+    }
+
+    @Override
+    @Transactional
+    public TokenResponse login(String email, String password, String fcmToken) {
+        TokenResponse response = login(email, password);
+        if (response != null) {
+            User user = userRepository.findById(response.getUserId()).orElseThrow(
+                    () -> new ElementNotFoundException("User not found")
+            );
+            if (fcmTokenRepository.existsById(fcmToken)) {
+                fcmTokenRepository.deleteById(fcmToken);
+            }
+            fcmTokenRepository.save(FcmToken.builder()
+                    .user(user)
+                    .token(fcmToken)
+                    .build());
+        }
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public void invalidateFcmToken(String fcmToken) {
+        if (fcmTokenRepository.existsById(fcmToken)) {
+            fcmTokenRepository.deleteById(fcmToken);
+        }
     }
 
     @Override

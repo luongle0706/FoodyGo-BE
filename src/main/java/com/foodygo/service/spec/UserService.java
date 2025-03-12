@@ -48,6 +48,10 @@ public interface UserService extends BaseService<User, Integer> {
 
     TokenResponse login(String email, String password);
 
+    TokenResponse login(String email, String password, String fcmToken);
+
+    void invalidateFcmToken(String fcmToken);
+
     boolean logout(HttpServletRequest request, HttpServletResponse response);
 
     TokenResponse getTokenLoginFromOauth2();
