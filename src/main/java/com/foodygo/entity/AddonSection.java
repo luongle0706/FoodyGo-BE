@@ -29,7 +29,7 @@ public class AddonSection extends BaseEntity {
     boolean required = false;
 
     @ManyToMany
-    List<Product> product;
+    List<Product> products;
 
     @OneToMany(mappedBy = "section")
     List<AddonItem> items;

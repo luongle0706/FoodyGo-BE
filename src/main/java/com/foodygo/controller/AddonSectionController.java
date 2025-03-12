@@ -1,6 +1,7 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.AddonSectionDTO;
+import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.spec.AddonItemService;
 import com.foodygo.service.spec.AddonSectionService;
@@ -14,7 +15,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -30,6 +34,40 @@ public class AddonSectionController {
 
     @Value("${application.default-page-size}")
     private int defaultPageSize;
+
+    @GetMapping()
+    @Operation(summary = "Get Addon Section", description = "Retrieve a paginated list of all add-on section. Supports sorting and pagination.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Addon section found"),
+            @ApiResponse(responseCode = "400", description = "Invalid addon section request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Addon section not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<MappingJacksonValue> getAllAddonSection(
+            @RequestParam(required = false, defaultValue = "1") int pageNo,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String params,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(required = false) Map<String, String> filters
+    ) {
+        filters.remove("pageNo");
+        filters.remove("pageSize");
+        filters.remove("sortBy");
+        filters.remove("filters");
+        return ResponseEntity
+                .status(OK)
+                .body(
+                        addonSectionService.getAddonSections(PagingRequest.builder()
+                                .pageNo(pageNo)
+                                .pageSize(pageSize)
+                                .params(params)
+                                .sortBy(sortBy)
+                                .filters(filters)
+                                .build())
+                );
+    }
 
     @GetMapping("/{addonSectionId}")
     @Operation(summary = "Get Addon Section by ID", description = "Retrieve details of an addon section by its unique ID.")

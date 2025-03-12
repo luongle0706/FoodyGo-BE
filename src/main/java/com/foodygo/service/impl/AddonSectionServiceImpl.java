@@ -1,16 +1,23 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.AddonSectionDTO;
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.paging.AddonSectionPagingResponse;
+import com.foodygo.dto.paging.OrderPagingResponse;
 import com.foodygo.entity.AddonSection;
+import com.foodygo.entity.Order;
 import com.foodygo.entity.Product;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.AddonSectionMapper;
 import com.foodygo.repository.AddonSectionRepository;
 import com.foodygo.repository.ProductRepository;
 import com.foodygo.service.spec.AddonSectionService;
+import com.foodygo.utils.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,17 +30,6 @@ public class AddonSectionServiceImpl implements AddonSectionService {
 
     private final AddonSectionRepository addonSectionRepository;
     private final ProductRepository productRepository;
-
-    @Override
-    public List<AddonSection> getAddonSectionsByProductId(Integer id) {
-        return addonSectionRepository.findByProductIdAndDeletedFalse(id);
-    }
-
-    @Override
-    public Page<AddonSectionDTO> getAddonSectionsByProductId(Integer id, Pageable pageable) {
-        return addonSectionRepository.findByProductIdAndDeletedFalse(id, pageable)
-                .map(AddonSectionMapper.INSTANCE::toDto);
-    }
 
     @Override
     public AddonSection getAddonSectionById(Integer id) {
@@ -65,7 +61,7 @@ public class AddonSectionServiceImpl implements AddonSectionService {
                 .name(request.name())
                 .maxChoice(request.maxChoice())
                 .required(request.required())
-                .product(listLinkProduct)
+                .products(listLinkProduct)
                 .build();
         return addonSectionRepository.save(addonSection);
     }
@@ -104,5 +100,14 @@ public class AddonSectionServiceImpl implements AddonSectionService {
         }
         addonSection.setDeleted(true);
         addonSectionRepository.save(addonSection);
+    }
+
+    @Override
+    public MappingJacksonValue getAddonSections(PagingRequest request) {
+        Pageable pageable = PaginationUtil.getPageable(request);
+        Specification<AddonSection> addonSectionSpecification = AddonSectionPagingResponse.filterByFields(request.getFilters());
+        Page<AddonSection> page = addonSectionRepository.findAll(addonSectionSpecification, pageable);
+        List<AddonSectionPagingResponse> mappedDTOs = page.getContent().stream().map(AddonSectionPagingResponse::fromEntity).toList();
+        return PaginationUtil.getPagedMappingJacksonValue(request, page, mappedDTOs, "Get orders");
     }
 }

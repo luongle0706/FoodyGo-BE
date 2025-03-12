@@ -184,36 +184,6 @@ public class ProductController {
                                 .build()
                 );
     }
-    @GetMapping("/{productId}/addon-sections")
-    @Operation(summary = "Get Addon Sections by Product ID",
-            description = "Retrieve a paginated list of addon sections by the specified product ID. Supports sorting and pagination.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Addon sections found"),
-            @ApiResponse(responseCode = "400", description = "Invalid addon section request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "400", description = "Product not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<ObjectResponse> getAddonSectionsByProductId(
-            @PathVariable Integer productId,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
-    ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
-        return ResponseEntity
-                .status(OK)
-                .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all addon sections by product Id")
-                                .data(addonSectionService.getAddonSectionsByProductId(productId, pageable))
-                                .build()
-                );
-    }
 
 }
 
