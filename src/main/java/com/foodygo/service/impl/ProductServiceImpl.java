@@ -1,11 +1,18 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.ProductDTO;
+import com.foodygo.dto.request.ProductCreateRequest;
+import com.foodygo.entity.AddonSection;
+import com.foodygo.entity.Category;
 import com.foodygo.entity.Product;
+import com.foodygo.entity.Restaurant;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.ProductMapper;
 import com.foodygo.repository.ProductRepository;
+import com.foodygo.service.spec.AddonSectionService;
+import com.foodygo.service.spec.CategoryService;
 import com.foodygo.service.spec.ProductService;
+import com.foodygo.service.spec.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,6 +30,9 @@ import java.util.Set;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final RestaurantService restaurantService;
+    private final CategoryService categoryService;
+    private final AddonSectionService addonSectionService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final String KEY_PRODUCT = "all_products";
 
@@ -91,13 +101,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void createProduct(ProductDTO productDTO) {
+    public void createProduct(ProductCreateRequest productDTO) {
+        Restaurant restaurant = restaurantService.getRestaurantById(productDTO.getRestaurantId());
+        Category category = categoryService.getCategoryById(productDTO.getCategoryId());
+        AddonSection addonSection = addonSectionService.getAddonSectionById(productDTO.getAddonSectionId());
+
         Product product = Product.builder()
-                .code(productDTO.code())
-                .name(productDTO.name())
-                .price(productDTO.price())
-                .description(productDTO.description())
-                .prepareTime(productDTO.prepareTime())
+                .code(productDTO.getCode())
+                .name(productDTO.getName())
+                .price(productDTO.getPrice())
+                .image(productDTO.getImage())
+                .description(productDTO.getDescription())
+                .prepareTime(productDTO.getPrepareTime())
+                .restaurant(restaurant)
+                .category(category)
                 .build();
         productRepository.save(product);
         clear();

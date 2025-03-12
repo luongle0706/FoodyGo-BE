@@ -2,6 +2,7 @@ package com.foodygo.service.spec;
 
 import com.foodygo.dto.RestaurantDTO;
 import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.request.RestaurantCreateRequest;
 import com.foodygo.dto.response.RestaurantResponseDTO;
 import com.foodygo.entity.Restaurant;
 import org.springframework.data.domain.Page;
@@ -27,7 +28,7 @@ public interface RestaurantService {
 
     void updateRestaurantInfo(RestaurantDTO restaurantDTO);
 
-    void createRestaurant(RestaurantDTO restaurantDTO);
+    void createRestaurant(RestaurantCreateRequest restaurantDTO);
 
     void deleteRestaurant(Integer restaurantId);
 

@@ -17,7 +17,7 @@ public record AddonSectionDTO(
             String name,
             Integer maxChoice,
             boolean required,
-            Integer productId
+            List<Integer> productId
     ) {
     }
 

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,14 +53,19 @@ public class AddonSectionServiceImpl implements AddonSectionService {
     @Override
     @Transactional
     public AddonSection createAddonSection(AddonSectionDTO.CreateRequest request) {
-        Product product = productRepository.findByIdAndDeletedFalse(request.productId()).orElseThrow(
-                () -> new ElementNotFoundException("Product not found with id: " + request.productId())
-        );
+        List<Product> listLinkProduct = new ArrayList<>();
+
+        for (Integer productId : request.productId()) {
+            Product product = productRepository.findByIdAndDeletedFalse(productId).orElseThrow(
+                    () -> new ElementNotFoundException("Product not found with id: " + request.productId())
+            );
+            listLinkProduct.add(product);
+        }
         AddonSection addonSection = AddonSection.builder()
                 .name(request.name())
                 .maxChoice(request.maxChoice())
                 .required(request.required())
-                .product(product)
+                .product(listLinkProduct)
                 .build();
         return addonSectionRepository.save(addonSection);
     }

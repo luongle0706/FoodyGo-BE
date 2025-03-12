@@ -1,6 +1,7 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.ProductDTO;
+import com.foodygo.dto.request.ProductCreateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.spec.AddonSectionService;
 import com.foodygo.service.spec.ProductService;
@@ -97,7 +98,7 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<ObjectResponse> createProduct(
-            @RequestBody ProductDTO request
+            @RequestBody ProductCreateRequest request
     ) {
         productService.createProduct(request);
         return ResponseEntity
