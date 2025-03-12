@@ -23,9 +23,6 @@ public class OrderUpdateRequest {
     String shipperPhone;
     String notes;
     MultipartFile image;
-    Integer employeeId;
-    Integer userId;
-    Integer restaurantId;
-    Integer hubId;
+    int userId;
     List<OrderDetailUpdateRequest> orderDetailUpdateRequests;
 }
