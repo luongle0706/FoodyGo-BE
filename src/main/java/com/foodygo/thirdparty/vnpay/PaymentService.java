@@ -1,4 +1,4 @@
-package com.foodygo.thirdparty;
+package com.foodygo.thirdparty.vnpay;
 
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.entity.Deposit;

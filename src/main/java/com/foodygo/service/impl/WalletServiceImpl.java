@@ -15,7 +15,7 @@ import com.foodygo.repository.TransactionRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.repository.WalletRepository;
 import com.foodygo.service.spec.WalletService;
-import com.foodygo.thirdparty.PaymentService;
+import com.foodygo.thirdparty.vnpay.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

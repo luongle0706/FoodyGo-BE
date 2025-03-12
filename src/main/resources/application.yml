@@ -120,3 +120,9 @@ business:
 #image:
 #  saveLocation: /var/www/images/
 #  getLocation: https://foodygo.theanh0804.id.vn/public/
+
+payos:
+  client-id: c94349d1-af6a-4c67-a947-d54c8466611d
+  api-key: 79b84f83-4c65-4bd6-98de-2ac31208bb87
+  checksum-key: 72349adae7a4cd849fa4cbd42287a6f44e9581d66b2aba75f5cd5519e6b72c2a
+  webhook-url: https://admin.foodygo.theanh0804.id.vn/admin
