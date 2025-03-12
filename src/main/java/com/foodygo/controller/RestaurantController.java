@@ -2,6 +2,7 @@ package com.foodygo.controller;
 
 import com.foodygo.dto.RestaurantDTO;
 import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.request.RestaurantCreateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.spec.CategoryService;
 import com.foodygo.service.spec.ProductService;
@@ -134,7 +135,7 @@ public class RestaurantController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<ObjectResponse> createRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
+    public ResponseEntity<ObjectResponse> createRestaurant(@RequestBody RestaurantCreateRequest restaurantDTO) {
         restaurantService.createRestaurant(restaurantDTO);
         return ResponseEntity
                 .status(OK)

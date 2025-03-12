@@ -1,6 +1,8 @@
 package com.foodygo.controller;
 
 import com.foodygo.dto.ProductDTO;
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.request.ProductCreateRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.service.spec.AddonSectionService;
 import com.foodygo.service.spec.ProductService;
@@ -13,9 +15,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -29,10 +36,7 @@ public class ProductController {
     private final ProductService productService;
     private final AddonSectionService addonSectionService;
 
-    @Value("${application.default-page-size}")
-    private int defaultPageSize;
-
-    @GetMapping()
+    @GetMapping
     @Operation(summary = "Get all products",
             description = "Retrieves all products, with optional pagination and sorting.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
@@ -42,23 +46,27 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<ObjectResponse> getAllProducts(
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
+    public ResponseEntity<MappingJacksonValue> getAllProducts(
+            @RequestParam(required = false, defaultValue = "1") int pageNo,
+            @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String params,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
+            @RequestParam(required = false) Map<String, String> filters
     ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
+        filters.remove("pageNo");
+        filters.remove("pageSize");
+        filters.remove("sortBy");
+        filters.remove("filters");
         return ResponseEntity
                 .status(OK)
-                .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all products")
-                                .data(productService.getAllProductDTOs(pageable))
-                                .build()
-                );
+                .body(productService.getProducts(
+                        PagingRequest.builder()
+                                .pageNo(pageNo)
+                                .pageSize(pageSize)
+                                .sortBy(sortBy)
+                                .filters(filters)
+                                .params(params)
+                                .build()));
     }
 
     @GetMapping("/{productId}")
@@ -87,8 +95,9 @@ public class ProductController {
 
     @Operation(summary = "Create a new product",
             description = "Creates a new product with the provided details.")
-    @PostMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Product created"),
             @ApiResponse(responseCode = "400", description = "Invalid product body"),
@@ -97,9 +106,10 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<ObjectResponse> createProduct(
-            @RequestBody ProductDTO request
+            @RequestPart("data") ProductCreateRequest request,
+            @RequestPart("image") MultipartFile image
     ) {
-        productService.createProduct(request);
+        productService.createProduct(request, image);
         return ResponseEntity
                 .status(CREATED)
                 .body(
@@ -113,7 +123,7 @@ public class ProductController {
     @Operation(summary = "Update an existing product",
             description = "Updates the details of an existing product.")
     @PutMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product updated"),
             @ApiResponse(responseCode = "400", description = "Invalid product body"),
@@ -139,7 +149,7 @@ public class ProductController {
     @PutMapping("/{productId}")
     @Operation(summary = "Switch product availability",
             description = "Switch product availability to open/close")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product availability updated"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -162,7 +172,7 @@ public class ProductController {
     @Operation(summary = "Delete a product",
             description = "Deletes a product by its ID.")
     @DeleteMapping("/{productId}")
-    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product deleted"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -180,36 +190,6 @@ public class ProductController {
                         ObjectResponse.builder()
                                 .status(CREATED.toString())
                                 .message("Delete product successfully")
-                                .build()
-                );
-    }
-    @GetMapping("/{productId}/addon-sections")
-    @Operation(summary = "Get Addon Sections by Product ID",
-            description = "Retrieve a paginated list of addon sections by the specified product ID. Supports sorting and pagination.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Addon sections found"),
-            @ApiResponse(responseCode = "400", description = "Invalid addon section request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "400", description = "Product not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<ObjectResponse> getAddonSectionsByProductId(
-            @PathVariable Integer productId,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
-    ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageNo, pageSize != null ? pageSize : defaultPageSize, sort);
-        return ResponseEntity
-                .status(OK)
-                .body(
-                        ObjectResponse.builder()
-                                .status(OK.toString())
-                                .message("Get all addon sections by product Id")
-                                .data(addonSectionService.getAddonSectionsByProductId(productId, pageable))
                                 .build()
                 );
     }

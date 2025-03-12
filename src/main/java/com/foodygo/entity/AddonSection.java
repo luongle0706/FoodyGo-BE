@@ -28,8 +28,8 @@ public class AddonSection extends BaseEntity {
     @Builder.Default
     boolean required = false;
 
-    @ManyToOne
-    Product product;
+    @ManyToMany
+    List<Product> products;
 
     @OneToMany(mappedBy = "section")
     List<AddonItem> items;

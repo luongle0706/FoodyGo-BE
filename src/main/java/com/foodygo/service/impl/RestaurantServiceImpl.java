@@ -2,9 +2,12 @@ package com.foodygo.service.impl;
 
 import com.foodygo.dto.RestaurantDTO;
 import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.request.RestaurantCreateRequest;
 import com.foodygo.dto.response.RestaurantResponseDTO;
 import com.foodygo.entity.OperatingHour;
 import com.foodygo.entity.Restaurant;
+import com.foodygo.entity.User;
+import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.RestaurantMapper;
 import com.foodygo.mapper.RestaurantResponseMapper;
@@ -12,6 +15,7 @@ import com.foodygo.repository.OperatingHourRepository;
 import com.foodygo.repository.RestaurantRepository;
 import com.foodygo.service.spec.OperatingHourService;
 import com.foodygo.service.spec.RestaurantService;
+import com.foodygo.service.spec.UserService;
 import com.foodygo.utils.PaginationUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +36,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final OperatingHourService operatingHourService;
+    private final UserService userService;
 
     public static final Map<Integer, String> WEEKDAYS = Map.of(
             1, "Thứ 2",
@@ -96,27 +101,35 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     @Transactional
-    public void createRestaurant(RestaurantDTO restaurantDTO) {
-        Restaurant restaurant = Restaurant.builder()
-                .name(restaurantDTO.getName())
-                .phone(restaurantDTO.getPhone())
-                .email(restaurantDTO.getEmail())
-                .address(restaurantDTO.getAddress())
-                .image(restaurantDTO.getImage())
-                .build();
-        restaurantRepository.save(restaurant);
-
-        for (int i = 0; i < 7; i++) {
-            OperatingHour operatingHour = OperatingHour.builder()
-                    .day(WEEKDAYS.get(i))
-                    .isOpen(false)
-                    .is24Hours(false)
-                    .openingTime(LocalTime.of(7,0))
-                    .closingTime(LocalTime.of(23,0))
-                    .restaurant(restaurant)
+    public void createRestaurant(RestaurantCreateRequest restaurantDTO) {
+        User owner = userService.findById(restaurantDTO.getOwnerId());
+        if (owner.getRestaurant() == null) {
+            Restaurant restaurant = Restaurant.builder()
+                    .name(restaurantDTO.getName())
+                    .phone(restaurantDTO.getPhone())
+                    .email(restaurantDTO.getEmail())
+                    .address(restaurantDTO.getAddress())
+                    .image(restaurantDTO.getImage())
+                    .owner(owner)
                     .build();
-            operatingHourService.createOperatingHour(operatingHour);
+            restaurantRepository.save(restaurant);
+
+            for (int i = 0; i < 7; i++) {
+                OperatingHour operatingHour = OperatingHour.builder()
+                        .day(WEEKDAYS.get(i))
+                        .isOpen(false)
+                        .is24Hours(false)
+                        .openingTime(LocalTime.of(7,0))
+                        .closingTime(LocalTime.of(23,0))
+                        .restaurant(restaurant)
+                        .build();
+                operatingHourService.createOperatingHour(operatingHour);
+            }
         }
+        else {
+            throw new ElementExistException("The user has already owned a restaurant!");
+        }
+
     }
 
     @Override

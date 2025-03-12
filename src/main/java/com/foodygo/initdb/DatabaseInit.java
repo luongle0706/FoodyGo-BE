@@ -65,7 +65,8 @@ public class DatabaseInit {
                 roleRepository.save(roleSeller);
             }
 
-            User user = null, admin, manager, staff = null, seller;
+            User user = null, admin, manager, seller;
+            List<User> staff = new ArrayList<>();
             if (userRepository.count() == 0) {
                 Role roleUser = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_USER);
                 Role roleAdmin = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_ADMIN);
@@ -74,7 +75,7 @@ public class DatabaseInit {
                 Role roleSeller = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_SELLER);
 
                 user = User.builder()
-                        .fullName("User")
+                        .fullName("Lê Vũ Đức Lương")
                         .accessToken(null)
                         .refreshToken(null)
                         .email("user@gmail.com")
@@ -86,7 +87,7 @@ public class DatabaseInit {
                 user = userRepository.save(user);
 
                 admin = User.builder()
-                        .fullName("Admin")
+                        .fullName("Nguyễn Thế Anh")
                         .accessToken(null)
                         .refreshToken(null)
                         .email("admin@gmail.com")
@@ -98,7 +99,7 @@ public class DatabaseInit {
                 userRepository.save(admin);
 
                 manager = User.builder()
-                        .fullName("Manager")
+                        .fullName("Phạm Tấn Lộc")
                         .accessToken(null)
                         .refreshToken(null)
                         .email("manager@gmail.com")
@@ -109,20 +110,21 @@ public class DatabaseInit {
                         .build();
                 userRepository.save(manager);
 
-                staff = User.builder()
-                        .fullName("HOANG SON HA")
-                        .accessToken(null)
-                        .refreshToken(null)
-                        .email("staff@gmail.com")
-                        .password(bCryptPasswordEncoder.encode("123456"))
-                        .enabled(true)
-                        .nonLocked(true)
-                        .role(roleStaff)
-                        .build();
-                staff = userRepository.save(staff);
+                for (int i = 1; i <= 5; i++) {
+                    staff.add(userRepository.save(User.builder()
+                            .fullName("Trịnh Trần Phương Tuấn")
+                            .accessToken(null)
+                            .refreshToken(null)
+                            .email("staff" + i + "@gmail.com")
+                            .password(bCryptPasswordEncoder.encode("123456"))
+                            .enabled(true)
+                            .nonLocked(true)
+                            .role(roleStaff)
+                            .build()));
+                }
 
                 seller = User.builder()
-                        .fullName("Seller")
+                        .fullName("Nguyễn Minh Quân")
                         .accessToken(null)
                         .refreshToken(null)
                         .email("seller@gmail.com")
@@ -135,75 +137,60 @@ public class DatabaseInit {
             }
 
             if (hubRepository.count() == 0) {
-                Random random = new Random();
-//                double[] hubLatitudes = new double[]{10.883272, 10.883719, 10.883246, 10.881893, 10.881890, 10.882405, 10.882813, 10.883466, 10.884012, 10.884505, 10.885257};
-//                double[] hubLongitudes = new double[]{106.783463, 106.780424, 106.779642, 106.781007, 106.781691, 106.781505, 106.782802, 106.779903, 106.782519, 106.781359, 106.782090};
-                // Danh sách ánh xạ Hub → Buildings
-                Map<String, String[]> hubBuildingMap = new HashMap<>();
-                hubBuildingMap.put("Hub 1", new String[]{"A1", "A2", "A3"});
-                hubBuildingMap.put("Hub 2", new String[]{"A4", "A5"});
-                hubBuildingMap.put("Hub 3", new String[]{"B1", "B2", "B3"});
-                hubBuildingMap.put("Hub 4", new String[]{"B4", "B5"});
-                hubBuildingMap.put("Hub 5", new String[]{"C1", "C2"});
-                hubBuildingMap.put("Hub 6", new String[]{"C3", "C4"});
-                hubBuildingMap.put("Hub 7", new String[]{"C5", "C6"});
-                hubBuildingMap.put("Hub 8", new String[]{"D2", "D3", "D4"});
-                hubBuildingMap.put("Hub 9", new String[]{"D5", "D6"});
-                hubBuildingMap.put("Hub 10", new String[]{"E1"});
-                hubBuildingMap.put("Hub 11", new String[]{"G1"});
-                hubBuildingMap.put("Hub 12", new String[]{"F1", "F2"});
+                // Danh sách ánh xạ Hub → Buildings với tọa độ chính xác
+                Map<String, Object[]> hubDataMap = new HashMap<>();
+                hubDataMap.put("HUB A", new Object[]{10.883726, 106.779940, new String[]{"C3", "C4", "C5", "C6", "E1", "C2", "C1"}});
+                hubDataMap.put("HUB B", new Object[]{10.882546, 106.781533, new String[]{"A5", "A3", "A2", "A4", "A1"}});
+                hubDataMap.put("HUB C", new Object[]{10.883210, 106.782327, new String[]{"B3", "B5", "B2", "B1", "B4"}});
+                hubDataMap.put("HUB D", new Object[]{10.884353, 106.781914, new String[]{"G1", "D6", "D4", "D3", "D2", "D5"}});
+                hubDataMap.put("HUB E", new Object[]{10.884869, 106.780256, new String[]{"F1", "F2"}});
 
                 // Tạo danh sách tọa độ building
                 Map<String, double[]> buildingCoordinates = new HashMap<>();
-                String[] buildingNames = {
-                        "A1", "A2", "A3", "A4", "A5",
-                        "B1", "B2", "B3", "B4", "B5",
-                        "C1", "C2", "C3", "C4", "C5", "C6",
-                        "D2", "D3", "D4", "D5", "D6",
-                        "E1", "G1", "F1", "F2"
-                };
-                double[] buildingLatitudes = {
-                        10.881837, 10.882055, 10.882527, 10.881701, 10.882287,
-                        10.882730, 10.883051, 10.883491, 10.883172, 10.883874,
-                        10.883195, 10.883517, 10.883755, 10.884056, 10.883054, 10.883545,
-                        10.884469, 10.884741, 10.884957, 10.884909, 10.885382,
-                        10.884249, 10.885634, 10.885450, 10.885655
-                };
-                double[] buildingLongitudes = {
-                        106.781889, 106.781678, 106.781222, 106.781364, 106.780879,
-                        106.782949, 106.782802, 106.782528, 106.783579, 106.783124,
-                        106.780772, 106.780462, 106.780233, 106.780000, 106.780032, 106.779607,
-                        106.781610, 106.781359, 106.781139, 106.782133, 106.781815,
-                        106.779313, 106.780883, 106.779819, 106.779581
-                };
-
-                // Lưu thông tin tọa độ vào Map
-                for (int i = 0; i < buildingNames.length; i++) {
-                    buildingCoordinates.put(buildingNames[i], new double[]{buildingLatitudes[i], buildingLongitudes[i]});
-                }
+                buildingCoordinates.put("A1", new double[]{10.881837, 106.781889});
+                buildingCoordinates.put("A2", new double[]{10.882055, 106.781678});
+                buildingCoordinates.put("A3", new double[]{10.882527, 106.781222});
+                buildingCoordinates.put("A4", new double[]{10.881701, 106.781364});
+                buildingCoordinates.put("A5", new double[]{10.882287, 106.780879});
+                buildingCoordinates.put("B1", new double[]{10.882730, 106.782949});
+                buildingCoordinates.put("B2", new double[]{10.883051, 106.782802});
+                buildingCoordinates.put("B3", new double[]{10.883491, 106.782528});
+                buildingCoordinates.put("B4", new double[]{10.883172, 106.783579});
+                buildingCoordinates.put("B5", new double[]{10.883874, 106.783124});
+                buildingCoordinates.put("C1", new double[]{10.883195, 106.780772});
+                buildingCoordinates.put("C2", new double[]{10.883517, 106.780462});
+                buildingCoordinates.put("C3", new double[]{10.883755, 106.780233});
+                buildingCoordinates.put("C4", new double[]{10.884056, 106.780000});
+                buildingCoordinates.put("C5", new double[]{10.883054, 106.780032});
+                buildingCoordinates.put("C6", new double[]{10.883545, 106.779607});
+                buildingCoordinates.put("D2", new double[]{10.884469, 106.781610});
+                buildingCoordinates.put("D3", new double[]{10.884741, 106.781359});
+                buildingCoordinates.put("D4", new double[]{10.884957, 106.781139});
+                buildingCoordinates.put("D5", new double[]{10.884909, 106.782133});
+                buildingCoordinates.put("D6", new double[]{10.885382, 106.781815});
+                buildingCoordinates.put("E1", new double[]{10.884249, 106.779313});
+                buildingCoordinates.put("F1", new double[]{10.885450, 106.779819});
+                buildingCoordinates.put("F2", new double[]{10.885655, 106.779581});
+                buildingCoordinates.put("G1", new double[]{10.885634, 106.780883});
 
                 int hubIndex = 1;
-                for (Map.Entry<String, String[]> entry : hubBuildingMap.entrySet()) {
+                for (Map.Entry<String, Object[]> entry : hubDataMap.entrySet()) {
                     String hubName = entry.getKey();
-                    String[] assignedBuildings = entry.getValue();
-
-                    // Random tọa độ cho Hub trong phạm vi hợp lý
-                    double hubLat = 10.88 + (random.nextDouble() * 0.01); // Từ 10.88 đến 10.89
-                    double hubLon = 106.78 + (random.nextDouble() * 0.01); // Từ 106.78 đến 106.79
+                    double hubLat = (double) entry.getValue()[0];
+                    double hubLon = (double) entry.getValue()[1];
+                    String[] assignedBuildings = (String[]) entry.getValue()[2];
 
                     Hub hub = Hub.builder()
-                            .address("Hub Address " + hubIndex)
+                            .address("Hub " + hubName + ", Đông Hoà, Dĩ An, Bình Dương, Vietnam")
                             .name(hubName)
                             .longitude(hubLon)
                             .latitude(hubLat)
-                            .description("Hub Description " + hubIndex)
+                            .description("Hub " + hubName + " của ký túc xá khu B")
                             .build();
                     Hub savedHub = hubRepository.save(hub);
-                    if (hubIndex == 1) {
-                        assert staff != null;
-                        staff.setHub(savedHub);
-                        userRepository.save(staff);
-                    }
+
+                    staff.get(hubIndex - 1).setHub(savedHub);
+                    userRepository.save(staff.get(hubIndex - 1));
 
                     // Gán các building vào Hub
                     for (String buildingName : assignedBuildings) {
@@ -213,7 +200,7 @@ public class DatabaseInit {
                                     .latitude(coordinates[0])
                                     .longitude(coordinates[1])
                                     .name(buildingName)
-                                    .description("Building Description for " + buildingName)
+                                    .description("Toà " + buildingName + " của ký túc xá khu B")
                                     .hub(savedHub)
                                     .build();
                             buildingRepository.save(building);
@@ -222,6 +209,7 @@ public class DatabaseInit {
                     hubIndex++;
                 }
             }
+
             Customer customer = null;
             if (customerRepository.count() == 0) {
 
@@ -279,97 +267,130 @@ public class DatabaseInit {
                 walletRepository.save(sellerWallet);
 
                 for (int j = 0; j < 10; j++) {
+                    String[] categoryNames = {"Cơm tấm", "Bún thịt nướng", "Gà rán", "Hủ tiếu", "Bánh mì", "Món chay", "Hải sản", "Lẩu", "Nước uống", "Tráng miệng"};
+                    String categoryName = categoryNames[j % categoryNames.length];
                     Category category = Category.builder()
-                            .name("R" + restaurant.getId() + "C" + j)
-                            .description("Sample category no. " + j + " from restaurant " + restaurant.getId())
+                            .name(categoryName)
+                            .description("Chuyên mục " + categoryName + " tại " + restaurant.getName())
                             .restaurant(restaurant)
                             .build();
                     categoryRepository.save(category);
 
-                    int randomPrice = ThreadLocalRandom.current().nextInt(10, 100);
+                    String[] productNames = {
+                            "Cơm sườn bì chả", "Bún thịt nướng", "Gà rán sốt mật ong", "Hủ tiếu Nam Vang", "Bánh mì thịt nướng",
+                            "Đậu hủ chiên giòn", "Tôm nướng muối ớt", "Lẩu thái hải sản", "Trà tắc", "Chè đậu xanh"
+                    };
+
+                    String[] productImages = {
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/com-tam-suon-bi-cha.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/bun-thit-nuong-kieu-mien-nam.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/ga-sot-mat-ong.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/hu-tieu-nam-vang-1.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/cach-lam-banh-mi-thit-nuong.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/cach-chien-dau-hu.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/cach-lam-tom-nuong-muoi-ot.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/lau-thai-hai-san-gofood-anh-2.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/cach-lam-tra-tac.jpg",
+                            "https://foodygo-storage.s3.ap-southeast-1.amazonaws.com/productImage/che-dau-xanh-nuoc-cot-dua.jpeg"
+                    };
+
+                    int randomPrice = ThreadLocalRandom.current().nextInt(30, 120);
 
                     Product product = Product.builder()
                             .code("R" + restaurant.getId() + "P" + j)
-                            .name("Sample product no. " + j)
+                            .name(productNames[j % productNames.length])
                             .price(randomPrice * 1000.0)
-                            .description("Sample product no. " + j + " from restaurant " + restaurant.getId())
+                            .image(productImages[j % productImages.length])
+                            .description("Món " + productNames[j % productNames.length] + " tại " + restaurant.getName())
                             .prepareTime(ThreadLocalRandom.current().nextDouble(10, 120))
                             .restaurant(restaurant)
                             .category(category)
                             .build();
                     productRepository.save(product);
 
+                    List<Product> productList = new ArrayList<>();
+                    productList.add(product);
+
+                    String[] addonSectionNames = {"Chọn thêm topping", "Thêm nước sốt", "Thêm rau sống", "Chọn mức cay", "Thêm chả trứng"};
                     AddonSection addonSection = AddonSection.builder()
-                            .name("Sample addon section no." + j)
+                            .name(addonSectionNames[j % addonSectionNames.length])
                             .maxChoice(((int) (Math.random() * 3)) + 1)
-                            .product(product)
+                            .products(productList)
                             .build();
                     addonSectionRepository.save(addonSection);
 
+                    String[][] addonItems = {
+                            {"Trứng ốp la", "Thịt chả", "Đậu hủ chiên"},
+                            {"Sốt tiêu đen", "Sốt tỏi", "Sốt me"},
+                            {"Xà lách", "Dưa leo", "Rau thơm"},
+                            {"Ít cay", "Cay vừa", "Cay nhiều"},
+                            {"Chả trứng nhỏ", "Chả trứng lớn", "Chả trứng đặc biệt"}
+                    };
+
                     for (int k = 0; k < 3; k++) {
-                        int randomAddonItemPrice = ThreadLocalRandom.current().nextInt(0, 10);
+                        int randomAddonItemPrice = ThreadLocalRandom.current().nextInt(5, 20);
                         AddonItem addonItem = AddonItem.builder()
-                                .name("Sample addon item no." + k)
+                                .name(addonItems[j % addonItems.length][k])
                                 .price(randomAddonItemPrice * 1000.0)
-                                .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .section(addonSection)
+                                .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .build();
                         addonItemRepository.save(addonItem);
                     }
                 }
             }
 
-            if (orderRepository.count() == 0) {
-                List<Hub> hubs = hubRepository.findAll();
-
-                // Phí dịch vụ & vận chuyển
-                double shippingFee = random.nextDouble() * 5 + 2;
-                double serviceFee = random.nextDouble() * 3 + 1;
-                double totalPrice = 0;
-
-                // Tạo đơn hàng
-                for (Hub hub : hubs) {
-                    Order order = Order.builder()
-                            .time(LocalDateTime.now().minusDays(random.nextInt(10)))
-                            .shippingFee(shippingFee)
-                            .serviceFee(serviceFee)
-                            .totalPrice(totalPrice + shippingFee + serviceFee)
-                            .status(OrderStatus.RESTAURANT_ACCEPTED)
-                            .expectedDeliveryTime(LocalDateTime.now().plusHours(random.nextInt(5) + 1))
-                            .customerPhone(user != null ? user.getPhone() : "190238019283")
-                            .shipperPhone("+84" + (100000000 + random.nextInt(900000000)))
-                            .notes("Giao hàng trước 6h tối")
-                            .employee(staff)
-                            .customer(customer)
-                            .restaurant(restaurant)
-                            .hub(hub)
-                            .build();
-                    orderRepository.save(order);
-                }
-            }
-
-            if (orderDetailRepository.count() == 0) {
-                List<Order> orders = orderRepository.findAll();
-                Product product1 = productRepository.findById(1).orElseThrow();
-                Product product2 = productRepository.findById(2).orElseThrow();
-
-                for (Order order : orders) {
-                    OrderDetail orderDetail1 = OrderDetail.builder()
-                            .order(order)
-                            .product(product1)
-                            .price(product1.getPrice())
-                            .quantity(1)
-                            .build();
-                    OrderDetail orderDetail2 = OrderDetail.builder()
-                            .order(order)
-                            .product(product2)
-                            .price(product2.getPrice())
-                            .quantity(1)
-                            .build();
-                    orderDetailRepository.save(orderDetail1);
-                    orderDetailRepository.save(orderDetail2);
-                }
-            }
+//            if (orderRepository.count() == 0) {
+//                List<Hub> hubs = hubRepository.findAll();
+//
+//                // Phí dịch vụ & vận chuyển
+//                double shippingFee = random.nextDouble() * 5 + 2;
+//                double serviceFee = random.nextDouble() * 3 + 1;
+//                double totalPrice = 0;
+//
+//                // Tạo đơn hàng
+//                for (Hub hub : hubs) {
+//                    Order order = Order.builder()
+//                            .time(LocalDateTime.now().minusDays(random.nextInt(10)))
+//                            .shippingFee(shippingFee)
+//                            .serviceFee(serviceFee)
+//                            .totalPrice(totalPrice + shippingFee + serviceFee)
+//                            .status(OrderStatus.RESTAURANT_ACCEPTED)
+//                            .expectedDeliveryTime(LocalDateTime.now().plusHours(random.nextInt(5) + 1))
+//                            .customerPhone(user != null ? user.getPhone() : "190238019283")
+//                            .shipperPhone("+84" + (100000000 + random.nextInt(900000000)))
+//                            .notes("Giao hàng trước 6h tối")
+//                            .employee(staff)
+//                            .customer(customer)
+//                            .restaurant(restaurant)
+//                            .hub(hub)
+//                            .build();
+//                    orderRepository.save(order);
+//                }
+//            }
+//
+//            if (orderDetailRepository.count() == 0) {
+//                List<Order> orders = orderRepository.findAll();
+//                Product product1 = productRepository.findById(1).orElseThrow();
+//                Product product2 = productRepository.findById(2).orElseThrow();
+//
+//                for (Order order : orders) {
+//                    OrderDetail orderDetail1 = OrderDetail.builder()
+//                            .order(order)
+//                            .product(product1)
+//                            .price(product1.getPrice())
+//                            .quantity(1)
+//                            .build();
+//                    OrderDetail orderDetail2 = OrderDetail.builder()
+//                            .order(order)
+//                            .product(product2)
+//                            .price(product2.getPrice())
+//                            .quantity(1)
+//                            .build();
+//                    orderDetailRepository.save(orderDetail1);
+//                    orderDetailRepository.save(orderDetail2);
+//                }
+//            }
         };
     }
 }

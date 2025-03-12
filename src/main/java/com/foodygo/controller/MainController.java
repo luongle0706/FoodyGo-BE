@@ -85,9 +85,9 @@ public class MainController {
      */
     @Operation(summary = "Login", description = "Login")
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> loginPage(@Valid @RequestBody UserLoginRequest userLogin) {
+    public ResponseEntity<TokenResponse> loginPage(@Valid @RequestBody UserLoginRequest userLogin, @RequestParam(required = false) String fcmToken) {
         try {
-            TokenResponse tokenResponse = userService.login(userLogin.getEmail(), userLogin.getPassword());
+            TokenResponse tokenResponse = fcmToken != null ? userService.login(userLogin.getEmail(), userLogin.getPassword(), fcmToken) : userService.login(userLogin.getEmail(), userLogin.getPassword());
             return ResponseEntity.status(tokenResponse.getCode().equals("Success") ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(tokenResponse);
         } catch (Exception e) {
             log.error("Cannot login : {}", e.toString());
@@ -98,6 +98,14 @@ public class MainController {
                             .build()
             );
         }
+    }
+
+    @PostMapping("/opt-out")
+    public ResponseEntity<ObjectResponse> logout(
+            @RequestParam String fcmToken
+    ) {
+        userService.invalidateFcmToken(fcmToken);
+        return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "FCM Token invalidated", null));
     }
 
     /**
