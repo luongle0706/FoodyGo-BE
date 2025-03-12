@@ -3,6 +3,8 @@ package com.foodygo.dto.request;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,6 +20,6 @@ public class ProductCreateRequest {
     Double prepareTime;
     boolean available;
     Integer restaurantId;
-    Integer addonSectionId;
+    List<Integer> addonSections;
     Integer categoryId;
 }
