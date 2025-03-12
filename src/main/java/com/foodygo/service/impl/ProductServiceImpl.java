@@ -1,11 +1,19 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.ProductDTO;
+import com.foodygo.dto.request.ProductCreateRequest;
+import com.foodygo.entity.AddonSection;
+import com.foodygo.entity.Category;
 import com.foodygo.entity.Product;
+import com.foodygo.entity.Restaurant;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.ProductMapper;
 import com.foodygo.repository.ProductRepository;
+import com.foodygo.service.spec.AddonSectionService;
+import com.foodygo.service.spec.CategoryService;
 import com.foodygo.service.spec.ProductService;
+import com.foodygo.service.spec.RestaurantService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -23,6 +32,9 @@ import java.util.Set;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final RestaurantService restaurantService;
+    private final CategoryService categoryService;
+    private final AddonSectionService addonSectionService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final String KEY_PRODUCT = "all_products";
 
@@ -91,26 +103,50 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void createProduct(ProductDTO productDTO) {
+    @Transactional
+    public void createProduct(ProductCreateRequest productDTO) {
+        Restaurant restaurant = restaurantService.getRestaurantById(productDTO.getRestaurantId());
+        Category category = categoryService.getCategoryById(productDTO.getCategoryId());
+
+        List<AddonSection> addonSectionList = new ArrayList<>();
+        for (Integer addonSectionId : productDTO.getAddonSections()) {
+            AddonSection addonSection = addonSectionService.getAddonSectionById(addonSectionId);
+            addonSectionList.add(addonSection);
+        }
+
         Product product = Product.builder()
-                .code(productDTO.code())
-                .name(productDTO.name())
-                .price(productDTO.price())
-                .description(productDTO.description())
-                .prepareTime(productDTO.prepareTime())
+                .code(productDTO.getCode())
+                .name(productDTO.getName())
+                .price(productDTO.getPrice())
+                .image(productDTO.getImage())
+                .description(productDTO.getDescription())
+                .prepareTime(productDTO.getPrepareTime())
+                .restaurant(restaurant)
+                .category(category)
+                .addonSections(addonSectionList)
                 .build();
         productRepository.save(product);
         clear();
     }
 
     @Override
+    @Transactional
     public void updateProductInfo(ProductDTO productDTO) {
+        Category category = categoryService.getCategoryById(productDTO.category().id());
+
+        List<AddonSection> addonSectionList = new ArrayList<>();
+        for (ProductDTO.AddonSection addonSectionId : productDTO.addonSections()) {
+            AddonSection addonSection = addonSectionService.getAddonSectionById(addonSectionId.id());
+            addonSectionList.add(addonSection);
+        }
         Product product = getProductById(productDTO.id());
         product.setCode(productDTO.code());
         product.setName(productDTO.name());
         product.setPrice(productDTO.price());
         product.setDescription(productDTO.description());
         product.setPrepareTime(productDTO.prepareTime());
+        product.setCategory(category);
+        product.setAddonSections(addonSectionList);
         productRepository.save(product);
         clear();
     }

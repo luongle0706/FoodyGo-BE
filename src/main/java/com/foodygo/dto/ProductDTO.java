@@ -13,6 +13,7 @@ public record ProductDTO(
         String description,
         Double prepareTime,
         boolean available,
+        Integer restaurantId,
         List<AddonSection> addonSections,
         Category category
 ) {

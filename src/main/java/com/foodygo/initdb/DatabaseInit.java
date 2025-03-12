@@ -299,10 +299,13 @@ public class DatabaseInit {
                             .build();
                     productRepository.save(product);
 
+                    List<Product> productList = new ArrayList<>();
+                    productList.add(product);
+
                     AddonSection addonSection = AddonSection.builder()
                             .name("Sample addon section no." + j)
                             .maxChoice(((int) (Math.random() * 3)) + 1)
-                            .product(product)
+                            .products(productList)
                             .build();
                     addonSectionRepository.save(addonSection);
 
@@ -311,8 +314,8 @@ public class DatabaseInit {
                         AddonItem addonItem = AddonItem.builder()
                                 .name("Sample addon item no." + k)
                                 .price(randomAddonItemPrice * 1000.0)
-                                .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .section(addonSection)
+                                .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .build();
                         addonItemRepository.save(addonItem);
                     }
