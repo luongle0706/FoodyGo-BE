@@ -13,6 +13,7 @@ import com.foodygo.service.spec.AddonSectionService;
 import com.foodygo.service.spec.CategoryService;
 import com.foodygo.service.spec.ProductService;
 import com.foodygo.service.spec.RestaurantService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -102,6 +103,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void createProduct(ProductCreateRequest productDTO) {
         Restaurant restaurant = restaurantService.getRestaurantById(productDTO.getRestaurantId());
         Category category = categoryService.getCategoryById(productDTO.getCategoryId());
@@ -128,6 +130,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void updateProductInfo(ProductDTO productDTO) {
         Category category = categoryService.getCategoryById(productDTO.category().id());
 
