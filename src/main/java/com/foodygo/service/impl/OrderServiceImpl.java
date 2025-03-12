@@ -46,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final WalletService walletService;
+    private final NotificationService notificationService;
 
     @Value("${business.service-fee}")
     private double serviceFeePercentage;
@@ -57,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
         Customer customer = customerService.findById(request.getCustomerId());
         Restaurant restaurant = restaurantService.getRestaurantById(request.getRestaurantId());
         Hub hub = hubService.getHubById(request.getHubId());
+        User employee = hub.getEmployees().getFirst();
         Order order = Order.builder()
                 .id(null)
                 .time(request.getTime())
@@ -67,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
                 .expectedDeliveryTime(request.getExpectedDeliveryTime())
                 .customerPhone(request.getCustomerPhone())
                 .shipperPhone(null)
-                .employee(null)
+                .employee(employee)
                 .customer(customer)
                 .restaurant(restaurant)
                 .hub(hub)
@@ -89,7 +91,8 @@ public class OrderServiceImpl implements OrderService {
 
         walletService.paymentOrder(order);
         order.setStatus(OrderStatus.ORDERED);
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        notificationService.sendOrderStatusChangeUpdates(savedOrder);
         return order.getId();
     }
 
@@ -102,11 +105,13 @@ public class OrderServiceImpl implements OrderService {
             order.setEmployee(user);
         }
         OrderStatus oldStatus = order.getStatus();
-        if(Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_SELLER)) {
+        if (Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_SELLER)) {
             order.setConfirmedAt(LocalDateTime.now());
         }
         OrderMapper.INSTANCE.updateOrderFromDto(orderUpdateRequest, order);
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        notificationService.sendOrderStatusChangeUpdates(savedOrder);
 
         String imageUrl = "null";
 //        if (orderUpdateRequest.getImage() != null && !orderUpdateRequest.getImage().isEmpty()) {
