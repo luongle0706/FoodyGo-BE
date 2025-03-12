@@ -15,10 +15,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -93,7 +95,8 @@ public class ProductController {
 
     @Operation(summary = "Create a new product",
             description = "Creates a new product with the provided details.")
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
     @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Product created"),
@@ -103,9 +106,10 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<ObjectResponse> createProduct(
-            @RequestBody ProductCreateRequest request
+            @RequestPart("data") ProductCreateRequest request,
+            @RequestPart("image") MultipartFile image
     ) {
-        productService.createProduct(request);
+        productService.createProduct(request, image);
         return ResponseEntity
                 .status(CREATED)
                 .body(

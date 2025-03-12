@@ -6,7 +6,9 @@ import com.foodygo.dto.request.ProductCreateRequest;
 import com.foodygo.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.converter.json.MappingJacksonValue;
+
 
 public interface ProductService {
     Product getProductById(Integer productId);
@@ -19,7 +21,7 @@ public interface ProductService {
 
     void updateProductInfo(ProductDTO productDTO);
 
-    void createProduct(ProductCreateRequest productDTO);
+    void createProduct(ProductCreateRequest productDTO, MultipartFile file);
 
     void deleteProduct(Integer productId);
 

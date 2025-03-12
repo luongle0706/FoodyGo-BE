@@ -10,6 +10,7 @@ public record ProductDTO(
         String code,
         String name,
         Double price,
+        String image,
         String description,
         Double prepareTime,
         boolean available,

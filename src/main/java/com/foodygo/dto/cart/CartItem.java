@@ -16,6 +16,7 @@ public class CartItem {
     Integer restaurantId;
     Integer productId;
     String productName;
+    String image;
     Double price;
     Integer quantity;
     List<CartAddOnItem> cartAddOnItems;
