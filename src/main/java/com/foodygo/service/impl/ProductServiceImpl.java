@@ -1,6 +1,8 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.ProductDTO;
+import com.foodygo.dto.internal.PagingRequest;
+import com.foodygo.dto.paging.ProductPagingResponse;
 import com.foodygo.dto.request.ProductCreateRequest;
 import com.foodygo.entity.AddonSection;
 import com.foodygo.entity.Category;
@@ -13,13 +15,16 @@ import com.foodygo.service.spec.AddonSectionService;
 import com.foodygo.service.spec.CategoryService;
 import com.foodygo.service.spec.ProductService;
 import com.foodygo.service.spec.RestaurantService;
+import com.foodygo.utils.PaginationUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -49,10 +54,7 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.INSTANCE.toDTO(getProductById(productId));
     }
 
-    @Override
-    public List<Product> getAllProducts() {return productRepository.findByDeletedFalse();}
-
-    private String getKeyFrom(Pageable pageRequest){
+    private String getKeyFrom(Pageable pageRequest) {
         int pageNumber = pageRequest.getPageNumber();
         int pageSize = pageRequest.getPageSize();
         Sort sort = pageRequest.getSort();
@@ -61,40 +63,14 @@ public class ProductServiceImpl implements ProductService {
         return String.format(KEY_PRODUCT + ":%d:%d:%s", pageNumber, pageSize, sortDirection);
     }
 
-    @Override
-    public Page<ProductDTO> getAllProductDTOs(Pageable pageable) {
-        String key = getKeyFrom(pageable) ;
-        List<ProductDTO> productDTOS = (List<ProductDTO>) redisTemplate.opsForValue().get(key);
-        if (productDTOS != null) {
-            return new PageImpl<>(productDTOS, pageable, productDTOS.size());
-        }
-        Page<ProductDTO> productPage = productRepository.findByDeletedFalse(pageable)
-                .map(ProductMapper.INSTANCE::toDTO);
-
-        redisTemplate.opsForValue().set(key, productPage.getContent());
-        return productPage;
-    }
-
     private void clear() {
         Set<String> keys = redisTemplate.keys(KEY_PRODUCT + ":*");
-        if (keys != null) {
-            redisTemplate.delete(keys);
-        }
-    }
-
-    @Override
-    public List<Product> getAllProductsByRestaurantId(Integer restaurantId) {
-        return productRepository.findByRestaurantIdAndDeletedFalse(restaurantId);
+        redisTemplate.delete(keys);
     }
 
     @Override
     public Page<ProductDTO> getAllProductDTOsByRestaurantId(Integer restaurantId, Pageable pageable) {
         return productRepository.findByRestaurantIdAndDeletedFalse(restaurantId, pageable).map(ProductMapper.INSTANCE::toDTO);
-    }
-
-    @Override
-    public List<Product> getAllProductsByCategoryId(Integer categoryId) {
-        return productRepository.findByCategoryIdAndDeletedFalse(categoryId);
     }
 
     @Override
@@ -169,8 +145,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getProductsByIds(List<Integer> productIds) {
-        return productRepository.findAllById(productIds);
+    public MappingJacksonValue getProducts(PagingRequest request) {
+        Pageable pageable = PaginationUtil.getPageable(request);
+        Specification<Product> spec = ProductPagingResponse.filterByFields(request.getFilters());
+        Page<Product> page = productRepository.findAll(spec, pageable);
+        List<ProductPagingResponse> mappedDTOs = page.getContent().stream().map(ProductPagingResponse::fromEntity).toList();
+        return PaginationUtil.getPagedMappingJacksonValue(request, page, mappedDTOs, "Get products");
     }
 
 }
