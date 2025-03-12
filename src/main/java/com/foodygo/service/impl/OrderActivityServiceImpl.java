@@ -33,8 +33,7 @@ public class OrderActivityServiceImpl implements OrderActivityService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.getUserByUserID(userId);
 
         OrderActivity activity = OrderActivity.builder()
                 .order(order)

@@ -1,12 +1,14 @@
 package com.foodygo.service.impl;
 
 import com.foodygo.dto.response.WalletBalanceResponse;
+import com.foodygo.dto.response.WalletsSummaryResponse;
 import com.foodygo.entity.Order;
 import com.foodygo.entity.Transaction;
 import com.foodygo.entity.User;
 import com.foodygo.entity.Wallet;
 import com.foodygo.enums.DepositMethod;
 import com.foodygo.enums.TransactionType;
+import com.foodygo.enums.WalletType;
 import com.foodygo.exception.BadRequestException;
 import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.repository.TransactionRepository;
@@ -18,7 +20,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -161,6 +165,79 @@ public class WalletServiceImpl implements WalletService {
 
         walletRepository.saveAll(List.of(customerWallet, restaurantWallet));
         transactionRepository.saveAll(List.of(customerTransaction, restaurantTransaction));
+    }
+
+    @Override
+    public WalletsSummaryResponse getWalletsSummary() {
+        List<Wallet> allWallets = walletRepository.findAll();
+
+        int totalWallets = allWallets.size();
+        double totalSystemAmount = allWallets.stream()
+                .mapToDouble(Wallet::getBalance)
+                .sum();
+
+        int customerWallets = 0;
+        int restaurantWallets = 0;
+
+        List<WalletsSummaryResponse.WalletResponse> walletResponses = new ArrayList<>();
+
+        for (Wallet wallet : allWallets) {
+            if (wallet.getWalletType() == WalletType.CUSTOMER) {
+                customerWallets++;
+            } else if (wallet.getWalletType() == WalletType.RESTAURANT) {
+                restaurantWallets++;
+            }
+
+            WalletsSummaryResponse.WalletResponse.CustomerResponse customerResponse = null;
+            WalletsSummaryResponse.WalletResponse.RestaurantResponse restaurantResponse = null;
+
+            if (wallet.getCustomer() != null) {
+                customerResponse = new WalletsSummaryResponse.WalletResponse.CustomerResponse(
+                        wallet.getCustomer().getId(),
+                        wallet.getCustomer().getUser().getFullName(),
+                        wallet.getCustomer().getUser().getEmail()
+                );
+            }
+
+            if (wallet.getRestaurant() != null) {
+                restaurantResponse = new WalletsSummaryResponse.WalletResponse.RestaurantResponse(
+                        wallet.getRestaurant().getId(),
+                        wallet.getRestaurant().getName(),
+                        wallet.getRestaurant().getAddress()
+                );
+            }
+
+            List<Transaction> transactions = transactionRepository.findByWalletId(wallet.getId());
+            List<WalletsSummaryResponse.WalletResponse.TransactionResponse> transactionResponses =
+                    transactions.stream()
+                            .map(tx -> new WalletsSummaryResponse.WalletResponse.TransactionResponse(
+                                    tx.getId(),
+                                    tx.getDescription(),
+                                    tx.getTime(),
+                                    tx.getAmount(),
+                                    tx.getRemaining(),
+                                    tx.getType()
+                            ))
+                            .collect(Collectors.toList());
+
+            // Create wallet response
+            walletResponses.add(new WalletsSummaryResponse.WalletResponse(
+                    wallet.getId().toString(),
+                    wallet.getBalance(),
+                    customerResponse,
+                    restaurantResponse,
+                    wallet.getWalletType(),
+                    transactionResponses
+            ));
+        }
+
+        return new WalletsSummaryResponse(
+                totalWallets,
+                totalSystemAmount,
+                customerWallets,
+                restaurantWallets,
+                walletResponses
+        );
     }
 
     private DepositMethod getDepositMethod(String method) {

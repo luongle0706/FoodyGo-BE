@@ -8,6 +8,7 @@ import com.foodygo.dto.request.OrderUpdateRequest;
 import com.foodygo.dto.response.OrderDetailResponse;
 import com.foodygo.dto.response.OrderResponse;
 import com.foodygo.entity.*;
+import com.foodygo.enums.EnumRoleNameType;
 import com.foodygo.enums.OrderStatus;
 import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.mapper.OrderDetailMapper;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private final CustomerService customerService;
+    private final UserService userService;
     private final RestaurantService restaurantService;
     private final ProductService productService;
     private final OrderDetailService orderDetailService;
@@ -94,9 +97,15 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse updateOrder(Integer orderId, OrderUpdateRequest orderUpdateRequest) {
         Order order = getOrderById(orderId);
+        User user = userService.findById(orderUpdateRequest.getUserId());
+        if (Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_STAFF)) {
+            order.setEmployee(user);
+        }
         OrderStatus oldStatus = order.getStatus();
+        if(Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_SELLER)) {
+            order.setConfirmedAt(LocalDateTime.now());
+        }
         OrderMapper.INSTANCE.updateOrderFromDto(orderUpdateRequest, order);
-        order.setConfirmedAt(LocalDateTime.now());
         orderRepository.save(order);
 
         String imageUrl = "null";
@@ -107,11 +116,10 @@ public class OrderServiceImpl implements OrderService {
 //                throw new RuntimeException("Update image failed", e);
 //            }
 //        }
-
-        //create order activity
-        orderActivityService.logOrderStatusChange(orderId, orderUpdateRequest.getUserId(), oldStatus,
-                orderUpdateRequest.getStatus(), imageUrl);
-
+        if (!Objects.equals(user.getRole().getRoleName(), EnumRoleNameType.ROLE_STAFF)) {
+            orderActivityService.logOrderStatusChange(orderId, orderUpdateRequest.getUserId(), oldStatus,
+                    orderUpdateRequest.getStatus(), imageUrl);
+        }
         List<OrderDetail> orderDetails = order.getOrderDetails();
         List<OrderDetailResponse> orderDetailResponses = orderDetails.stream()
                 .map(OrderDetailMapper.INSTANCE::toDto)

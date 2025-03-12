@@ -88,7 +88,7 @@ public class ProductController {
     @Operation(summary = "Create a new product",
             description = "Creates a new product with the provided details.")
     @PostMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Product created"),
             @ApiResponse(responseCode = "400", description = "Invalid product body"),
@@ -113,7 +113,7 @@ public class ProductController {
     @Operation(summary = "Update an existing product",
             description = "Updates the details of an existing product.")
     @PutMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product updated"),
             @ApiResponse(responseCode = "400", description = "Invalid product body"),
@@ -139,7 +139,7 @@ public class ProductController {
     @PutMapping("/{productId}")
     @Operation(summary = "Switch product availability",
             description = "Switch product availability to open/close")
-    @PreAuthorize("hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product availability updated"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -162,7 +162,7 @@ public class ProductController {
     @Operation(summary = "Delete a product",
             description = "Deletes a product by its ID.")
     @DeleteMapping("/{productId}")
-    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product deleted"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

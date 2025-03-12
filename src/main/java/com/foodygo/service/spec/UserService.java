@@ -17,6 +17,7 @@ import java.util.List;
 
 public interface UserService extends BaseService<User, Integer> {
 
+    List<User> getUsersByHub(int hubId);
     PagingResponse findAllUsers(Integer currentPage, Integer pageSize);
 
     List<User> getUsersByRole(Integer roleID);
