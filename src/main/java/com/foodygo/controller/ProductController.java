@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -98,9 +99,10 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<ObjectResponse> createProduct(
-            @RequestBody ProductCreateRequest request
+            @RequestBody ProductCreateRequest request,
+            @RequestParam("image") MultipartFile file
     ) {
-        productService.createProduct(request);
+        productService.createProduct(request, file);
         return ResponseEntity
                 .status(CREATED)
                 .body(
