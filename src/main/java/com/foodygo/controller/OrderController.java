@@ -65,7 +65,7 @@ public class OrderController {
 
     @PutMapping("/{orderId}")
     @Operation(summary = "Update Order", description = "Update an existing order with the provided data.")
-    @PreAuthorize("hasAnyRole('STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF', 'SELLER')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Order found"),
             @ApiResponse(responseCode = "400", description = "Invalid Order request"),
