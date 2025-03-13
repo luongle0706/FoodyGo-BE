@@ -64,6 +64,7 @@ public class ProductServiceImpl implements ProductService {
 
     private void clear() {
         Set<String> keys = redisTemplate.keys(KEY_PRODUCT + ":*");
+        assert keys != null;
         redisTemplate.delete(keys);
     }
 

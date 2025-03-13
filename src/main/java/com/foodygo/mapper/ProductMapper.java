@@ -3,6 +3,7 @@ package com.foodygo.mapper;
 import com.foodygo.dto.ProductDTO;
 import com.foodygo.entity.Product;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -11,5 +12,7 @@ import org.mapstruct.factory.Mappers;
 public interface ProductMapper {
 
     ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
+    @Mapping(source = "image", target = "image")
+    @Mapping(source = "restaurant.id", target = "restaurantId")
     ProductDTO toDTO(Product product);
 }
