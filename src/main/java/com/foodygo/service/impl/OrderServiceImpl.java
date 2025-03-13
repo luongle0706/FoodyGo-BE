@@ -48,13 +48,10 @@ public class OrderServiceImpl implements OrderService {
     private final WalletService walletService;
     private final NotificationService notificationService;
 
-    @Value("${business.service-fee}")
-    private double serviceFeePercentage;
-
     @Override
     @Transactional
     public int createOrder(OrderCreateRequest request) {
-        double serviceFee = serviceFeePercentage * (request.getProductPrice() + request.getShippingFee());
+//        double serviceFee = serviceFeePercentage * (request.getProductPrice() + request.getShippingFee());
         Customer customer = customerService.findById(request.getCustomerId());
         Restaurant restaurant = restaurantService.getRestaurantById(request.getRestaurantId());
         Hub hub = hubService.getHubById(request.getHubId());
@@ -63,8 +60,8 @@ public class OrderServiceImpl implements OrderService {
                 .id(null)
                 .time(request.getTime())
                 .shippingFee(request.getShippingFee())
-                .serviceFee(serviceFee)
-                .totalPrice(request.getProductPrice() + request.getShippingFee() + serviceFee)
+                .serviceFee(1.0)
+                .totalPrice(request.getProductPrice() + request.getShippingFee())
                 .status(OrderStatus.CANCELLED)
                 .expectedDeliveryTime(request.getExpectedDeliveryTime())
                 .customerPhone(request.getCustomerPhone())

@@ -2,7 +2,6 @@ package com.foodygo.mapper;
 
 import com.foodygo.dto.ProductDTO;
 import com.foodygo.entity.Product;
-import com.foodygo.entity.Restaurant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;

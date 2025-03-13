@@ -355,6 +355,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                         userRepository.save(user);
                         Customer customer = customerRepository.findByUserUserID(user.getUserID()).orElse(null);
                         Restaurant restaurant = restaurantRepository.findByOwnerUserID(user.getUserID()).orElse(null);
+                        Wallet wallet = null;
+                        if (customer != null) {
+                            wallet = walletRepository.findByCustomerId(customer.getId()).orElse(null);
+                        } else if(restaurant != null) {
+                            wallet = walletRepository.findByRestaurantId(restaurant.getId()).orElse(null);
+                        }
                         tokenResponse = TokenResponse.builder()
                                 .code("Success")
                                 .message("Login successfully")
@@ -367,6 +373,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                                 .customerId(customer != null ? customer.getId() : null)
                                 .restaurantId(restaurant != null ? restaurant.getId() : null)
                                 .hubId(user.getHub() != null ? user.getHub().getId() : null)
+                                .walletId(wallet != null ? wallet.getId() : null)
                                 .build();
                     }
                 }
@@ -392,6 +399,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         user.setRefreshToken(refreshToken);
         user.setAccessToken(token);
         userRepository.save(user);
+        Wallet wallet = null;
+        if (customer != null) {
+            wallet = walletRepository.findByCustomerId(customer.getId()).orElse(null);
+        } else if(restaurant != null) {
+            wallet = walletRepository.findByRestaurantId(restaurant.getId()).orElse(null);
+        }
         tokenResponse = TokenResponse.builder()
                 .code("Success")
                 .message("Login successfully")
@@ -404,6 +417,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .customerId(customer != null ? customer.getId() : null)
                 .restaurantId(restaurant != null ? restaurant.getId() : null)
                 .hubId(user.getHub() != null ? user.getHub().getId() : null)
+                .walletId(wallet != null ? wallet.getId() : null)
                 .build();
         return tokenResponse;
     }
