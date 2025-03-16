@@ -42,7 +42,7 @@ services:
   redis:
     image: docker.io/redis:7.2.3
     container_name: redis-container
-    restart: always
+    restart: no
     ports:
       - "6379:6379"
     volumes:

@@ -11,21 +11,19 @@ import com.foodygo.entity.Restaurant;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.ProductMapper;
 import com.foodygo.repository.ProductRepository;
-import com.foodygo.service.spec.AddonSectionService;
-import com.foodygo.service.spec.CategoryService;
-import com.foodygo.service.spec.ProductService;
-import com.foodygo.service.spec.RestaurantService;
+import com.foodygo.service.spec.*;
 import com.foodygo.utils.PaginationUtil;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
     private final RestaurantService restaurantService;
     private final CategoryService categoryService;
     private final AddonSectionService addonSectionService;
+    private final S3Service s3Service;
     private final RedisTemplate<String, Object> redisTemplate;
     private final String KEY_PRODUCT = "all_products";
 
@@ -65,6 +64,7 @@ public class ProductServiceImpl implements ProductService {
 
     private void clear() {
         Set<String> keys = redisTemplate.keys(KEY_PRODUCT + ":*");
+        assert keys != null;
         redisTemplate.delete(keys);
     }
 
@@ -80,10 +80,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void createProduct(ProductCreateRequest productDTO) {
+    public void createProduct(ProductCreateRequest productDTO, MultipartFile image) {
         Restaurant restaurant = restaurantService.getRestaurantById(productDTO.getRestaurantId());
         Category category = categoryService.getCategoryById(productDTO.getCategoryId());
 
+        String urlImage = s3Service.uploadFileToS3(image, "productImage");
         List<AddonSection> addonSectionList = new ArrayList<>();
         for (Integer addonSectionId : productDTO.getAddonSections()) {
             AddonSection addonSection = addonSectionService.getAddonSectionById(addonSectionId);
@@ -94,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
                 .code(productDTO.getCode())
                 .name(productDTO.getName())
                 .price(productDTO.getPrice())
-                .image(productDTO.getImage())
+                .image(urlImage)
                 .description(productDTO.getDescription())
                 .prepareTime(productDTO.getPrepareTime())
                 .restaurant(restaurant)
