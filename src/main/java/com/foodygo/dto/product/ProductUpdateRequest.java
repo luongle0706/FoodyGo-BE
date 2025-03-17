@@ -1,24 +1,19 @@
-package com.foodygo.dto.request;
+package com.foodygo.dto.product;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductCreateRequest {
-    Integer id;
+public class ProductUpdateRequest {
     String code;
     String name;
     Double price;
     String description;
     Double prepareTime;
-    boolean available;
-    Integer restaurantId;
-    List<Integer> addonSections;
+    Boolean available;
     Integer categoryId;
 }

@@ -1,8 +1,9 @@
 package com.foodygo.service.spec;
 
-import com.foodygo.dto.ProductDTO;
+import com.foodygo.dto.product.ProductDTO;
 import com.foodygo.dto.internal.PagingRequest;
-import com.foodygo.dto.request.ProductCreateRequest;
+import com.foodygo.dto.product.ProductUpdateRequest;
+import com.foodygo.dto.product.ProductCreateRequest;
 import com.foodygo.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ public interface ProductService {
 
     Page<ProductDTO> getAllProductDTOsByCategoryId(Integer categoryId, Pageable pageable);
 
-    void updateProductInfo(ProductDTO productDTO);
+    void updateProductInfo(MultipartFile image, Integer productId, ProductUpdateRequest request);
 
     void createProduct(ProductCreateRequest productDTO, MultipartFile file);
 
