@@ -1,4 +1,4 @@
-package com.foodygo.dto;
+package com.foodygo.dto.product;
 
 import lombok.Builder;
 
