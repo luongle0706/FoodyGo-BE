@@ -32,6 +32,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 orderDetail.getQuantity(),
                 orderDetail.getPrice(),
                 orderDetail.getAddonItems(),
+                orderDetail.getProduct().getImage(),
                 orderDetail.getProduct().getName()
         ));
     }
