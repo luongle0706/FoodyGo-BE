@@ -256,6 +256,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .fullName(userRegisterRequest.getFullName())
                 .phone(userRegisterRequest.getPhone())
                 .accessToken(null)
+                .dob(userRegisterRequest.getDob())
                 .refreshToken(null)
                 .enabled(true)
                 .nonLocked(true)
@@ -273,7 +274,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .customer(customerMapper.customerDTOToCustomer(customer))
                 .build());
 
-        return userMapper.userToUserDTO(userRepository.save(user));
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+        userDTO = userDTO.toBuilder()
+                .buildingID(customer.getBuilding().getId())
+                .buildingName(customer.getBuilding().getName())
+                .build();
+
+        return userDTO;
     }
 
     @Override
