@@ -5,6 +5,7 @@ import com.foodygo.entity.Deposit;
 import com.foodygo.entity.Transaction;
 import com.foodygo.entity.Wallet;
 import com.foodygo.enums.DepositMethod;
+import com.foodygo.enums.DepositStatus;
 import com.foodygo.enums.TransactionType;
 import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.repository.DepositRepository;
@@ -138,6 +139,7 @@ public class PaymentService {
                     .method(DepositMethod.VNPAY)
                     .remaining(newBalance)
                     .customer(wallet.getCustomer())
+                    .status(DepositStatus.PAID)
                     .wallet(wallet)
                     .build();
 

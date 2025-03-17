@@ -1,6 +1,18 @@
 package com.foodygo.thirdparty.payos;
 
 import com.foodygo.dto.response.ObjectResponse;
+import com.foodygo.entity.Deposit;
+import com.foodygo.entity.Transaction;
+import com.foodygo.entity.User;
+import com.foodygo.entity.Wallet;
+import com.foodygo.enums.DepositMethod;
+import com.foodygo.enums.DepositStatus;
+import com.foodygo.enums.TransactionType;
+import com.foodygo.exception.IdNotFoundException;
+import com.foodygo.repository.DepositRepository;
+import com.foodygo.repository.TransactionRepository;
+import com.foodygo.repository.UserRepository;
+import com.foodygo.repository.WalletRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +26,8 @@ import vn.payos.type.ItemData;
 import vn.payos.type.PaymentData;
 import vn.payos.type.PaymentLinkData;
 
+import javax.annotation.security.PermitAll;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +36,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PayOSController {
 
+    private final UserRepository userRepository;
     @Value("${payos.client-id}")
     private String clientId;
 
@@ -36,6 +51,10 @@ public class PayOSController {
 
     private PayOS payOSClient;
 
+    private final WalletRepository walletRepository;
+    private final DepositRepository depositRepository;
+    private final TransactionRepository transactionRepository;
+
     @Bean
     public PayOS payOSClient() {
         payOSClient = new PayOS(clientId, apiKey, checksumKey);
@@ -45,29 +64,28 @@ public class PayOSController {
     @PostMapping("/create-link")
     public ResponseEntity<ObjectResponse> createPaymentLink(@RequestBody CreatePaymentRequest request) {
         try {
-            String orderCode = request.getOrderCode();
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new IdNotFoundException("Không tìm thấy người dùng có id là: " + request.getUserId()));
 
-            if (orderCode == null || orderCode.isEmpty()) {
-                return new ResponseEntity<>(
-                        ObjectResponse.builder()
-                                .status(HttpStatus.BAD_REQUEST.toString())
-                                .message("Order code is required")
-                                .build(),
-                        HttpStatus.BAD_REQUEST
-                );
-            }
+            Wallet wallet = user.getCustomer().getWallet();
 
-            // Use product name from request or default
-            String productName = request.getProductName() != null ?
-                    request.getProductName() : "Thanh toan dia com";
+            Deposit deposit = Deposit.builder()
+                    .description("Nạp tiền vào ví foodygo")
+                    .amount(Double.valueOf(request.getAmount()))
+                    .time(LocalDateTime.now())
+                    .method(DepositMethod.PAYOS)
+                    .remaining((wallet.getBalance() + request.getAmount()))
+                    .customer(user.getCustomer())
+                    .status(DepositStatus.PENDING)
+                    .wallet(wallet)
+                    .build();
 
-            // Use amount from request or default
+            Deposit saved= depositRepository.save(deposit);
+
+            String productName ="FoodyXu";
             int amount = request.getAmount() > 0 ?
-                    request.getAmount() : 2000;
-
-            // Use description from request or default
-            String description = request.getDescription() != null ?
-                    request.getDescription() : "Thanh toán đơn hàng";
+                    request.getAmount() : 1000;
+            String description = "Nạp tiền vào ví foodygo: " + saved.getId();
 
             ItemData itemData = ItemData.builder()
                     .name(productName)
@@ -76,7 +94,7 @@ public class PayOSController {
                     .build();
 
             PaymentData paymentData = PaymentData.builder()
-                    .orderCode(Long.valueOf(orderCode))
+                    .orderCode(Long.valueOf(saved.getId()))
                     .amount(amount)
                     .description(description)
                     .returnUrl(webhookUrl + "/success")
@@ -105,74 +123,105 @@ public class PayOSController {
         }
     }
 
-    @PostMapping("/refund")
-    public ResponseEntity<ObjectResponse> refundPayment(@RequestBody RefundRequest request) {
+    @GetMapping("/payos-callback/success")
+    public ResponseEntity<ObjectResponse> callBack(HttpServletRequest request) {
         try {
-            String orderId = request.getOrderId();
-            String reason = request.getReason();
+            String responseCode = request.getParameter("code");
+            String orderCode = request.getParameter("orderCode");
+            String paymentId = request.getParameter("id");
+            String status = request.getParameter("status");
 
-            if (orderId == null || orderId.isEmpty()) {
+            if (responseCode.equals("00") && "PAID".equals(status)) {
+                PaymentLinkData paymentData = payOSClient.getPaymentLinkInformation(Long.valueOf(orderCode));
+
+                if (paymentData == null) {
+                    return new ResponseEntity<>(
+                            ObjectResponse.builder()
+                                    .status(HttpStatus.BAD_REQUEST.toString())
+                                    .message("Unable to verify payment information")
+                                    .build(),
+                            HttpStatus.BAD_REQUEST
+                    );
+                } else {
+                    paymentData.getAmount();
+                }
+
+                double amountInVND = paymentData.getAmount();
+
+                double foodyXuAmount = amountInVND / 1000;
+
+                Deposit deposit = depositRepository.findById(Integer.valueOf(orderCode)).orElseThrow(() -> new IdNotFoundException("Không tìm thấy lần nạp tieenff có mã số: " + orderCode));
+
+                Wallet wallet = deposit.getWallet();
+
+                String depositDescription = String.format(
+                        "Nạp tiền qua PayOS - Mã GD: %s",
+                        paymentId
+                );
+
+                double newBalance = wallet.getBalance() + foodyXuAmount;
+
+                deposit.setAmount(foodyXuAmount);
+                deposit.setStatus(DepositStatus.PAID);
+                deposit.setDescription(depositDescription);
+                depositRepository.save(deposit);
+
+                Transaction transaction = Transaction.builder()
+                        .description("Nạp " + foodyXuAmount + " FoodyXu qua PayOS")
+                        .time(LocalDateTime.now())
+                        .amount(foodyXuAmount)
+                        .remaining(newBalance)
+                        .type(TransactionType.TOP_UP)
+                        .wallet(wallet)
+                        .deposit(deposit)
+                        .build();
+
+                transactionRepository.save(transaction);
+
+                wallet.setBalance(newBalance);
+                walletRepository.save(wallet);
+
+                return new ResponseEntity<>(
+                        ObjectResponse.builder()
+                                .status(HttpStatus.OK.toString())
+                                .message("Payment Success")
+                                .data(Map.of(
+                                        "transactionId", transaction.getId(),
+                                        "depositId", deposit.getId(),
+                                        "amount", foodyXuAmount,
+                                        "newBalance", newBalance
+                                ))
+                                .build(),
+                        HttpStatus.OK
+                );
+            } else {
+                String errorMessage = "Payment failed with response code: " + responseCode + ", status: " + status;
+
+                System.err.println(errorMessage);
+
                 return new ResponseEntity<>(
                         ObjectResponse.builder()
                                 .status(HttpStatus.BAD_REQUEST.toString())
-                                .message("Order ID is required")
+                                .message(errorMessage)
                                 .build(),
                         HttpStatus.BAD_REQUEST
                 );
             }
-
-            // Attempt to cancel the payment link
-            PaymentLinkData cancelResult = payOSClient.cancelPaymentLink(
-                    Long.parseLong(orderId),
-                    reason
-            );
-
-            // If successful, return the cancellation result
-            return new ResponseEntity<>(
-                    ObjectResponse.builder()
-                            .status(HttpStatus.OK.toString())
-                            .message("Payment cancelled successfully")
-                            .data(cancelResult)
-                            .build(),
-                    HttpStatus.OK
-            );
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(
                     ObjectResponse.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
-                            .message("Error processing refund: " + e.getMessage())
+                            .message("Error processing payment callback: " + e.getMessage())
                             .build(),
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
     }
 
-    @GetMapping("/order-info/{orderCode}")
-    public ResponseEntity<ObjectResponse> getPaymentInfo(@PathVariable String orderCode) {
-        try {
-            PaymentLinkData paymentLinkData = payOSClient.getPaymentLinkInformation(Long.valueOf(orderCode));
-
-            return new ResponseEntity<>(
-                    ObjectResponse.builder()
-                            .status(HttpStatus.OK.toString())
-                            .message("Payment information retrieved successfully")
-                            .data(paymentLinkData)
-                            .build(),
-                    HttpStatus.OK
-            );
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    ObjectResponse.builder()
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
-                            .message("Error retrieving payment information: " + e.getMessage())
-                            .build(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    @GetMapping("/callbackne")
-    public void callBack(HttpServletRequest request) {
-        System.out.println(request.getParameter("s"));
+    @GetMapping("/payos-callback/cancel")
+    public void handleCancel(HttpServletRequest request) {
+        String orderCode = request.getParameter("orderCode");
+        depositRepository.deleteById(Integer.valueOf(orderCode));
     }
 }

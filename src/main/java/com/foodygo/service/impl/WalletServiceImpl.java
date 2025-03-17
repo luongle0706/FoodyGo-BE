@@ -244,14 +244,4 @@ public class WalletServiceImpl implements WalletService {
         );
     }
 
-    private DepositMethod getDepositMethod(String method) {
-        return switch (method.toUpperCase()) {
-            case "VNPAY" -> DepositMethod.VNPAY;
-            case "MOMO" -> DepositMethod.MOMO;
-            default -> null;
-        };
-    }
-
-
-
 }
