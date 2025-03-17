@@ -65,7 +65,7 @@ public class DatabaseInit {
                 roleRepository.save(roleSeller);
             }
 
-            User user = null, admin, manager, seller;
+            User user = null, admin, manager, seller = null;
             List<User> staff = new ArrayList<>();
             if (userRepository.count() == 0) {
                 Role roleUser = roleRepository.getRoleByRoleName(EnumRoleNameType.ROLE_USER);
@@ -233,14 +233,11 @@ public class DatabaseInit {
 
             Restaurant restaurant = null;
             if (restaurantRepository.count() <= 0) {
-                User owner = userRepository.findById(5).orElseThrow(
-                        () -> new RuntimeException("Owner not found when init restaurant")
-                );
                 restaurant = Restaurant.builder()
                         .name("Cơm tấm Ngô Quyền")
                         .phone("+84" + (100000000 + random.nextInt(900000000)))
                         .email("restaurant@foodygo.com")
-                        .owner(owner)
+                        .owner(seller)
                         .address((1 + random.nextInt(100)) + "/" + (1 + random.nextInt(100)) + " Street " + (1 + random.nextInt(100)))
                         .image("https://img-global.cpcdn.com/recipes/49876fe80303b991/640x640sq70/photo.webp")
                         .build();

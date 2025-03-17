@@ -194,5 +194,23 @@ public class ProductController {
                 );
     }
 
+    @Operation(summary = "Link an addon-section to product",
+            description = "Deletes a product by its ID.")
+    @PutMapping("/{productId}/addon-sections/{addonSectionId}")
+    @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
+    public ResponseEntity<ObjectResponse> link(
+            @PathVariable Integer addonSectionId,
+            @PathVariable Integer productId
+    ) {
+        productService.linkAddonSection(addonSectionId, productId);
+        return ResponseEntity
+                .status(OK)
+                .body(
+                        ObjectResponse.builder()
+                                .status(OK.toString())
+                                .message("Product update successfully")
+                                .build()
+                );
+    }
 }
 

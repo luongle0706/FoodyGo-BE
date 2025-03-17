@@ -11,6 +11,9 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 
 
 public interface ProductService {
+
+    void linkAddonSection(Integer addonSectionId, Integer productId);
+
     Product getProductById(Integer productId);
 
     ProductDTO getProductDTOById(Integer productId);
