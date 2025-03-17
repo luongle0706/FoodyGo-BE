@@ -1,5 +1,7 @@
 package com.foodygo.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.google.type.DateTime;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
@@ -39,8 +43,9 @@ public class UserRegisterRequest {
     private String phone;
 
     private MultipartFile image;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate dob;
 
     @Positive(message = "BuildingID must be positive")
     private Integer buildingID;
-
 }

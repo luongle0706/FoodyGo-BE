@@ -14,5 +14,6 @@ public class OrderDetailResponse {
     Integer quantity;
     Double price;
     String addonItems;
+    String image;
     String productName;
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -32,6 +33,9 @@ public class User extends BaseEntity {
 
     @Column(name = "phone", unique = true, columnDefinition = "NVARCHAR(12)")
     String phone;
+
+    @Column(name = "dob", columnDefinition = "DATE")
+    LocalDate dob;
 
     @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     boolean enabled;
