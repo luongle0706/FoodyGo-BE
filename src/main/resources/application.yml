@@ -6,7 +6,7 @@ spring:
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/foodygo}
     username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:12345}
+    password: ${MYSQL_PASSWORD:123456789}
   jpa:
     hibernate:
       ddl-auto: update
@@ -114,9 +114,6 @@ aws:
     secret-key: ${S3_SECRET_KEY}
     region: ${S3_REGION}
     bucket-name: ${S3_BUCKET_NAME}
-
-business:
-  service-fee: 0.01
 #image:
 #  saveLocation: /var/www/images/
 #  getLocation: https://foodygo.theanh0804.id.vn/public/

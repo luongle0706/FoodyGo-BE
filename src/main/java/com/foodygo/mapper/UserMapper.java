@@ -13,6 +13,7 @@ public interface UserMapper {
     @Mapping(source = "nonLocked", target = "nonLocked")
     @Mapping(source = "deleted", target = "deleted")
     @Mapping(source = "userID", target = "userID")
+    @Mapping(source = "dob", target = "dob")
     UserDTO userToUserDTO(User user);
 
     User UserDTOToUser(UserDTO userDTO);

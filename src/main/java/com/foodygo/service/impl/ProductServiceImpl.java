@@ -8,8 +8,10 @@ import com.foodygo.entity.AddonSection;
 import com.foodygo.entity.Category;
 import com.foodygo.entity.Product;
 import com.foodygo.entity.Restaurant;
+import com.foodygo.exception.BadRequestException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.ProductMapper;
+import com.foodygo.repository.AddonSectionRepository;
 import com.foodygo.repository.ProductRepository;
 import com.foodygo.service.spec.*;
 import com.foodygo.utils.PaginationUtil;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +44,39 @@ public class ProductServiceImpl implements ProductService {
     private final S3Service s3Service;
     private final RedisTemplate<String, Object> redisTemplate;
     private final String KEY_PRODUCT = "all_products";
+    private final AddonSectionRepository addonSectionRepository;
+
+    @Override
+    @Transactional
+    public void linkAddonSection(Integer addonSectionId, Integer productId) {
+        AddonSection addonSection = addonSectionService.getAddonSectionById(addonSectionId);
+        if(addonSection == null) {
+            throw new BadRequestException("Unable to find addon section with id " + addonSectionId);
+        }
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new ElementNotFoundException("Unable to find product with id " + productId)
+        );
+
+        // Create a new mutable list to avoid UnsupportedOperationException
+        List<Product> linkedProducts = new ArrayList<>(addonSection.getProducts());
+
+        boolean exists = linkedProducts.stream()
+                .anyMatch(p -> p.getId().equals(product.getId()));
+
+        if(exists) {
+            // Remove the product if it already exists
+            linkedProducts.removeIf(p -> p.getId().equals(productId));
+        } else {
+            // Add the product if it doesn't exist
+            linkedProducts.add(product);
+        }
+
+        // Set the new list of products
+        addonSection.setProducts(linkedProducts);
+
+        // Save the updated addon section
+        addonSectionRepository.save(addonSection);
+    }
 
     @Override
     public Product getProductById(Integer productId) {

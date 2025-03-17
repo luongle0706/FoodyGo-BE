@@ -27,6 +27,7 @@ public class OrderResponse {
     String employeeName;
     String customerName;
     String restaurantName;
+    String image;
     String hubName;
     List<OrderDetailResponse> orderDetails;
 }
