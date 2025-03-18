@@ -4,13 +4,16 @@ import com.foodygo.dto.AddonSectionDTO;
 import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.paging.AddonSectionPagingResponse;
 import com.foodygo.dto.paging.OrderPagingResponse;
+import com.foodygo.entity.AddonItem;
 import com.foodygo.entity.AddonSection;
 import com.foodygo.entity.Order;
 import com.foodygo.entity.Product;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.mapper.AddonSectionMapper;
+import com.foodygo.repository.AddonItemRepository;
 import com.foodygo.repository.AddonSectionRepository;
 import com.foodygo.repository.ProductRepository;
+import com.foodygo.service.spec.AddonItemService;
 import com.foodygo.service.spec.AddonSectionService;
 import com.foodygo.utils.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +32,7 @@ import java.util.List;
 public class AddonSectionServiceImpl implements AddonSectionService {
 
     private final AddonSectionRepository addonSectionRepository;
-    private final ProductRepository productRepository;
+    private final AddonItemRepository addonItemRepository;
 
     @Override
     public AddonSection getAddonSectionById(Integer id) {
@@ -49,21 +52,23 @@ public class AddonSectionServiceImpl implements AddonSectionService {
     @Override
     @Transactional
     public AddonSection createAddonSection(AddonSectionDTO.CreateRequest request) {
-        List<Product> listLinkProduct = new ArrayList<>();
-
-        for (Integer productId : request.productId()) {
-            Product product = productRepository.findByIdAndDeletedFalse(productId).orElseThrow(
-                    () -> new ElementNotFoundException("Product not found with id: " + request.productId())
-            );
-            listLinkProduct.add(product);
-        }
         AddonSection addonSection = AddonSection.builder()
                 .name(request.name())
                 .maxChoice(request.maxChoice())
                 .required(request.required())
-                .products(listLinkProduct)
                 .build();
-        return addonSectionRepository.save(addonSection);
+        AddonSection saved =  addonSectionRepository.save(addonSection);
+
+        for (AddonSectionDTO.CreateRequest.AddonItemCreateRequest addonItem : request.addonItems()) {
+            AddonItem addItem = AddonItem.builder()
+                    .name(addonItem.name())
+                    .price(addonItem.price())
+                    .quantity(addonItem.quantity())
+                    .section(addonSection)
+                    .build();
+            addonItemRepository.save(addItem);
+        }
+        return saved;
     }
 
     @Override

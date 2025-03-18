@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -93,6 +94,7 @@ public class AddonSectionController {
 
     @PostMapping
     @Operation(summary = "Create Addon Section", description = "Create a new addon section using the provided data.")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN','SELLER')")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Addon section created"),
             @ApiResponse(responseCode = "400", description = "Invalid addon section body"),
@@ -116,6 +118,7 @@ public class AddonSectionController {
 
     @PutMapping
     @Operation(summary = "Update Addon Section", description = "Update an existing addon section with the provided data.")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN','SELLER')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Addon section updated"),
             @ApiResponse(responseCode = "400", description = "Invalid addon section body"),
@@ -140,6 +143,7 @@ public class AddonSectionController {
 
     @DeleteMapping("/{addonSectionId}")
     @Operation(summary = "Delete Addon Section", description = "Delete an addon section by its unique ID.")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN','SELLER')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Addon section availability updated"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
