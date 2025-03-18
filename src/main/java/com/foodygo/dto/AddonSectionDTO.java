@@ -17,8 +17,14 @@ public record AddonSectionDTO(
             String name,
             Integer maxChoice,
             boolean required,
-            List<Integer> productId
+            List<AddonItemCreateRequest> addonItems
     ) {
+        @Builder
+        public record AddonItemCreateRequest(
+                String name,
+                Double price,
+                Integer quantity
+        ) {}
     }
 
     @Builder
