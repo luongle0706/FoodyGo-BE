@@ -1,20 +1,15 @@
 package com.foodygo.controller;
 
-import com.foodygo.dto.ProductDTO;
 import com.foodygo.dto.internal.PagingRequest;
-import com.foodygo.dto.request.ProductCreateRequest;
+import com.foodygo.dto.product.ProductCreateRequest;
+import com.foodygo.dto.product.ProductUpdateRequest;
 import com.foodygo.dto.response.ObjectResponse;
-import com.foodygo.service.spec.AddonSectionService;
 import com.foodygo.service.spec.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -34,7 +29,6 @@ import static org.springframework.http.HttpStatus.OK;
 public class ProductController {
 
     private final ProductService productService;
-    private final AddonSectionService addonSectionService;
 
     @GetMapping
     @Operation(summary = "Get all products",
@@ -122,7 +116,7 @@ public class ProductController {
 
     @Operation(summary = "Update an existing product",
             description = "Updates the details of an existing product.")
-    @PutMapping
+    @PutMapping("/{productId}")
     @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product updated"),
@@ -133,9 +127,11 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<ObjectResponse> updateProduct(
-            @RequestBody ProductDTO request
+            @PathVariable Integer productId,
+            @RequestPart("data") ProductUpdateRequest request,
+            @RequestPart("image") MultipartFile image
     ) {
-        productService.updateProductInfo(request);
+        productService.updateProductInfo(image, productId, request);
         return ResponseEntity
                 .status(OK)
                 .body(
@@ -146,7 +142,7 @@ public class ProductController {
                 );
     }
 
-    @PutMapping("/{productId}")
+    @PutMapping("/{productId}/availability")
     @Operation(summary = "Switch product availability",
             description = "Switch product availability to open/close")
     @PreAuthorize("hasAnyRole('SELLER', 'MANAGER', 'ADMIN')")

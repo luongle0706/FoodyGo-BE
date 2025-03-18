@@ -1,9 +1,10 @@
 package com.foodygo.service.impl;
 
-import com.foodygo.dto.ProductDTO;
+import com.foodygo.dto.product.ProductDTO;
 import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.paging.ProductPagingResponse;
-import com.foodygo.dto.request.ProductCreateRequest;
+import com.foodygo.dto.product.ProductUpdateRequest;
+import com.foodygo.dto.product.ProductCreateRequest;
 import com.foodygo.entity.AddonSection;
 import com.foodygo.entity.Category;
 import com.foodygo.entity.Product;
@@ -15,7 +16,6 @@ import com.foodygo.repository.AddonSectionRepository;
 import com.foodygo.repository.ProductRepository;
 import com.foodygo.service.spec.*;
 import com.foodygo.utils.PaginationUtil;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void linkAddonSection(Integer addonSectionId, Integer productId) {
         AddonSection addonSection = addonSectionService.getAddonSectionById(addonSectionId);
-        if(addonSection == null) {
+        if (addonSection == null) {
             throw new BadRequestException("Unable to find addon section with id " + addonSectionId);
         }
         Product product = productRepository.findById(productId).orElseThrow(
@@ -63,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
         boolean exists = linkedProducts.stream()
                 .anyMatch(p -> p.getId().equals(product.getId()));
 
-        if(exists) {
+        if (exists) {
             // Remove the product if it already exists
             linkedProducts.removeIf(p -> p.getId().equals(productId));
         } else {
@@ -100,7 +99,6 @@ public class ProductServiceImpl implements ProductService {
 
     private void clear() {
         Set<String> keys = redisTemplate.keys(KEY_PRODUCT + ":*");
-        assert keys != null;
         redisTemplate.delete(keys);
     }
 
@@ -144,22 +142,25 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void updateProductInfo(ProductDTO productDTO) {
-        Category category = categoryService.getCategoryById(productDTO.category().id());
+    public void updateProductInfo(MultipartFile image, Integer productId, ProductUpdateRequest request) {
 
-        List<AddonSection> addonSectionList = new ArrayList<>();
-        for (ProductDTO.AddonSection addonSectionId : productDTO.addonSections()) {
-            AddonSection addonSection = addonSectionService.getAddonSectionById(addonSectionId.id());
-            addonSectionList.add(addonSection);
+
+        Product product = getProductById(productId);
+        if (product == null) {
+            throw new BadRequestException("Unable to find product with id " + productId);
         }
-        Product product = getProductById(productDTO.id());
-        product.setCode(productDTO.code());
-        product.setName(productDTO.name());
-        product.setPrice(productDTO.price());
-        product.setDescription(productDTO.description());
-        product.setPrepareTime(productDTO.prepareTime());
-        product.setCategory(category);
-        product.setAddonSections(addonSectionList);
+        String urlImage = s3Service.uploadFileToS3(image, "productImage");
+        if (urlImage != null) product.setImage(urlImage);
+        if (request.getCode() != null) product.setCode(request.getCode());
+        if (request.getName() != null) product.setName(request.getName());
+        if (request.getPrice() != null) product.setPrice(request.getPrice());
+        if (request.getDescription() != null) product.setDescription(request.getDescription());
+        if (request.getPrepareTime() != null) product.setPrepareTime(request.getPrepareTime());
+        if (request.getAvailable() != null) product.setAvailable(request.getAvailable());
+        if (request.getCategoryId() != null) {
+            Category category = categoryService.getCategoryById(request.getCategoryId());
+            if (category != null) product.setCategory(category);
+        }
         productRepository.save(product);
         clear();
     }
