@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class CustomerCreateRequest {
 
-    private MultipartFile image;
+    private String image;
 
     @Positive(message = "BuildingID must be positive")
     private Integer buildingID;

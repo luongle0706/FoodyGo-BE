@@ -1,8 +1,11 @@
 package com.foodygo;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import vn.payos.PayOS;
 
 import java.util.TimeZone;
 
@@ -26,6 +29,11 @@ public class FoodygoApplication {
         String s3Region = dotenv.get("S3_REGION") != null ? dotenv.get("S3_REGION") : System.getProperty("S3_REGION", "");
         String s3BucketName = dotenv.get("S3_BUCKET_NAME") != null ? dotenv.get("S3_BUCKET_NAME") : System.getProperty("S3_BUCKET_NAME", "");
 
+        String payOSClient = dotenv.get("PAYOS_CLIENT_ID") != null ? dotenv.get("PAYOS_CLIENT_ID") : System.getProperty("PAYOS_CLIENT_ID", "");
+        String payOSApiKey = dotenv.get("PAYOS_API_KEY") != null ? dotenv.get("PAYOS_API_KEY") : System.getProperty("PAYOS_API_KEY", "");
+        String checksumKey = dotenv.get("PAYOS_CHECKSUM_KEY") != null ? dotenv.get("PAYOS_CHECKSUM_KEY") : System.getProperty("PAYOS_CHECKSUM_KEY", "");
+        String webhookURL = dotenv.get("WEBHOOK_URL") != null ? dotenv.get("WEBHOOK_URL") : System.getProperty("WEBHOOK_URL", "");
+
 
         System.setProperty("PAY_URL", payUrl);
         System.setProperty("TMN_CODE", tmnCode);
@@ -39,6 +47,12 @@ public class FoodygoApplication {
         System.setProperty("S3_SECRET_KEY", s3SecretKey);
         System.setProperty("S3_REGION", s3Region);
         System.setProperty("S3_BUCKET_NAME", s3BucketName);
+
+        System.setProperty("PAYOS_CLIENT_ID", payOSClient);
+        System.setProperty("PAYOS_CLIENT_ID", payOSClient);
+        System.setProperty("PAYOS_API_KEY", payOSApiKey);
+        System.setProperty("PAYOS_CHECKSUM_KEY", checksumKey);
+        System.setProperty("WEBHOOK_URL", webhookURL);
 
         SpringApplication.run(FoodygoApplication.class, args);
     }

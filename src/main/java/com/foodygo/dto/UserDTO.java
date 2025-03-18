@@ -18,7 +18,8 @@ public class UserDTO {
     String roleName;
     String buildingName;
     LocalDate dob;
-    int buildingID;
+    String image;
+    Integer buildingID;
     boolean enabled;
     boolean nonLocked;
     boolean deleted;

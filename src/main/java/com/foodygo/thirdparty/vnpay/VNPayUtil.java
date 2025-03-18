@@ -1,4 +1,4 @@
-package com.foodygo.thirdparty;
+package com.foodygo.thirdparty.vnpay;
 
 import jakarta.servlet.http.HttpServletRequest;
 
