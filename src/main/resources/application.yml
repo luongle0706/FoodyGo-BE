@@ -6,7 +6,7 @@ spring:
   datasource:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/foodygo}
     username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:123456789}
+    password: ${MYSQL_PASSWORD:12345}
   jpa:
     hibernate:
       ddl-auto: update
@@ -119,7 +119,7 @@ aws:
 #  getLocation: https://foodygo.theanh0804.id.vn/public/Ư
 
 payos:
-  client-id: c94349d1-af6a-4c67-a947-d54c8466611d
-  api-key: 79b84f83-4c65-4bd6-98de-2ac31208bb87
-  checksum-key: 72349adae7a4cd849fa4cbd42287a6f44e9581d66b2aba75f5cd5519e6b72c2a
-  webhook-url: http://localhost:8080/api/v1/payment/payos-callback
+  client-id: ${PAYOS_CLIENT_ID}
+  api-key: ${PAYOS_API_KEY}
+  checksum-key: ${PAYOS_CHECKSUM_KEY}
+  webhook-url: ${WEBHOOK_URL}
