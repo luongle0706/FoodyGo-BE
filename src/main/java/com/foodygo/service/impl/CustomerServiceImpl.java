@@ -247,7 +247,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
 //                url = upload(customerCreateRequest.getImage());
 //            }
             Customer customer = Customer.builder()
-                    .image(url)
+                    .image(customerCreateRequest.getImage())
                     .building(building)
                     .user(user)
                     .build();

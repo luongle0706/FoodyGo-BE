@@ -7,15 +7,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -42,10 +40,9 @@ public class UserRegisterRequest {
     @Size(max = 12, min = 9, message = "Số điện thoại phải từ 9 tới 12 kí tự")
     private String phone;
 
-    private MultipartFile image;
+    private MultipartFile imageCustomer;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dob;
 
-    @Positive(message = "BuildingID must be positive")
     private Integer buildingID;
 }
