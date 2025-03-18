@@ -16,8 +16,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/authentications")
@@ -52,9 +54,12 @@ public class MainController {
      * @return user or null
      */
     @Operation(summary = "Register account", description = "User register an account to login")
-    @PostMapping("/register")
-    public ResponseEntity<ObjectResponse> userRegister(@Valid @RequestBody UserRegisterRequest userRegisterRequest) {
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ObjectResponse> userRegister(
+            @RequestPart("userRegisterRequest") UserRegisterRequest userRegisterRequest,
+            @RequestPart("image") MultipartFile image) {
         try {
+            userRegisterRequest.setImageCustomer(image);
             UserDTO user = userService.registerUser(userRegisterRequest);
             return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Register user successfully", user));
         } catch (Exception e) {
