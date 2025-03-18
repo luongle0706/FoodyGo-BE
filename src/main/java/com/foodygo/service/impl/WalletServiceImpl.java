@@ -14,8 +14,9 @@ import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.repository.TransactionRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.repository.WalletRepository;
+import com.foodygo.service.spec.NotificationService;
 import com.foodygo.service.spec.WalletService;
-import com.foodygo.thirdparty.PaymentService;
+import com.foodygo.thirdparty.vnpay.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class WalletServiceImpl implements WalletService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final PaymentService paymentService;
+    private final NotificationService notificationService;
 
     @Override
     public WalletBalanceResponse getWalletByCustomerId(Integer customerId) {
@@ -118,6 +120,8 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.save(receiverWallet);
         transactionRepository.save(transactionOfSender);
         transactionRepository.save(transactionOfReceiver);
+
+        notificationService.sendNotification(user.getUserID(), "Nhận tiền vào ví", "Bạn vừa nhận được " + amount + " foodyxu từ " + wallet.getCustomer().getUser().getFullName() + " với lời nhắn: " + note, "");
     }
 
     @Override
@@ -239,15 +243,5 @@ public class WalletServiceImpl implements WalletService {
                 walletResponses
         );
     }
-
-    private DepositMethod getDepositMethod(String method) {
-        return switch (method.toUpperCase()) {
-            case "VNPAY" -> DepositMethod.VNPAY;
-            case "MOMO" -> DepositMethod.MOMO;
-            default -> null;
-        };
-    }
-
-
 
 }

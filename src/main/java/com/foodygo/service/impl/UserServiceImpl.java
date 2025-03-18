@@ -21,6 +21,7 @@ import com.foodygo.mapper.UserMapper;
 import com.foodygo.repository.*;
 import com.foodygo.service.spec.CustomerService;
 import com.foodygo.service.spec.RoleService;
+import com.foodygo.service.spec.S3Service;
 import com.foodygo.service.spec.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -60,11 +61,13 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     private final CustomerService customerService;
     private final RestaurantRepository restaurantRepository;
     private final FcmTokenRepository fcmTokenRepository;
+    private final S3Service s3Service;
 
     public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder,
                            UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
                            JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager,
-                           WalletRepository walletRepository, CustomerService customerService, RestaurantRepository restaurantRepository, FcmTokenRepository fcmTokenRepository) {
+                           WalletRepository walletRepository, CustomerService customerService, RestaurantRepository restaurantRepository, FcmTokenRepository fcmTokenRepository
+            ,S3Service s3Service) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -79,6 +82,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         this.customerService = customerService;
         this.restaurantRepository = restaurantRepository;
         this.fcmTokenRepository = fcmTokenRepository;
+        this.s3Service = s3Service;
     }
 
     @Override
@@ -245,6 +249,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
     @Override
     public UserDTO registerUser(UserRegisterRequest userRegisterRequest) {
+        String urlImage = s3Service.uploadFileToS3(userRegisterRequest.getImageCustomer(), "productImage");
         User checkExistingUser = userRepository.getUserByEmail(userRegisterRequest.getEmail());
         if (checkExistingUser != null) {
             throw new ElementExistException("User already exists");
@@ -264,7 +269,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                 .build();
         user = userRepository.save(user);
 
-        CustomerCreateRequest customerCreateRequest = new CustomerCreateRequest(userRegisterRequest.getImage(), userRegisterRequest.getBuildingID(), user.getUserID());
+        CustomerCreateRequest customerCreateRequest = new CustomerCreateRequest(urlImage, userRegisterRequest.getBuildingID(), user.getUserID());
 
         CustomerDTO customer = customerService.createCustomer(customerCreateRequest);
 
@@ -276,8 +281,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
         UserDTO userDTO = userMapper.userToUserDTO(user);
         userDTO = userDTO.toBuilder()
-                .buildingID(customer.getBuilding().getId())
-                .buildingName(customer.getBuilding().getName())
+                .buildingID(customer.getBuilding() != null ? customer.getBuilding().getId() :  null)
+                .buildingName(customer.getBuilding()!= null ? customer.getBuilding().getName() :  null)
+                .image(customer.getImage() != null ? customer.getImage() : null)
                 .build();
 
         return userDTO;

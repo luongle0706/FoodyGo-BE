@@ -1,4 +1,4 @@
-package com.foodygo.thirdparty;
+package com.foodygo.thirdparty.vnpay;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
