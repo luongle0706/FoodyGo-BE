@@ -4,6 +4,7 @@ import com.foodygo.dto.request.OrderCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
 import com.foodygo.dto.response.OrderDetailResponse;
 import com.foodygo.dto.response.OrderResponse;
+import com.foodygo.dto.response.OrderResponseV2;
 import com.foodygo.entity.Order;
 import com.foodygo.entity.OrderDetail;
 import org.mapstruct.Mapper;
@@ -29,4 +30,12 @@ public interface OrderMapper {
     @Mapping(source = "restaurant.name", target = "restaurantName")
     @Mapping(source = "hub.name", target = "hubName")
     OrderResponse toDto(Order order);
+
+    @Mapping(source = "employee.fullName", target = "employeeName")
+    @Mapping(source = "customer.user.fullName", target = "customerName")
+    @Mapping(source = "restaurant.name", target = "restaurantName")
+    @Mapping(source = "hub.name", target = "hubName")
+    @Mapping(source = "restaurant.address", target = "restaurantAddress")
+    @Mapping(source = "hub.address", target = "customerAddress")
+    OrderResponseV2 toDtoV2(Order order);
 }
