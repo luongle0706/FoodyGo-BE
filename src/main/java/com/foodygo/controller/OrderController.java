@@ -128,6 +128,27 @@ public class OrderController {
         );
     }
 
+    @GetMapping("/{orderId}/v2")
+    @Operation(summary = "Get Order By Id", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
+    @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Order found"),
+            @ApiResponse(responseCode = "400", description = "Invalid Order request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "400", description = "Order not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ObjectResponse> getOrderByIdV2(@PathVariable Integer orderId) {
+        return ResponseEntity.ok(
+                ObjectResponse.builder()
+                        .status(OK.toString())
+                        .message("Get order by Id")
+                        .data(orderService.getOrderResponseByIdV2(orderId))
+                        .build()
+        );
+    }
+
     @GetMapping()
     @Operation(summary = "Get All Orders", description = "Retrieve a paginated list of all orders. Supports sorting and pagination.")
     @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")

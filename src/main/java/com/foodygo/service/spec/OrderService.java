@@ -4,6 +4,7 @@ import com.foodygo.dto.internal.PagingRequest;
 import com.foodygo.dto.request.OrderCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
 import com.foodygo.dto.response.OrderResponse;
+import com.foodygo.dto.response.OrderResponseV2;
 import com.foodygo.entity.Order;
 import com.foodygo.enums.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ public interface OrderService {
     int createOrder(OrderCreateRequest orderCreateRequest);
     OrderResponse updateOrder(Integer orderId, OrderUpdateRequest request);
     OrderResponse getOrderResponseById(Integer id);
+    OrderResponseV2 getOrderResponseByIdV2(Integer id);
     Order getOrderById(Integer id);
     void deleteOrder(Integer id);
     Page<OrderResponse> getAllOrders(Pageable pageable);
