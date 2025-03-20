@@ -17,7 +17,7 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info().title("FoodyGo - Food delivery platform for Dormitory B - HCMC National University Dormitory"))
                 .addServersItem(
-                        new Server().url("https://foodygo.theanh0804.id.vn")
+                        new Server().url("https://foodygo.theanh0804.duckdns.org")
                 )
                 .addServersItem(
                         new Server().url("http://localhost:8080")
