@@ -11,9 +11,10 @@ jobs:
       - name: SSH into VPS and deploy
         uses: appleboy/ssh-action@v0.1.5
         with:
-          host: theanh0804.id.vn
+          host: theanh0804.duckdns.org
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
+          port: 3333
           script: |
             cd /home/theanh/GIT/SWD301-FoodyGo-BE/
             docker compose down
