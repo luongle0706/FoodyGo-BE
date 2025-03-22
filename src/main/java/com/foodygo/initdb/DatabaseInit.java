@@ -357,7 +357,7 @@ public class DatabaseInit {
 //                            .customerPhone(user != null ? user.getPhone() : "190238019283")
 //                            .shipperPhone("+84" + (100000000 + random.nextInt(900000000)))
 //                            .notes("Giao hàng trước 6h tối")
-//                            .employee(staff)
+//                            .employee(user)
 //                            .customer(customer)
 //                            .restaurant(restaurant)
 //                            .hub(hub)

@@ -216,6 +216,9 @@ public class OrderServiceImpl implements OrderService {
                     .mapToInt(OrderDetailResponse::getQuantity)
                     .sum();
             orderResponse.setTotalItems(totalItems);
+            orderResponse.setRestaurantId(
+                    order.getRestaurant() != null ? order.getRestaurant().getId() : null
+            );
             orderResponse.setOrderDetails(orderDetailResponses);
             return orderResponse;
         });
