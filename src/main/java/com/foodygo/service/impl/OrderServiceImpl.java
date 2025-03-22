@@ -7,6 +7,7 @@ import com.foodygo.dto.request.OrderDetailCreateRequest;
 import com.foodygo.dto.request.OrderUpdateRequest;
 import com.foodygo.dto.response.OrderDetailResponse;
 import com.foodygo.dto.response.OrderResponse;
+import com.foodygo.dto.response.OrderResponseV2;
 import com.foodygo.entity.*;
 import com.foodygo.enums.EnumRoleNameType;
 import com.foodygo.enums.OrderStatus;
@@ -182,6 +183,20 @@ public class OrderServiceImpl implements OrderService {
         OrderResponse orderResponse = OrderMapper.INSTANCE.toDto(order);
         orderResponse.setOrderDetails(orderDetailResponses);
         return orderResponse;
+    }
+
+    @Override
+    public OrderResponseV2 getOrderResponseByIdV2(Integer id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IdNotFoundException("Order not found"));
+        List<OrderDetailResponse> orderDetailResponses = order.getOrderDetails().stream()
+                .map(OrderDetailMapper.INSTANCE::toDto)
+                .collect(Collectors.toList());
+
+        OrderResponseV2 orderResponseV2 = OrderMapper.INSTANCE.toDtoV2(order);
+        orderResponseV2.setOrderDetails(orderDetailResponses);
+
+        return orderResponseV2;
     }
 
     @Override

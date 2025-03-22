@@ -1,4 +1,4 @@
-package com.foodygo.thirdparty;
+package com.foodygo.thirdparty.vnpay;
 
 import lombok.Builder;
 import lombok.Data;

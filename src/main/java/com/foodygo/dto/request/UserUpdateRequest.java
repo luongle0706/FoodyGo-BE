@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserUpdateRequest {
 
-    @Size(max = 10, min = 10, message = "Phone phải có 10 chữ số")
+    @Size(max = 11, min = 10, message = "Phone phải có 10 chữ số")
     private String phone;
 
     @Size(max = 255, min = 1, message = "FullName phải từ 1 tới 255 kí tự")

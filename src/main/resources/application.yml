@@ -116,4 +116,10 @@ aws:
     bucket-name: ${S3_BUCKET_NAME}
 #image:
 #  saveLocation: /var/www/images/
-#  getLocation: https://foodygo.theanh0804.id.vn/public/
+#  getLocation: https://foodygo.theanh0804.id.vn/public/Ư
+
+payos:
+  client-id: ${PAYOS_CLIENT_ID}
+  api-key: ${PAYOS_API_KEY}
+  checksum-key: ${PAYOS_CHECKSUM_KEY}
+  webhook-url: ${WEBHOOK_URL}

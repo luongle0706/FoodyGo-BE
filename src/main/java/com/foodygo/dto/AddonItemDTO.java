@@ -13,7 +13,8 @@ public record AddonItemDTO(
     public record CreateRequest(
             String name,
             Double price,
-            Integer quantity
+            Integer quantity,
+            Integer addonSectionId
     ) {
     }
 

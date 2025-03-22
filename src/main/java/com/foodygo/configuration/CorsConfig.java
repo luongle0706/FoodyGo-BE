@@ -18,8 +18,10 @@ public class CorsConfig {
         corsConfiguration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost",
                 "http://localhost:5173",
-                "http://foodygo.theanh0804.id.vn",
-                "https://foodygo.theanh0804.id.vn"));
+                "http://foodygo.theanh0804.duckdns.org",
+                "https://foodygo.theanh0804.duckdns.org",
+                "https://admin.foodygo.theanh0804.duckdns.org",
+                "http://admin.foodygo.theanh0804.duckdns.org"));
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
