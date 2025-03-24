@@ -9,6 +9,7 @@ import com.foodygo.dto.request.CustomerUpdateRequest;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
 import com.foodygo.exception.AuthenticationException;
+import com.foodygo.exception.ElementExistException;
 import com.foodygo.exception.ElementNotFoundException;
 import com.foodygo.exception.UnchangedStateException;
 import com.foodygo.mapper.BuildingMapper;
@@ -18,6 +19,7 @@ import com.foodygo.repository.CustomerRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.service.spec.BuildingService;
 import com.foodygo.service.spec.CustomerService;
+import com.foodygo.service.spec.S3Service;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobId;
@@ -54,6 +56,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     private final CustomerMapper customerMapper;
     private final UserMapper userMapper;
     private final BuildingMapper buildingMapper;
+    private final S3Service s3Service;
 
     // Firebase
 
@@ -107,7 +110,8 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     @Value("${buffer-image.devide}")
     private int bufferImageDevide;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserRepository userRepository, CustomerMapper customerMapper, UserMapper userMapper, BuildingMapper buildingMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, BuildingService buildingService, UserRepository userRepository,
+                               CustomerMapper customerMapper, UserMapper userMapper, BuildingMapper buildingMapper, S3Service s3Service) {
         super(customerRepository);
         this.customerRepository = customerRepository;
         this.buildingService = buildingService;
@@ -115,6 +119,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
         this.customerMapper = customerMapper;
         this.userMapper = userMapper;
         this.buildingMapper = buildingMapper;
+        this.s3Service = s3Service;
     }
 
     @Override
@@ -200,7 +205,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     public UserDTO getUserByCustomerID(Integer customerID) {
         Customer customer = customerRepository.findCustomerById(customerID);
         if (customer == null) {
-           throw new ElementNotFoundException("Customer not found");
+            throw new ElementNotFoundException("Customer not found");
         }
         return userMapper.userToUserDTO(customer.getUser());
     }
@@ -233,7 +238,7 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     public CustomerDTO createCustomer(CustomerCreateRequest customerCreateRequest) {
         // Allow null building create request because of Google Registration
         Building building = null;
-        if(customerCreateRequest.getBuildingID() != null) {
+        if (customerCreateRequest.getBuildingID() != null) {
             building = getBuilding(customerCreateRequest.getBuildingID());
         }
         User user = getUser(customerCreateRequest.getUserID());
@@ -259,36 +264,59 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
     }
 
     @Override
-    public CustomerDTO updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID) {
-        Customer customer = getCustomer(customerID);
+    public UserDTO updateCustomer(CustomerUpdateRequest customerUpdateRequest, int userId) {
+
+        User user = getUser(userId);
+        if (user.getCustomer() == null) {
+            throw new ElementNotFoundException("Customer profile not found");
+        }
 
         CustomUserDetail customUserDetail = (CustomUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (customUserDetail.getUserID() != customer.getUser().getUserID()) {
+        if (customUserDetail.getUserID() != user.getUserID()) {
             throw new AuthenticationException("You are not allowed to update other customer");
         }
-        try {
-            if(customerUpdateRequest.getImage() != null) {
-                String oldAvatar = customer.getImage();
-                String url = upload(customerUpdateRequest.getImage());
-                customer.setImage(url);
-                if (oldAvatar != null) {
-                    deleteImageOnFireBase(oldAvatar);
-                }
+
+        if (!user.getEmail().equals(customerUpdateRequest.getEmail().trim())) {
+            if (userRepository.getUserByEmail(customerUpdateRequest.getEmail()) != null) {
+                throw new ElementExistException("Email đã tồn tại");
             }
-            if (customerUpdateRequest.getBuildingID() > 0) {
-                Building building = getBuilding(customerUpdateRequest.getBuildingID());
-                customer.setBuilding(building);
-            }
-            if (customerUpdateRequest.getUserID() > 0) {
-                User user = getUser(customerUpdateRequest.getUserID());
-                customer.setUser(user);
-            }
-            return customerMapper.customerToCustomerDTO(customerRepository.save(customer));
-        } catch (Exception e) {
-            log.error("Customer update failed", e);
-            return null;
+            user.setEmail(customerUpdateRequest.getEmail());
         }
+        if (user.getPhone() != null) {
+            if (!user.getPhone().equals(customerUpdateRequest.getPhone().trim())) {
+                if (userRepository.getUserByPhone(customerUpdateRequest.getPhone()) != null) {
+                    throw new ElementExistException("Phone number đã tồn tại");
+                }
+                user.setPhone(customerUpdateRequest.getPhone());
+            }
+        } else {
+            user.setPhone(customerUpdateRequest.getPhone());
+        }
+        user.setFullName(customerUpdateRequest.getFullName().trim());
+        user.setDob(customerUpdateRequest.getDob());
+
+        Customer customer = user.getCustomer();
+        customer.setUser(user);
+        if (customerUpdateRequest.getImage() != null) {
+            String url = s3Service.uploadFileToS3(customerUpdateRequest.getImage(), "userImage");
+            customer.setImage(url);
+        }
+
+        if (customerUpdateRequest.getBuildingID() != null) {
+            Building building = getBuilding(customerUpdateRequest.getBuildingID());
+            customer.setBuilding(building);
+        }
+
+        userRepository.save(user);
+        customerRepository.save(customer);
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+        userDTO = userDTO.toBuilder()
+                .buildingID(customer.getBuilding() != null ? customer.getBuilding().getId() : null)
+                .buildingName(customer.getBuilding() != null ? customer.getBuilding().getName() : null)
+                .image(customer.getImage() != null ? customer.getImage() : null)
+                .build();
+        return userDTO;
     }
 
     @Override
@@ -361,8 +389,6 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
 //        // chưa có wallet service
 //        return null;
 //    }
-
-
 
 
     //  Xử lí hình ảnh vs firebase

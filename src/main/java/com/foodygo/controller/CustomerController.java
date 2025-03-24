@@ -6,6 +6,7 @@ import com.foodygo.dto.HubDTO;
 import com.foodygo.dto.UserDTO;
 import com.foodygo.dto.request.CustomerCreateRequest;
 import com.foodygo.dto.request.CustomerUpdateRequest;
+import com.foodygo.dto.request.UserRegisterRequest;
 import com.foodygo.dto.response.ObjectResponse;
 import com.foodygo.dto.response.PagingResponse;
 import com.foodygo.entity.*;
@@ -17,11 +18,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -283,17 +287,22 @@ public class CustomerController {
     /**
      * Method update customer by id
      *
-     * @param customerID idOfCustomer
+     * @param userId idOfCustomer
      * @param customerUpdateRequest param basic for save customer
      * @return customer or null
      */
     @Operation(summary = "Update customer by id", description = "Update customer by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
 //    @PostAuthorize("returnObject.customer.id == customerID")
-    @PutMapping("/{customer-id}")
-    public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("customer-id") int customerID, @RequestBody CustomerUpdateRequest customerUpdateRequest) {
+    @PutMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("userId") int userId,
+                                                         @RequestPart("customerUpdateRequest") CustomerUpdateRequest customerUpdateRequest,
+                                                         @RequestPart("image") MultipartFile image) {
         try {
-            CustomerDTO customer = customerService.updateCustomer(customerUpdateRequest, customerID);
+            if(image != null) {
+                customerUpdateRequest.setImage(image);
+            }
+            UserDTO customer = customerService.updateCustomer(customerUpdateRequest, userId);
             if (customer != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update customer successfully", customer));
             }
@@ -303,7 +312,7 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update customer failed. " + e.getMessage(), null));
         } catch (Exception e) {
             log.error("Error updating customer", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update customer failed", null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Update customer failed " + e.getMessage(), null));
         }
     }
 

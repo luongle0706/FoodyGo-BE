@@ -251,7 +251,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     public UserDTO registerUser(UserRegisterRequest userRegisterRequest) {
         String urlImage = null;
         if (userRegisterRequest.getImageCustomer() != null) {
-            urlImage = s3Service.uploadFileToS3(userRegisterRequest.getImageCustomer(), "productImage");
+            urlImage = s3Service.uploadFileToS3(userRegisterRequest.getImageCustomer(), "userImage");
         }
         User checkExistingUser = userRepository.getUserByEmail(userRegisterRequest.getEmail());
         if (checkExistingUser != null) {
