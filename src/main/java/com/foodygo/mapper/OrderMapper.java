@@ -29,6 +29,8 @@ public interface OrderMapper {
     @Mapping(source = "customer.user.fullName", target = "customerName")
     @Mapping(source = "restaurant.name", target = "restaurantName")
     @Mapping(source = "hub.name", target = "hubName")
+    @Mapping(source = "restaurant.id", target ="restaurantId")
+    @Mapping(source = "shipperPhone", target = "shipperPhone")
     OrderResponse toDto(Order order);
 
     @Mapping(source = "employee.fullName", target = "employeeName")

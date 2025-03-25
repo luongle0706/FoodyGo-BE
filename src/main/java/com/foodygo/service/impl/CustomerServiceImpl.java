@@ -290,11 +290,13 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
                 }
                 user.setPhone(customerUpdateRequest.getPhone());
             }
-        } else {
-            user.setPhone(customerUpdateRequest.getPhone());
         }
-        user.setFullName(customerUpdateRequest.getFullName().trim());
-        user.setDob(customerUpdateRequest.getDob());
+        if(customerUpdateRequest.getFullName() != null) {
+            user.setFullName(customerUpdateRequest.getFullName().trim());
+        }
+        if(customerUpdateRequest.getDob() != null) {
+            user.setDob(customerUpdateRequest.getDob());
+        }
 
         Customer customer = user.getCustomer();
         customer.setUser(user);
