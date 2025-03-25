@@ -277,11 +277,13 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
             throw new AuthenticationException("You are not allowed to update other customer");
         }
 
-        if (!user.getEmail().equals(customerUpdateRequest.getEmail().trim())) {
-            if (userRepository.getUserByEmail(customerUpdateRequest.getEmail()) != null) {
-                throw new ElementExistException("Email đã tồn tại");
+        if (user.getEmail() != null) {
+            if (!user.getEmail().equals(customerUpdateRequest.getEmail().trim())) {
+                if (userRepository.getUserByEmail(customerUpdateRequest.getEmail()) != null) {
+                    throw new ElementExistException("Email đã tồn tại");
+                }
+                user.setEmail(customerUpdateRequest.getEmail());
             }
-            user.setEmail(customerUpdateRequest.getEmail());
         }
         if (user.getPhone() != null) {
             if (!user.getPhone().equals(customerUpdateRequest.getPhone().trim())) {
@@ -291,12 +293,9 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
                 user.setPhone(customerUpdateRequest.getPhone());
             }
         }
-        if(customerUpdateRequest.getFullName() != null) {
-            user.setFullName(customerUpdateRequest.getFullName().trim());
-        }
-        if(customerUpdateRequest.getDob() != null) {
-            user.setDob(customerUpdateRequest.getDob());
-        }
+
+        if (user.getFullName() != null) user.setFullName(customerUpdateRequest.getFullName().trim());
+        if(user.getDob() != null) user.setDob(customerUpdateRequest.getDob());
 
         Customer customer = user.getCustomer();
         customer.setUser(user);

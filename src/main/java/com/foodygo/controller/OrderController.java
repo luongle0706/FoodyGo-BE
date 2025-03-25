@@ -50,8 +50,6 @@ public class OrderController {
     public ResponseEntity<ObjectResponse> createOrder(
             @RequestBody OrderCreateRequest request
     ) {
-        System.out.println("Order create request");
-        System.out.println(request);
         return ResponseEntity
                 .status(CREATED)
                 .body(
