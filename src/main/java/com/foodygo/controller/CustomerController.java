@@ -87,11 +87,7 @@ public class CustomerController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-    /**
-     * Method get all customers non paging
-     *
-     * @return list or empty
-     */
+
     @Operation(summary = "Get all customers non paging", description = "Retrieves all customers, without optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/non-paging")
@@ -101,13 +97,6 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Failed", "get all customers non paging failed", results));
     }
 
-    /**
-     * Method get all customers have status is active
-     *
-     * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
-     * @return list or empty
-     */
     @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/active")
@@ -120,48 +109,6 @@ public class CustomerController {
         return ResponseEntity.status(!data.isEmpty() ? HttpStatus.OK : HttpStatus.BAD_REQUEST).body(results);
     }
 
-//    // lấy tất cả các order từ customer id
-//    /**
-//     * Method get all customers have status is active
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
-//    @PreAuthorize("hasRole('MANAGER') or hasRole('STAFF')")
-//    @GetMapping("/get-all-orders/{customer-id}")
-//    public ResponseEntity<ObjectResponse> getOrdersByCustomerID(@PathVariable("customer-id") int customerID) {
-//        List<Order> results = customerService.getOrdersByCustomerID(customerID);
-//        return results != null ?
-//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get all orders by customer ID successfully", results)) :
-//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get all orders by customer ID failed", null));
-//    }
-
-//    // lấy customer từ order id
-//    /**
-//     * Method get all customers have status is active
-//     *
-//     * @param currentPage currentOfThePage
-//     * @param pageSize numberOfElement
-//     * @return list or empty
-//     */
-//    @Operation(summary = "Get all customers active", description = "Retrieves all customers have status is active, with optional pagination")
-//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
-//    @GetMapping("/get-customer/{order-id}")
-//    public ResponseEntity<ObjectResponse> getCustomerByOrderID(@PathVariable("order-id") int orderID) {
-//        CustomerDTO results = customerService.getCustomerByOrderID(orderID);
-//        return results != null ?
-//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by order ID successfully", results)) :
-//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by order ID failed", null));
-//    }
-
-    /**
-     * Method get building by customer id
-     *
-     * @param customerID idOfCustomer
-     * @return building or null
-     */
     @Operation(summary = "Get building by customer id", description = "Retrieves building by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/{customer-id}/building")
@@ -172,12 +119,6 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get building by customer ID failed", null));
     }
 
-    /**
-     * Method get user by customer id
-     *
-     * @param customerID idOfCustomer
-     * @return user or null
-     */
     @Operation(summary = "Get user by customer id", description = "Retrieves user by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF')")
     @GetMapping("/{customer-id}/user")
@@ -188,12 +129,6 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by customer ID failed", null));
     }
 
-    /**
-     * Method get wallet by customer id
-     *
-     * @param customerID idOfCustomer
-     * @return wallet or null
-     */
     @Operation(summary = "Get wallet by customer id", description = "Retrieves wallet by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
     @GetMapping("/{customer-id}/wallet")
@@ -204,29 +139,6 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get wallet by customer ID failed", null));
     }
 
-//    // lấy user từ wallet id
-//    /**
-//     * Method get wallet by customer id
-//     *
-//     * @param customerID idOfCustomer
-//     * @return user or null
-//     */
-//    @Operation(summary = "Get wallet by customer id", description = "Retrieves wallet by customer id")
-//    @PreAuthorize("hasRole('USER') or hasRole('MANAGER')")
-//    @GetMapping("/get-user-by-wallet/{wallet-id}")
-//    public ResponseEntity<ObjectResponse> getCustomerByWalletID(@PathVariable("wallet-id") int walletID) {
-//        CustomerDTO results = customerService.getCustomerByWalletID(walletID);
-//        return results != null ?
-//                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get customer by wallet ID successfully", results)) :
-//                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by wallet ID failed", null));
-//    }
-
-    /**
-     * Method restore customer by customer id and set deleted = false
-     *
-     * @param customerID idOfCustomer
-     * @return customer or null
-     */
     @Operation(summary = "restore customer by customer id", description = "restore customer by customer id and set deleted = false")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{customer-id}/restore")
@@ -243,12 +155,6 @@ public class CustomerController {
         }
     }
 
-    /**
-     * Method get customer by customer id
-     *
-     * @param customerID idOfCustomer
-     * @return customer or null
-     */
     @Operation(summary = "get customer by customer id", description = "get customer by customer id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF') or hasRole('SELLER')")
     @GetMapping("/{customer-id}")
@@ -259,12 +165,6 @@ public class CustomerController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by ID failed", null));
     }
 
-    /**
-     * Method create customer
-     *
-     * @param customerCreateRequest param basic for save customer
-     * @return customer or null
-     */
     @Operation(summary = "Create customer", description = "Create customer")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
     @PostMapping("")
@@ -284,16 +184,8 @@ public class CustomerController {
         }
     }
 
-    /**
-     * Method update customer by id
-     *
-     * @param userId idOfCustomer
-     * @param customerUpdateRequest param basic for save customer
-     * @return customer or null
-     */
     @Operation(summary = "Update customer by id", description = "Update customer by id")
     @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('ADMIN')")
-//    @PostAuthorize("returnObject.customer.id == customerID")
     @PutMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("userId") int userId,
                                                          @RequestPart("customerUpdateRequest") CustomerUpdateRequest customerUpdateRequest,
@@ -316,12 +208,6 @@ public class CustomerController {
         }
     }
 
-    /**
-     * Method delete customer by id and set deleted = true and set delete of user = true, enabled = false and nonLocked = false
-     *
-     * @param customerID idOfCustomer
-     * @return customer or null
-     */
     @Operation(summary = "Delete customer by id", description = "delete customer by id and set deleted = true and set delete of user = true, enabled = false and nonLocked = false")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{customer-id}")
