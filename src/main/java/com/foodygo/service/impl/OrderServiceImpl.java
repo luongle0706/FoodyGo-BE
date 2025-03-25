@@ -182,6 +182,7 @@ public class OrderServiceImpl implements OrderService {
 
         OrderResponse orderResponse = OrderMapper.INSTANCE.toDto(order);
         orderResponse.setOrderDetails(orderDetailResponses);
+        orderResponse.setTotalItems(order.getOrderDetails().size());
         return orderResponse;
     }
 
