@@ -17,6 +17,7 @@ public class UserDTO {
     String email;
     String roleName;
     String buildingName;
+    String hubName;
     LocalDate dob;
     String image;
     Integer buildingID;
