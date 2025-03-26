@@ -1,4 +1,4 @@
-package com.foodygo.test;
+package com.foodygo.thirdparty.websocket;
 
 import lombok.Builder;
 
@@ -6,6 +6,7 @@ import lombok.Builder;
 public record Coords(
         int orderId,
         double latitude,
-        double longitude
+        double longitude,
+        double distance
 ) {
 }
