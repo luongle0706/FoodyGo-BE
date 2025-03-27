@@ -1,7 +1,7 @@
 //package com.foodygo.controller.test;
 //
 //import com.foodygo.dto.response.ObjectResponse;
-//import com.foodygo.service.spec.NotificationService;
+//import com.foodygo.thirdparty.kafka.NotificationService;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;

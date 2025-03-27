@@ -6,7 +6,6 @@ import com.foodygo.entity.Order;
 import com.foodygo.entity.Transaction;
 import com.foodygo.entity.User;
 import com.foodygo.entity.Wallet;
-import com.foodygo.enums.DepositMethod;
 import com.foodygo.enums.TransactionType;
 import com.foodygo.enums.WalletType;
 import com.foodygo.exception.BadRequestException;
@@ -14,7 +13,7 @@ import com.foodygo.exception.IdNotFoundException;
 import com.foodygo.repository.TransactionRepository;
 import com.foodygo.repository.UserRepository;
 import com.foodygo.repository.WalletRepository;
-import com.foodygo.service.spec.NotificationService;
+import com.foodygo.thirdparty.kafka.NotificationService;
 import com.foodygo.service.spec.WalletService;
 import com.foodygo.thirdparty.vnpay.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -121,7 +120,7 @@ public class WalletServiceImpl implements WalletService {
         transactionRepository.save(transactionOfSender);
         transactionRepository.save(transactionOfReceiver);
 
-        notificationService.sendNotification(user.getUserID(), "Nhận tiền vào ví", "Bạn vừa nhận được " + amount + " foodyxu từ " + wallet.getCustomer().getUser().getFullName() + " với lời nhắn: " + note, "");
+        notificationService.requestMessage(user.getUserID(), "Nhận tiền vào ví", "Bạn vừa nhận được " + amount + " foodyxu từ " + wallet.getCustomer().getUser().getFullName() + " với lời nhắn: " + note, "");
     }
 
     @Override

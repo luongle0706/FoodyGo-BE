@@ -23,6 +23,7 @@ services:
       MYSQL_PASSWORD: fFP4vTcMY@!NUxgt
       REDIS_HOST: redis-container
       REDIS_PORT: 6379
+      BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "2222:8080"
     depends_on:
@@ -50,6 +51,37 @@ services:
     networks:
       - foodygo-network
 
+  # ZOOKEEPER
+  zookeeper:
+    container_name: foodygo-zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - foodygo-network
+
+  # KAFKA
+  kafka:
+    container_name: foodygo-kafka
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - foodygo-network
+
 volumes:
   redis:
     name: foodygo-redis
@@ -58,6 +90,7 @@ networks:
   mysql-network:
     external: true
   foodygo-network:
+    name: foodygo-network
     driver: bridge
 
 #  ollama:
