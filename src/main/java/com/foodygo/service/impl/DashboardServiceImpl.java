@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class DashboardServiceImpl implements DashboardService {
 
     private final OrderRepository orderRepository;
+    private static final int FOODYXU_TO_VND_RATE = 1000;
 
     @Override
     public DashboardResponse getDashboardData() {
@@ -63,10 +64,10 @@ public class DashboardServiceImpl implements DashboardService {
         int thisMonthOrderCount = thisMonthOrders.size();
         int thisYearOrderCount = thisYearOrders.size();
 
-        double todayRevenue = todayOrders.stream().mapToDouble(Order::getTotalPrice).sum();
-        double thisWeekRevenue = thisWeekOrders.stream().mapToDouble(Order::getTotalPrice).sum();
-        double thisMonthRevenue = thisMonthOrders.stream().mapToDouble(Order::getTotalPrice).sum();
-        double thisYearRevenue = thisYearOrders.stream().mapToDouble(Order::getTotalPrice).sum();
+        double todayRevenue = convertToVND(todayOrders.stream().mapToDouble(Order::getTotalPrice).sum());
+        double thisWeekRevenue = convertToVND(thisWeekOrders.stream().mapToDouble(Order::getTotalPrice).sum());
+        double thisMonthRevenue = convertToVND(thisMonthOrders.stream().mapToDouble(Order::getTotalPrice).sum());
+        double thisYearRevenue = convertToVND(thisYearOrders.stream().mapToDouble(Order::getTotalPrice).sum());
 
         // Get last 12 months revenue
         List<DashboardResponse.RevenueStatistics.MonthlyRevenue> last12MonthsRevenue = getLast12MonthsRevenue(allOrders);
@@ -108,7 +109,7 @@ public class DashboardServiceImpl implements DashboardService {
         for (int i = 11; i >= 0; i--) {
             YearMonth month = currentMonth.minusMonths(i);
             String formattedMonth = month.format(formatter);
-            double revenue = monthlyRevenueMap.getOrDefault(month, 0.0);
+            double revenue = convertToVND(monthlyRevenueMap.getOrDefault(month, 0.0));
             result.add(new DashboardResponse.RevenueStatistics.MonthlyRevenue(formattedMonth, revenue));
         }
 
@@ -154,9 +155,9 @@ public class DashboardServiceImpl implements DashboardService {
             Restaurant restaurant = entry.getKey();
             List<Order> restaurantOrders = entry.getValue();
 
-            double totalRevenue = restaurantOrders.stream()
+            double totalRevenue = convertToVND(restaurantOrders.stream()
                     .mapToDouble(Order::getTotalPrice)
-                    .sum();
+                    .sum());
 
             restaurantDataList.add(new DashboardResponse.TopRestaurants.RestaurantData(
                     restaurant.getId().longValue(),
@@ -173,5 +174,9 @@ public class DashboardServiceImpl implements DashboardService {
                 .collect(Collectors.toList());
 
         return new DashboardResponse.TopRestaurants(topRestaurants);
+    }
+
+    private double convertToVND(double foodyXuAmount) {
+        return foodyXuAmount * FOODYXU_TO_VND_RATE;
     }
 }
