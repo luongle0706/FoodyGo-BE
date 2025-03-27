@@ -5,10 +5,10 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Data
-@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "order-detail")

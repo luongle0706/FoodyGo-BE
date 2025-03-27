@@ -290,8 +290,6 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
                 throw new ElementExistException("Phone number đã tồn tại");
             }
             user.setPhone(customerUpdateRequest.getPhone());
-        } else {
-            System.err.println("Phone number is null");
         }
 
         if (customerUpdateRequest.getFullName() != null) user.setFullName(customerUpdateRequest.getFullName().trim());
@@ -456,7 +454,6 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
             file1.delete();
             return URL;
         } catch (Exception e) {
-            e.printStackTrace();
             return "Image couldn't upload, Something went wrong";
         }
     }
@@ -480,7 +477,6 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
 //            file.delete();
 //            return URL;
         } catch (Exception e) {
-            e.printStackTrace();
             return "Image couldn't upload, Something went wrong";
         }
         return null;

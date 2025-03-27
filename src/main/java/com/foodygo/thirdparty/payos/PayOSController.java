@@ -196,9 +196,6 @@ public class PayOSController {
                 );
             } else {
                 String errorMessage = "Payment failed with response code: " + responseCode + ", status: " + status;
-
-                System.err.println(errorMessage);
-
                 return new ResponseEntity<>(
                         ObjectResponse.builder()
                                 .status(HttpStatus.BAD_REQUEST.toString())
@@ -208,7 +205,6 @@ public class PayOSController {
                 );
             }
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(
                     ObjectResponse.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())

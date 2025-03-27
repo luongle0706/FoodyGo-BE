@@ -51,7 +51,6 @@ public class FirebaseServiceImpl implements FirebaseService {
                 return userService.login(user.get().getEmail(), user.get().getEmail() + passwordPostfix);
             } else {
                 // Create new user
-                System.out.println("Full name: " + token.getName());
                 UserRegisterRequest request = UserRegisterRequest.builder()
                         .email(email)
                         .password(email + passwordPostfix)

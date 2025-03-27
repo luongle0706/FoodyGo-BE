@@ -30,10 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotification(NotificationRequestDTO request) {
         List<FcmToken> devices = fcmTokenRepository.findByUserUserID(request.getUserId());
 
-        System.out.println("Devices found: " + devices.size());
-
         for (FcmToken deviceToken : devices) {
-            System.out.println("Sending notification to device token: " + deviceToken.getToken());
             String fcmToken = deviceToken.getToken();
             Message message = Message.builder()
                     .setToken(fcmToken)
@@ -62,8 +59,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void sendOrderStatusChangeUpdates(Order order) {
-        System.out.println("Order: " + order.getId());
-        System.out.println("Order status: " + order.getStatus());
         switch (order.getStatus()) {
             case OrderStatus.ORDERED -> requestMessage(
                     order.getRestaurant().getOwner().getUserID(),

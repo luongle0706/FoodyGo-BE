@@ -173,7 +173,8 @@ public class DatabaseInit {
                 buildingCoordinates.put("F2", new double[]{10.885655, 106.779581});
                 buildingCoordinates.put("G1", new double[]{10.885634, 106.780883});
 
-                int hubIndex = 1;
+                // Add this check before accessing the staff list
+                int hubIndex = 0; // Start from 0 instead of 1
                 for (Map.Entry<String, Object[]> entry : hubDataMap.entrySet()) {
                     String hubName = entry.getKey();
                     double hubLat = (double) entry.getValue()[0];
@@ -189,8 +190,11 @@ public class DatabaseInit {
                             .build();
                     Hub savedHub = hubRepository.save(hub);
 
-                    staff.get(hubIndex - 1).setHub(savedHub);
-                    userRepository.save(staff.get(hubIndex - 1));
+                    // Check if we have enough staff members
+                    if (hubIndex < staff.size()) {
+                        staff.get(hubIndex).setHub(savedHub);
+                        userRepository.save(staff.get(hubIndex));
+                    }
 
                     // Gán các building vào Hub
                     for (String buildingName : assignedBuildings) {

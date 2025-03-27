@@ -8,8 +8,8 @@ import java.time.LocalTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @Builder
 @Entity(name = "OperatingHours")
 @FieldDefaults(level = AccessLevel.PRIVATE)

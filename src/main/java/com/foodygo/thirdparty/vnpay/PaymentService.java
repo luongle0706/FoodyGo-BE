@@ -38,8 +38,6 @@ public class PaymentService {
     ) {
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
 
-        System.out.println("Amount: " + amount);
-
         long amountInVND = amount * 100;
         vnpParamsMap.put("vnp_Amount", String.valueOf(amountInVND));
 

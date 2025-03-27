@@ -194,7 +194,6 @@ public class CustomerController {
             if (image != null) {
                 customerUpdateRequest.setImage(image);
             }
-            System.err.println(customerUpdateRequest.toString());
             UserDTO customer = customerService.updateCustomer(customerUpdateRequest, userId);
             if (customer != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update customer successfully", customer));
