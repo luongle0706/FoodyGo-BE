@@ -571,6 +571,16 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
     }
 
     @Override
+    public UserDTO getUserById(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+        userDTO = userDTO.toBuilder()
+                .hubName(user.getHub().getName())
+                .build();
+        return userDTO;
+    }
+
+    @Override
     public CustomerDTO getCustomerByUserID(int userID) {
         User user = userRepository.getUserByUserID(userID);
         if (user != null) {

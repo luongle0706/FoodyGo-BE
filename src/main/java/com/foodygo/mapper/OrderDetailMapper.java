@@ -22,6 +22,7 @@ public interface OrderDetailMapper {
 
     @Mapping(source = "product.name", target = "productName")
     @Mapping(source = "order.id", target = "orderId")
+    @Mapping(source = "product.image", target = "image")
     OrderDetailResponse toDto(OrderDetail orderDetail);
 
     List<OrderDetailResponse> mapOrderDetails(List<OrderDetail> orderDetails);

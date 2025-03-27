@@ -189,6 +189,16 @@ public class UserController {
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get customer by user ID failed", null));
     }
 
+    @Operation(summary = "Get user by user id", description = "Get user by user id")
+    @PreAuthorize("hasAnyRole('USER', 'STAFF', 'SELLER', 'MANAGER', 'ADMIN')")
+    @GetMapping("/get/{userId}")
+    public ResponseEntity<ObjectResponse> getUserById(@PathVariable("userId") int userId) {
+        UserDTO user = userService.getUserById(userId);
+        return user != null ?
+                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get user by user ID successfully", user)) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get user by user ID failed", null));
+    }
+
 //    // lấy ra tất cả user bằng role
 //    @PreAuthorize("hasRole('ADMIN')")
 //    @GetMapping("/get-users-by-role/{role-id}")

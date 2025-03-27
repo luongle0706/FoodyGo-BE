@@ -67,7 +67,7 @@ public class HubController {
      * Method get all hubs
      *
      * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
+     * @param pageSize    numberOfElement
      * @return list or empty
      */
     @Operation(summary = "Get all hubs", description = "Retrieves all hubs, with optional pagination")
@@ -100,7 +100,7 @@ public class HubController {
      * Method get all hubs have status is active
      *
      * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
+     * @param pageSize    numberOfElement
      * @return list or empty
      */
     @Operation(summary = "Get all hubs active", description = "Retrieves all hubs have status is active")
@@ -121,17 +121,17 @@ public class HubController {
      *
      * @param currentPage currentOfThePage
      * @param pageSize    numberOfElement
-     * @param name name of building to search
-     * @param sortBy sortBy with "nameasc, namedesc"
+     * @param name        name of building to search
+     * @param sortBy      sortBy with "nameasc, namedesc"
      * @return list or empty
      */
     @Operation(summary = "Search hubs", description = "Retrieves all hubs are filtered by name and sortBy")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/search")
     public ResponseEntity<PagingResponse> searchHubs(@RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                         @RequestParam(value = "pageSize", required = false) Integer pageSize,
-                                                         @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                         @RequestParam(value = "sortBy", required = false) String sortBy) {
+                                                     @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                     @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                     @RequestParam(value = "sortBy", required = false) String sortBy) {
         int resolvedCurrentPage = (currentPage != null) ? currentPage : defaultCurrentPage;
         int resolvedPageSize = (pageSize != null) ? pageSize : defaultPageSize;
 
@@ -143,9 +143,9 @@ public class HubController {
     /**
      * Method get all buildings by hub id
      *
-     * @param hubID idOfHub
+     * @param hubID       idOfHub
      * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
+     * @param pageSize    numberOfElement
      * @return list or empty
      */
     @Operation(summary = "Get all buildings by hub id", description = "Retrieves all buildings by hub id, with optional pagination")
@@ -223,13 +223,21 @@ public class HubController {
      * @return hub or null
      */
     @Operation(summary = "Get hub by id", description = "Get hub by id")
-    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER') or hasRole('MANAGER') or hasRole('STAFF') or hasRole('ADMIN') or hasRole('SELLER')")
     @GetMapping("/{hub-id}")
     public ResponseEntity<ObjectResponse> getHubByID(@PathVariable("hub-id") int hubID) {
         Hub hub = hubService.findById(hubID);
-        return hub != null ?
-                ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get hub by ID successfully", hub)) :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get hub by ID failed", null));
+        if (hub != null) {
+            HubDTO hubDTO = HubDTO.builder()
+                    .id(hub.getId())
+                    .name(hub.getName())
+                    .address(hub.getAddress())
+                    .latitude(hub.getLatitude())
+                    .longitude(hub.getLongitude())
+                    .build();
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Get hub by ID successfully", hubDTO));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ObjectResponse("Fail", "Get hub by ID failed", null));
     }
 
     /**
@@ -294,7 +302,7 @@ public class HubController {
     public ResponseEntity<ObjectResponse> deleteHubByID(@PathVariable("hub-id") int hubID) {
         try {
             Hub hub = hubService.findById(hubID);
-            if(hub != null) {
+            if (hub != null) {
                 hub.setDeleted(true);
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Delete hub successfully", hubService.save(hub)));
             }

@@ -13,4 +13,6 @@ public class HubDTO {
     String name;
     String address;
     String description;
+    double latitude;
+    double longitude;
 }

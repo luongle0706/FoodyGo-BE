@@ -277,24 +277,25 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
             throw new AuthenticationException("You are not allowed to update other customer");
         }
 
-        if (!user.getEmail().equals(customerUpdateRequest.getEmail().trim())) {
-            if (userRepository.getUserByEmail(customerUpdateRequest.getEmail()) != null) {
-                throw new ElementExistException("Email đã tồn tại");
-            }
-            user.setEmail(customerUpdateRequest.getEmail());
-        }
-        if (user.getPhone() != null) {
-            if (!user.getPhone().equals(customerUpdateRequest.getPhone().trim())) {
-                if (userRepository.getUserByPhone(customerUpdateRequest.getPhone()) != null) {
-                    throw new ElementExistException("Phone number đã tồn tại");
+        if (customerUpdateRequest.getEmail() != null) {
+            if (!user.getEmail().equals(customerUpdateRequest.getEmail().trim())) {
+                if (userRepository.getUserByEmail(customerUpdateRequest.getEmail()) != null) {
+                    throw new ElementExistException("Email đã tồn tại");
                 }
-                user.setPhone(customerUpdateRequest.getPhone());
+                user.setEmail(customerUpdateRequest.getEmail());
             }
-        } else {
-            user.setPhone(customerUpdateRequest.getPhone());
         }
-        user.setFullName(customerUpdateRequest.getFullName().trim());
-        user.setDob(customerUpdateRequest.getDob());
+        if (customerUpdateRequest.getPhone() != null) {
+            if (userRepository.getUserByPhone(customerUpdateRequest.getPhone()) != null) {
+                throw new ElementExistException("Phone number đã tồn tại");
+            }
+            user.setPhone(customerUpdateRequest.getPhone());
+        } else {
+            System.err.println("Phone number is null");
+        }
+
+        if (customerUpdateRequest.getFullName() != null) user.setFullName(customerUpdateRequest.getFullName().trim());
+        if (customerUpdateRequest.getDob() != null) user.setDob(customerUpdateRequest.getDob());
 
         Customer customer = user.getCustomer();
         customer.setUser(user);

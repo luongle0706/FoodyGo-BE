@@ -4,11 +4,11 @@ import com.foodygo.enums.EnumRoleNameType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Value
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Data
 public class TokenResponse {
     String code;
     String message;
@@ -22,4 +22,6 @@ public class TokenResponse {
     Integer hubId;
     Integer walletId;
     EnumRoleNameType role;
+    @Builder.Default
+    boolean created = false;
 }

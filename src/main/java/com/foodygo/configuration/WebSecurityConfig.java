@@ -50,6 +50,7 @@ public class WebSecurityConfig {
                         auth.
                                 requestMatchers("/**").permitAll()
                                 .requestMatchers("/api/v1/carts/**").permitAll()
+                                .requestMatchers("/ws/**").permitAll()
 //                              .requestMatchers(HttpMethod.POST, "/ues", "/*").permitAll()
                                 .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
@@ -64,7 +65,7 @@ public class WebSecurityConfig {
 
 
 //                .oauth2Login(oauth2 -> {
-////                    oauth2.loginPage("/api/v1/public/login").permitAll();
-////                    oauth2.defaultSuccessUrl("http://localhost:3000/home", true);
+/// /                    oauth2.loginPage("/api/v1/public/login").permitAll();
+/// /                    oauth2.defaultSuccessUrl("http://localhost:3000/home", true);
 //                    oauth2.successHandler(customOAuth2AuthenticationSuccessHandler);
 //                })

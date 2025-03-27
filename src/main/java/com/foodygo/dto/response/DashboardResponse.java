@@ -1,42 +1,30 @@
 package com.foodygo.dto.response;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public record DashboardResponse(
-        CategoryStatistics categoryStatistics,
 
         RevenueStatistics revenueStatistics,
 
         OrderStatusStatistics orderStatusStatistics,
 
-        OrderDeliveryStatistics orderDeliveryStatistics
+        TopRestaurants topRestaurants
+
 ) {
-    public record CategoryStatistics(
-            int totalOrders,
-            List<CategoryData> categoryDistribution
-    ) {
-        public record CategoryData(
-                String categoryName,
-                int orderCount,
-                double percentage
-        ) {}
-    }
 
     public record RevenueStatistics(
-            double totalRevenue,
-            double currentMonthRevenue,
-            double currentYearRevenue,
-            List<MonthlyRevenue> monthlyRevenue,
-            List<DailyRevenue> dailyRevenue
+            int todayOrders,
+            int thisWeekOrders,
+            int thisMonthOrders,
+            int thisYearOrders,
+            double todayRevenue,
+            double thisWeekRevenue,
+            double thisMonthRevenue,
+            double thisYearRevenue,
+            List<MonthlyRevenue> last12MonthsRevenue
     ) {
         public record MonthlyRevenue(
-                String month, // Format: "YYYY-MM"
-                double revenue
-        ) {}
-
-        public record DailyRevenue(
-                LocalDate date,
+                String month,
                 double revenue
         ) {}
     }
@@ -52,12 +40,14 @@ public record DashboardResponse(
         ) {}
     }
 
-    public record OrderDeliveryStatistics(
-            int totalDeliveredOrders,
-            int onTimeOrders,
-            int delayedOrders,
-            double onTimePercentage,
-            double delayedPercentage,
-            double averageDelayTime
-    ) {}
+    public record TopRestaurants(
+            List<RestaurantData> restaurants
+    ) {
+        public record RestaurantData(
+                Long id,
+                String name,
+                double totalRevenue,
+                int totalOrders
+        ) {}
+    }
 }

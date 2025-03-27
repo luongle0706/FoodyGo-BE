@@ -31,5 +31,6 @@ public class OrderResponseV2 {
     String restaurantName;
     String image;
     String hubName;
+    Integer hubId;
     List<OrderDetailResponse> orderDetails;
 }

@@ -238,6 +238,8 @@ public class DatabaseInit {
                         .phone("+84" + (100000000 + random.nextInt(900000000)))
                         .email("restaurant@foodygo.com")
                         .owner(seller)
+                        .latitude(10.880823)
+                        .longitude(106.781256)
                         .address((1 + random.nextInt(100)) + "/" + (1 + random.nextInt(100)) + " Street " + (1 + random.nextInt(100)))
                         .image("https://img-global.cpcdn.com/recipes/49876fe80303b991/640x640sq70/photo.webp")
                         .build();
@@ -296,7 +298,7 @@ public class DatabaseInit {
                     Product product = Product.builder()
                             .code("R" + restaurant.getId() + "P" + j)
                             .name(productNames[j % productNames.length])
-                            .price(randomPrice * 1000.0)
+                            .price(randomPrice * 1.0)
                             .image(productImages[j % productImages.length])
                             .description("Món " + productNames[j % productNames.length] + " tại " + restaurant.getName())
                             .prepareTime(ThreadLocalRandom.current().nextDouble(10, 120))
@@ -328,7 +330,7 @@ public class DatabaseInit {
                         int randomAddonItemPrice = ThreadLocalRandom.current().nextInt(5, 20);
                         AddonItem addonItem = AddonItem.builder()
                                 .name(addonItems[j % addonItems.length][k])
-                                .price(randomAddonItemPrice * 1000.0)
+                                .price(randomAddonItemPrice * 1.0)
                                 .section(addonSection)
                                 .quantity(ThreadLocalRandom.current().nextInt(1, 10))
                                 .build();
