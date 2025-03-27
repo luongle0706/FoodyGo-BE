@@ -24,7 +24,7 @@ public interface CustomerService extends BaseService<Customer, Integer> {
 
     CustomerDTO createCustomer(CustomerCreateRequest customerCreateRequest);
 
-    CustomerDTO updateCustomer(CustomerUpdateRequest customerUpdateRequest, int customerID);
+    UserDTO updateCustomer(CustomerUpdateRequest customerUpdateRequest, int userId);
 
     List<Order> getOrdersByCustomerID(Integer customerID);
 

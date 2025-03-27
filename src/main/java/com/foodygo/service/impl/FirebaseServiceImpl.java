@@ -67,7 +67,9 @@ public class FirebaseServiceImpl implements FirebaseService {
                             .build();
                     fcmTokenRepository.save(newDeviceToken);
 
-                    return userService.login(newUser.get().getEmail(), newUser.get().getEmail() + passwordPostfix);
+                    TokenResponse response = userService.login(newUser.get().getEmail(), newUser.get().getEmail() + passwordPostfix);
+                    response.setCreated(true);
+                    return response;
                 } else {
                     throw new AuthenticationException("Google was unable to authorize account access");
                 }

@@ -48,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailRepository orderDetailRepository;
     private final WalletService walletService;
     private final NotificationService notificationService;
+    private final CartService cartService;
 
     @Override
     @Transactional
@@ -91,6 +92,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.ORDERED);
         Order savedOrder = orderRepository.save(order);
         notificationService.sendOrderStatusChangeUpdates(savedOrder);
+        cartService.clearCart(customer.getUser().getUserID());
         return order.getId();
     }
 
@@ -182,6 +184,7 @@ public class OrderServiceImpl implements OrderService {
 
         OrderResponse orderResponse = OrderMapper.INSTANCE.toDto(order);
         orderResponse.setOrderDetails(orderDetailResponses);
+        orderResponse.setTotalItems(order.getOrderDetails().size());
         return orderResponse;
     }
 
@@ -231,6 +234,10 @@ public class OrderServiceImpl implements OrderService {
                     .mapToInt(OrderDetailResponse::getQuantity)
                     .sum();
             orderResponse.setTotalItems(totalItems);
+            orderResponse.setRestaurantImage(order.getRestaurant() != null ? order.getRestaurant().getImage() : null);
+            orderResponse.setRestaurantId(
+                    order.getRestaurant() != null ? order.getRestaurant().getId() : null
+            );
             orderResponse.setOrderDetails(orderDetailResponses);
             return orderResponse;
         });

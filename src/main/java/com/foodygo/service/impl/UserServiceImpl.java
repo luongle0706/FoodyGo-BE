@@ -67,7 +67,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                            UserMapper userMapper, CustomerMapper customerMapper, CustomerRepository customerRepository,
                            JWTToken jwtToken, JWTAuthenticationFilter jwtAuthenticationFilter, AuthenticationManager authenticationManager,
                            WalletRepository walletRepository, CustomerService customerService, RestaurantRepository restaurantRepository, FcmTokenRepository fcmTokenRepository
-            ,S3Service s3Service) {
+            , S3Service s3Service) {
         super(userRepository);
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -249,7 +249,10 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
     @Override
     public UserDTO registerUser(UserRegisterRequest userRegisterRequest) {
-        String urlImage = s3Service.uploadFileToS3(userRegisterRequest.getImageCustomer(), "productImage");
+        String urlImage = null;
+        if (userRegisterRequest.getImageCustomer() != null) {
+            urlImage = s3Service.uploadFileToS3(userRegisterRequest.getImageCustomer(), "userImage");
+        }
         User checkExistingUser = userRepository.getUserByEmail(userRegisterRequest.getEmail());
         if (checkExistingUser != null) {
             throw new ElementExistException("User already exists");
@@ -281,8 +284,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
 
         UserDTO userDTO = userMapper.userToUserDTO(user);
         userDTO = userDTO.toBuilder()
-                .buildingID(customer.getBuilding() != null ? customer.getBuilding().getId() :  null)
-                .buildingName(customer.getBuilding()!= null ? customer.getBuilding().getName() :  null)
+                .buildingID(customer.getBuilding() != null ? customer.getBuilding().getId() : null)
+                .buildingName(customer.getBuilding() != null ? customer.getBuilding().getName() : null)
                 .image(customer.getImage() != null ? customer.getImage() : null)
                 .build();
 
@@ -371,7 +374,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
                         Wallet wallet = null;
                         if (customer != null) {
                             wallet = walletRepository.findByCustomerId(customer.getId()).orElse(null);
-                        } else if(restaurant != null) {
+                        } else if (restaurant != null) {
                             wallet = walletRepository.findByRestaurantId(restaurant.getId()).orElse(null);
                         }
                         tokenResponse = TokenResponse.builder()
@@ -415,7 +418,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         Wallet wallet = null;
         if (customer != null) {
             wallet = walletRepository.findByCustomerId(customer.getId()).orElse(null);
-        } else if(restaurant != null) {
+        } else if (restaurant != null) {
             wallet = walletRepository.findByRestaurantId(restaurant.getId()).orElse(null);
         }
         tokenResponse = TokenResponse.builder()
@@ -565,6 +568,16 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer> implements U
         user.setDeleted(false);
         user.setEnabled(true);
         return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    @Override
+    public UserDTO getUserById(int userID) {
+        User user = userRepository.getUserByUserID(userID);
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+        userDTO = userDTO.toBuilder()
+                .hubName(user.getHub().getName())
+                .build();
+        return userDTO;
     }
 
     @Override

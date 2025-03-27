@@ -59,6 +59,7 @@ public interface UserService extends BaseService<User, Integer> {
     UserDTO createUserWithRole(UserCreateRequest userCreateRequest);
 
     UserDTO undeletedUser(int userID);
+    UserDTO getUserById(int userID);
 
     CustomerDTO getCustomerByUserID(int userID);
 

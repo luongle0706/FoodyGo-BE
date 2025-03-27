@@ -37,7 +37,7 @@ public class UserRegisterRequest {
 
     @NotNull(message = "Vui lòng nhập số điện thoại")
     @NotBlank(message = "Số điện thoại không được để trống")
-    @Size(max = 12, min = 9, message = "Số điện thoại phải từ 9 tới 12 kí tự")
+    @Size(max = 11, min = 10, message = "Số điện thoại phải từ 10 tới 11 kí tự")
     private String phone;
 
     private MultipartFile imageCustomer;
