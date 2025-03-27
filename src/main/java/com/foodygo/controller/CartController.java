@@ -147,4 +147,24 @@ public class CartController {
                                 .build()
                 );
     }
+
+    // In CartController.java, add a new endpoint
+    @DeleteMapping("/users/{userId}/products/{productId}/items/{itemIndex}")
+    @Operation(summary = "Remove Specific Item From Cart", description = "Remove a specific product item from cart based on index.")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<ObjectResponse> removeSpecificItemFromCart(
+            @PathVariable Integer userId,
+            @PathVariable Integer productId,
+            @PathVariable Integer itemIndex) {
+
+        Cart cart = cartService.removeSpecificItemFromCart(userId, productId, itemIndex);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ObjectResponse.builder()
+                                .status(HttpStatus.OK.toString())
+                                .message("Remove from cart successfully!")
+                                .data(cart)
+                                .build()
+                );
+    }
 }
