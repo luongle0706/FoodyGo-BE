@@ -179,4 +179,5 @@ public class DashboardServiceImpl implements DashboardService {
     private double convertToVND(double foodyXuAmount) {
         return foodyXuAmount * FOODYXU_TO_VND_RATE;
     }
+
 }
