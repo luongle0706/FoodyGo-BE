@@ -48,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailRepository orderDetailRepository;
     private final WalletService walletService;
     private final NotificationService notificationService;
+    private final CartService cartService;
 
     @Override
     @Transactional
@@ -91,6 +92,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.ORDERED);
         Order savedOrder = orderRepository.save(order);
         notificationService.sendOrderStatusChangeUpdates(savedOrder);
+        cartService.clearCart(customer.getUser().getUserID());
         return order.getId();
     }
 
