@@ -149,7 +149,10 @@ public class ProductServiceImpl implements ProductService {
         if (product == null) {
             throw new BadRequestException("Unable to find product with id " + productId);
         }
-        String urlImage = s3Service.uploadFileToS3(image, "productImage");
+        String urlImage = null;
+        if(image != null) {
+            s3Service.uploadFileToS3(image, "productImage");
+        }
         if (urlImage != null) product.setImage(urlImage);
         if (request.getCode() != null) product.setCode(request.getCode());
         if (request.getName() != null) product.setName(request.getName());

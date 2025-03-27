@@ -129,7 +129,7 @@ public class ProductController {
     public ResponseEntity<ObjectResponse> updateProduct(
             @PathVariable Integer productId,
             @RequestPart("data") ProductUpdateRequest request,
-            @RequestPart("image") MultipartFile image
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         productService.updateProductInfo(image, productId, request);
         return ResponseEntity
