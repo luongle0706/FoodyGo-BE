@@ -189,7 +189,7 @@ public class CustomerController {
     @PutMapping(value = "/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ObjectResponse> updateCustomer(@PathVariable("userId") int userId,
                                                          @RequestPart("customerUpdateRequest") CustomerUpdateRequest customerUpdateRequest,
-                                                         @RequestPart("image") MultipartFile image) {
+                                                         @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             if (image != null) {
                 customerUpdateRequest.setImage(image);

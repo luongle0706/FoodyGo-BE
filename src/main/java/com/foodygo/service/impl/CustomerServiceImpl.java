@@ -286,10 +286,12 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, Integer> impl
             }
         }
         if (customerUpdateRequest.getPhone() != null) {
-            if (userRepository.getUserByPhone(customerUpdateRequest.getPhone()) != null) {
-                throw new ElementExistException("Phone number đã tồn tại");
+            if (!user.getPhone().equals(customerUpdateRequest.getPhone().trim())) {
+                if (userRepository.getUserByPhone(customerUpdateRequest.getPhone()) != null) {
+                    throw new ElementExistException("Phone number đã tồn tại");
+                }
+                user.setPhone(customerUpdateRequest.getPhone());
             }
-            user.setPhone(customerUpdateRequest.getPhone());
         }
 
         if (customerUpdateRequest.getFullName() != null) user.setFullName(customerUpdateRequest.getFullName().trim());
