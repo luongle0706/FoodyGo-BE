@@ -104,7 +104,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductDTO> getAllProductDTOsByRestaurantId(Integer restaurantId, Pageable pageable) {
-        return productRepository.findByRestaurantIdAndDeletedIsFalseAndAvailableIsTrue(restaurantId, pageable).map(ProductMapper.INSTANCE::toDTO);
+        return productRepository.findByRestaurantIdAndDeletedIsFalse(restaurantId, pageable).map(ProductMapper.INSTANCE::toDTO);
     }
 
     @Override

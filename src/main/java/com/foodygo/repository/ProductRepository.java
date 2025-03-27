@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
     Optional<Product> findByIdAndDeletedFalse(Integer id);
 
-    Page<Product> findByRestaurantIdAndDeletedIsFalseAndAvailableIsTrue(Integer restaurantId, Pageable pageable);
+    Page<Product> findByRestaurantIdAndDeletedIsFalse(Integer restaurantId, Pageable pageable);
 
     Page<Product> findByCategoryIdAndDeletedIsFalse(Integer categoryId, Pageable pageable);
 }
