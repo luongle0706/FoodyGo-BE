@@ -15,5 +15,7 @@ public class RestaurantResponseDTO {
     String email;
     String address;
     String image;
+    double latitude;
+    double longitude;
     boolean available;
 }

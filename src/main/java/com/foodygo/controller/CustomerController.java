@@ -72,7 +72,7 @@ public class CustomerController {
      * Method get all customers
      *
      * @param currentPage currentOfThePage
-     * @param pageSize numberOfElement
+     * @param pageSize    numberOfElement
      * @return list or empty
      */
     @Operation(summary = "Get all customers", description = "Retrieves all customers, with optional pagination")
@@ -191,9 +191,10 @@ public class CustomerController {
                                                          @RequestPart("customerUpdateRequest") CustomerUpdateRequest customerUpdateRequest,
                                                          @RequestPart("image") MultipartFile image) {
         try {
-            if(image != null) {
+            if (image != null) {
                 customerUpdateRequest.setImage(image);
             }
+            System.err.println(customerUpdateRequest.toString());
             UserDTO customer = customerService.updateCustomer(customerUpdateRequest, userId);
             if (customer != null) {
                 return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("Success", "Update customer successfully", customer));

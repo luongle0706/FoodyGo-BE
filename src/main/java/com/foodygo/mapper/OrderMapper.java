@@ -29,7 +29,7 @@ public interface OrderMapper {
     @Mapping(source = "customer.user.fullName", target = "customerName")
     @Mapping(source = "restaurant.name", target = "restaurantName")
     @Mapping(source = "hub.name", target = "hubName")
-    @Mapping(source = "restaurant.id", target ="restaurantId")
+    @Mapping(source = "restaurant.id", target = "restaurantId")
     @Mapping(source = "shipperPhone", target = "shipperPhone")
     OrderResponse toDto(Order order);
 
@@ -37,6 +37,7 @@ public interface OrderMapper {
     @Mapping(source = "customer.user.fullName", target = "customerName")
     @Mapping(source = "restaurant.name", target = "restaurantName")
     @Mapping(source = "hub.name", target = "hubName")
+    @Mapping(source = "hub.id", target = "hubId")
     @Mapping(source = "restaurant.address", target = "restaurantAddress")
     @Mapping(source = "hub.address", target = "customerAddress")
     OrderResponseV2 toDtoV2(Order order);
