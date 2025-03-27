@@ -129,9 +129,6 @@ aws:
     secret-key: ${S3_SECRET_KEY}
     region: ${S3_REGION}
     bucket-name: ${S3_BUCKET_NAME}
-#image:
-#  saveLocation: /var/www/images/
-#  getLocation: https://foodygo.theanh0804.id.vn/public/Ư
 
 payos:
   client-id: ${PAYOS_CLIENT_ID}
